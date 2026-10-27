@@ -15,6 +15,7 @@ const { Phrases } = require("./phrases");
 const { TTS } = require("./tts");
 const { readConfig, CONFIG_FILE } = require("./config");
 const { checkAndReport } = require("./apiStats");
+const { Recorder } = require("./recorder");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -48,11 +49,14 @@ async function main() {
   // Les phrases sont générées une par une, dans l'ordre, pour ne pas mélanger les commentaires
   let chain = Promise.resolve();
   const detector = new Detector({ options: readConfig });
+  const replayFile = option("--rejouer");
+  const recorder = !replayFile && config.enregistrerMatchs !== false ? new Recorder(path.join(ROOT, "matchs")) : null;
   detector.on("warning", (msg) => console.log(msg));
   detector.on("comment", ({ key, vars, live, t }) => {
     let text;
     try { text = phrases.pick(key, vars); } catch (e) { return console.error(e.message); }
     console.log(`${new Date(t).toLocaleTimeString()} [${key}${live ? ", direct" : ""}] ${text}`);
+    if (recorder) recorder.comment(t, key, text);
     if (!output) return;
     chain = chain
       .then(() => tts.synth(text))
@@ -60,7 +64,6 @@ async function main() {
       .catch((e) => console.error("Voix :", e.message));
   });
 
-  const replayFile = option("--rejouer");
   if (replayFile) return replay(replayFile, Number(option("--vitesse") || 1), detector);
 
   // Une mise à jour du jeu peut remettre PacketSendRate à 0 : on vérifie au lancement, puis toutes les 10 minutes
@@ -74,7 +77,11 @@ async function main() {
   const rl = new RLClient(config.rocketLeague);
   rl.on("connected", () => console.log("Rocket League : connecté à l'API Stats"));
   rl.on("disconnected", () => console.log("Rocket League : connexion perdue, on attend le jeu…"));
-  rl.on("event", (event, data) => detector.handle(event, data || {}, Date.now()));
+  rl.on("event", (event, data) => {
+    const t = Date.now();
+    if (recorder) recorder.handle(event, data || {}, t);
+    detector.handle(event, data || {}, t);
+  });
   rl.start();
   console.log("En attente de Rocket League…");
 }

@@ -93,12 +93,14 @@ npm start -- --local --rejouer capture.jsonl --vitesse 5 --config config.exemple
 - `--rejouer fichier.jsonl` : rejoue une partie enregistrée · `--vitesse 5` : 5 fois plus vite
 - `--config fichier.json` : utilise une autre config que `config.json`
 
-### Enregistrer un nouveau match (pour régler les seuils)
+### Matchs enregistrés (pour régler les seuils)
 
+Chaque match joué avec le bot est enregistré dans `matchs/` (un fichier par partie, avec les commentaires du bot dedans).
+Si le bot s'est trompé, rejoue la partie après avoir changé un seuil :
 ```
-node capture.js mon-match.jsonl
+npm start -- --muet --rejouer matchs/2026-10-27_21-04-12_611EB566.jsonl --vitesse 1000
 ```
-Laisse tourner pendant la partie, puis rejoue-le avec `--rejouer mon-match.jsonl`.
+Pour désactiver : `"enregistrerMatchs": false` dans `config.json`. `node capture.js fichier.jsonl` enregistre aussi sans lancer le bot.
 
 ---
 

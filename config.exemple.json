@@ -39,6 +39,9 @@
     "hauteur": "+0Hz",
     "volume": 1
   },
+  "_enregistrerMatchs": "Enregistre chaque match dans matchs/ (rejouable avec --rejouer), avec les commentaires du bot dedans.",
+  "enregistrerMatchs": true,
+
   "_rocketLeague": "verifierApi : au lancement puis toutes les 10 min, remet PacketSendRate à la bonne valeur dans DefaultStatsAPI.ini (Steam et Epic trouvés automatiquement ; cheminsJeu pour ajouter un dossier d'installation à la main).",
   "rocketLeague": {
     "hote": "127.0.0.1",
