@@ -13,7 +13,7 @@ const S = {
   tapinMaxDist: 900, tapinMaxX: 1200, tapinMaxSpeed: 50, tapinMaxGapMs: 2000, tapinMaxTouches: 2,
   shotDelayMs: 300,
   volMaxDist: 1500,
-  arretMaxMs: 1000, arretMaxDist: 1500, arretTirSurLigne: 1000,
+  arretMaxMs: 1000, arretMaxDist: 1500, arretTirSurLigne: 1000, arretTirAvantMs: 3000,
   lucarneMinZ: 450, lucarneMinX: 550, rasDuSolMaxZ: 110, rasDuSolMaxSpeed: 60,
   passeAdminMinMs: 3000, passeAdminMinTouches: 3,
   mvpMinRatio: 0.7,
@@ -155,7 +155,8 @@ class Detector extends EventEmitter {
         this.inPlay = true;
         this.roundStart = t;
         this.kickoffScores = [...this.scores];
-        for (const p of this.players.values()) p.zeroBoostMs = 0;
+        // Nouvelle manche : fantôme et mendiant repartent de zéro
+        for (const p of this.players.values()) { p.zeroBoostMs = 0; p.idleMs = 0; }
         break;
       case "CountdownBegin":
       case "GoalReplayStart":
@@ -176,8 +177,13 @@ class Detector extends EventEmitter {
         this.onFeed(d, t);
         break;
       case "GoalScored":
-        if (d.Scorer && d.Scorer.Name) this.onGoal(d, t);
-        else this.onReplayGoal(d);
+        if (d.Scorer && d.Scorer.Name) {
+          this.onGoal(d, t);
+          // Plus personne ne joue jusqu'au prochain coup d'envoi (fantôme et mendiant ne comptent plus)
+          this.inPlay = false;
+        } else {
+          this.onReplayGoal(d);
+        }
         break;
       case "PodiumStart":
         this.benevoleDuMatch();
@@ -343,9 +349,10 @@ class Detector extends EventEmitter {
     if (iD >= 0 && distOwn(TD, hits[iD].loc.Y) <= S.arretMaxDist) {
       const defender = hits[iD].players.find((p) => p.team === TD).name;
       const iAtk = findLastIndex(hits.slice(0, iD), (h) => h.players.some((p) => p.team === TS));
-      // La balle rentrait si l'attaquant avait un tir cadré, ou s'il l'a touchée sur la ligne (le jeu n'envoie pas toujours "Shot" si près)
+      // La balle rentrait si l'attaquant avait un tir cadré peu avant la touche du défenseur (le jeu l'envoie parfois
+      // avant la touche elle-même), ou s'il l'a touchée sur la ligne (le jeu n'envoie pas toujours "Shot" si près)
       const onTarget = iAtk >= 0 && (distOpp(TS, hits[iAtk].loc.Y) <= S.arretTirSurLigne ||
-        this.feed.some((f) => f.type === "Shot" && f.team === TS && f.t >= hits[iAtk].t && f.t <= hits[iAtk].t + S.shotDelayMs));
+        this.feed.some((f) => f.type === "Shot" && f.team === TS && f.t >= hits[iD].t - S.arretTirAvantMs && f.t <= hits[iD].t));
       found[onTarget ? "arretManque.accompagne" : "arretManque.csc"] = { defenseur: defender, buteur: scorer };
 
       const [s, o] = this.kickoffScores ? [this.kickoffScores[TS], this.kickoffScores[TD]] : [NaN, NaN];
