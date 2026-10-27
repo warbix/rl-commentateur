@@ -24,8 +24,9 @@
   "prononciation": {
     "MVP": "aime vie pie"
   },
-  "_voix": "rotation : 'aleatoire' (au hasard, jamais deux fois de suite la même), 'alternee' (chacune son tour) ou 'fixe' (toujours la première). Modifiable pendant que le bot tourne, sauf le volume.",
+  "_voix": "rotation : 'aleatoire' (au hasard, jamais deux fois de suite la même), 'alternee' (chacune son tour) ou 'fixe' (toujours la première). Modifiable pendant que le bot tourne, sauf le volume. jingle : true (ding avant chaque phrase), false, ou le chemin d'un son à toi (ex. sons/sifflet.mp3)",
   "voix": {
+    "jingle": true,
     "rotation": "aleatoire",
     "liste": [
       "fr-FR-HenriNeural",

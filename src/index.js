@@ -18,6 +18,7 @@ const { checkAndReport } = require("./apiStats");
 const { Recorder } = require("./recorder");
 const { PhrasePool } = require("./pool");
 const { Bilan } = require("./bilan");
+const { jingleFile } = require("./jingle");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -46,6 +47,13 @@ async function main() {
   } else if (!muet) {
     output = new (require("./discordVoice").DiscordVoice)(config.discord, config.voix);
   }
+  // Bruitage (si activé) puis la phrase
+  const play = (file, text) => {
+    const jingle = jingleFile();
+    if (jingle) output.enqueue(jingle);
+    output.enqueue(file, text);
+  };
+
   const bilan = new Bilan();
   const bilanTexte = () => bilan.texte((name) => phrases.say(name));
 
@@ -74,7 +82,7 @@ async function main() {
       const text = bilanTexte();
       await interaction.deferReply();
       const file = await tts.synth(phrases.pronounce(text.replace(/\n/g, " ")));
-      output.enqueue(file);
+      play(file);
       await interaction.editReply(`📋 ${text}`);
     });
   }
@@ -105,7 +113,7 @@ async function main() {
     if (!output || muted) return;
     chain = chain
       .then(() => (ready ? ready.file : tts.synth(text)))
-      .then((file) => output.enqueue(file, text))
+      .then((file) => play(file, text))
       .catch((e) => console.error("Voix :", e.message));
   });
 
