@@ -15,10 +15,12 @@ Tout tourne **sur ton PC** : pas de serveur à louer.
 1. Installer **Node.js** (version LTS) et **Python 3** (cocher « Add to PATH »).
 2. Dans un terminal : `pip install edge-tts`
 3. Dans un terminal ouvert dans ce dossier : `npm install`
-4. Activer l'API Stats de Rocket League : dans le dossier d'installation du jeu, ouvrir
-   `TAGame\Config\DefaultStatsAPI.ini` et passer `PacketSendRate=0` à `PacketSendRate=30`, puis relancer le jeu.
-   - Steam : `...\steamapps\common\rocketleague\`
-   - Epic : `C:\Program Files\Epic Games\rocketleague\` (par défaut)
+4. Activer l'API Stats de Rocket League : `npm run verifier-api`, puis relancer le jeu s'il était ouvert.
+   Le bot trouve tout seul les installations **Steam** (toutes les bibliothèques) et **Epic**, et passe
+   `PacketSendRate` à `30` dans `TAGame\Config\DefaultStatsAPI.ini` (une copie `.bak` de l'original est gardée).
+   Il refait cette vérification à chaque lancement puis toutes les 10 minutes : si une mise à jour du jeu
+   remet la valeur à 0, elle est corrigée automatiquement. Installation ailleurs ? Ajoute son dossier dans
+   `config.json` → `rocketLeague.cheminsJeu`.
 5. Copier `config.exemple.json` en `config.json` (ce fichier contiendra le token : il est ignoré par git).
 
 ### 1. Créer le bot Discord (5 minutes)
@@ -109,7 +111,7 @@ Laisse tourner pendant la partie, puis rejoue-le avec `--rejouer mon-match.jsonl
 | Surnoms (`surnoms`) et prononciation (`prononciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
 | Voix et rotation (`voix`) | `config.json` | Tout de suite (sauf le volume) |
 | Seuils de détection (distances, durées…) | `src/detector.js`, en haut du fichier | Au prochain lancement |
-| Token, salon, volume | `config.json` | Au prochain lancement |
+| Token, salon, volume, vérification de l'API (`rocketLeague`) | `config.json` | Au prochain lancement |
 
 Les phrases déjà générées sont gardées dans `cache/` : elles ne repassent pas par internet et sont lues sans attente.
 Tu peux vider ce dossier sans risque.
@@ -120,7 +122,7 @@ Tu peux vider ce dossier sans risque.
 
 | Problème | Solution |
 |---|---|
-| « En attente de Rocket League » en pleine partie | Une mise à jour du jeu a peut-être remis `PacketSendRate=0` dans `DefaultStatsAPI.ini`. Remets `30` et relance le jeu. |
+| « En attente de Rocket League » en pleine partie | Le jeu a été lancé avant que le bot corrige `PacketSendRate` (message « relance le jeu » dans la console) : relance le jeu. Si le bot dit « accès refusé », lance `lancer.bat` une fois en administrateur. |
 | « Salon vocal introuvable » | Vérifie `salonVocalId` et que le bot est bien sur le serveur (étape 1.4). |
 | Erreur de login Discord | Le token est faux ou a été régénéré : refais **Reset Token** et recolle-le. |
 | « edge-tts a échoué » | Problème de connexion au service de voix de Microsoft (gratuit, non officiel). Les phrases déjà en cache marchent quand même. |

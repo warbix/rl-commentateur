@@ -39,9 +39,13 @@
     "hauteur": "+0Hz",
     "volume": 1
   },
+  "_rocketLeague": "verifierApi : au lancement puis toutes les 10 min, remet PacketSendRate à la bonne valeur dans DefaultStatsAPI.ini (Steam et Epic trouvés automatiquement ; cheminsJeu pour ajouter un dossier d'installation à la main).",
   "rocketLeague": {
     "hote": "127.0.0.1",
-    "port": 49123
+    "port": 49123,
+    "verifierApi": true,
+    "packetSendRate": 30,
+    "cheminsJeu": []
   },
   "python": "python"
 }

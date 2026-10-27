@@ -14,6 +14,7 @@ const { Detector } = require("./detector");
 const { Phrases } = require("./phrases");
 const { TTS } = require("./tts");
 const { readConfig, CONFIG_FILE } = require("./config");
+const { checkAndReport } = require("./apiStats");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -62,12 +63,20 @@ async function main() {
   const replayFile = option("--rejouer");
   if (replayFile) return replay(replayFile, Number(option("--vitesse") || 1), detector);
 
+  // Une mise à jour du jeu peut remettre PacketSendRate à 0 : on vérifie au lancement, puis toutes les 10 minutes
+  const checkApi = (verbose) => {
+    const options = readConfig().rocketLeague || {};
+    if (options.verifierApi !== false) checkAndReport(options, { verbose });
+  };
+  checkApi(true);
+  setInterval(() => checkApi(false), 10 * 60 * 1000);
+
   const rl = new RLClient(config.rocketLeague);
   rl.on("connected", () => console.log("Rocket League : connecté à l'API Stats"));
   rl.on("disconnected", () => console.log("Rocket League : connexion perdue, on attend le jeu…"));
   rl.on("event", (event, data) => detector.handle(event, data || {}, Date.now()));
   rl.start();
-  console.log("En attente de Rocket League (lance le jeu, ou vérifie PacketSendRate dans DefaultStatsAPI.ini)…");
+  console.log("En attente de Rocket League…");
 }
 
 // Rejoue un fichier enregistré par capture.js, en respectant le rythme d'origine (accéléré par --vitesse)
