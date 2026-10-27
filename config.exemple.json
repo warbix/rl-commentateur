@@ -8,7 +8,7 @@
   },
   "_commenter": "'notre-equipe' : seulement les joueurs de l'équipe où joue au moins un pseudo de la liste des surnoms. 'tout-le-monde' : les deux équipes. Modifiable pendant que le bot tourne.",
   "commenter": "notre-equipe",
-  "_surnoms": "Pseudo exact en jeu (majuscules sans importance) -> noms prononcés, un est tiré au hasard à chaque phrase. Un pseudo absent est lu tel quel. Modifiable pendant que le bot tourne.",
+  "_surnoms": "Pseudo en jeu -> noms prononcés. Majuscules, accents, espaces et ponctuation sans importance, et un pseudo coupé par le jeu (8 caractères ou plus) est reconnu : MonSuperPseudo2000 = MonSuperPséudo20. Ces pseudos définissent aussi notre équipe. Noms prononcés, un est tiré au hasard à chaque phrase. Un pseudo absent est lu tel quel. Modifiable pendant que le bot tourne.",
   "surnoms": {
     "MonPseudo": [
       "Mon surnom",
