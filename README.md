@@ -139,6 +139,17 @@ Tu peux vider ce dossier sans risque.
 
 ---
 
+## Tests
+
+```
+npm test
+```
+Rejoue le match enregistré et vérifie que le bot dit toujours la même chose, que les phrases sont valides et que la
+réactivation de l'API marche. À lancer après avoir touché aux seuils ou aux phrases : si un test casse sans que ce soit
+voulu, c'est qu'une règle a changé de comportement.
+
+---
+
 ## En cas de souci
 
 | Problème | Solution |

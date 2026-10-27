@@ -46,10 +46,12 @@ function gameRunning() {
 }
 
 // Renvoie un résultat par installation trouvée : { file, avant, apres, corrige, erreur }
-function checkStatsApi({ packetSendRate = 30, cheminsJeu = [] } = {}) {
+// recherche: false pour ne vérifier que cheminsJeu (utilisé par les tests)
+function checkStatsApi({ packetSendRate = 30, cheminsJeu = [], recherche = true } = {}) {
   // Windows ne tient pas compte des majuscules : on dédoublonne en minuscules, mais on garde le chemin tel quel
   const unique = new Map();
-  for (const d of [...steamInstalls(), ...epicInstalls(), ...cheminsJeu]) {
+  const found = recherche ? [...steamInstalls(), ...epicInstalls()] : [];
+  for (const d of [...found, ...cheminsJeu]) {
     const full = path.resolve(d);
     if (!unique.has(full.toLowerCase())) unique.set(full.toLowerCase(), full);
   }
