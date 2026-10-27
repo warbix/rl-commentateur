@@ -8,9 +8,11 @@ const {
 } = require("@discordjs/voice");
 
 class DiscordVoice {
-  constructor({ token, salonVocalId, salonTexteId }, { volume = 1 } = {}) {
+  constructor({ token, salonVocalId, salonTexteId, suivre = [] }, { volume = 1 } = {}) {
     this.token = token;
     this.voiceChannelId = salonVocalId;
+    // Membres à suivre, par ordre de priorité : identifiant Discord, nom d'utilisateur, nom affiché ou pseudo du serveur
+    this.follow = (Array.isArray(suivre) ? suivre : [suivre]).filter(Boolean).map((x) => String(x).toLowerCase());
     this.textChannelId = salonTexteId;
     this.volume = volume;
     this.queue = [];
@@ -27,15 +29,18 @@ class DiscordVoice {
     await ready;
     console.log(`Discord : connecté en tant que ${this.client.user.tag}`);
 
-    const channel = await this.client.channels.fetch(this.voiceChannelId).catch(() => null);
-    if (!channel || !channel.isVoiceBased()) throw new Error(`Salon vocal introuvable (salonVocalId = ${this.voiceChannelId}). Le bot est bien invité sur le serveur ?`);
+    const home = await this.client.channels.fetch(this.voiceChannelId).catch(() => null);
+    if (!home || !home.isVoiceBased()) throw new Error(`Salon vocal introuvable (salonVocalId = ${this.voiceChannelId}). Le bot est bien invité sur le serveur ?`);
     if (this.textChannelId) this.textChannel = await this.client.channels.fetch(this.textChannelId).catch(() => null);
+    this.me = await home.guild.members.fetchMe();
 
-    // Sans ces droits, la connexion vocale reste bloquée sans message clair
-    const me = await channel.guild.members.fetchMe();
-    const perms = channel.permissionsFor(me);
-    const missing = [["ViewChannel", "Voir le salon"], ["Connect", "Se connecter"], ["Speak", "Parler"]]
-      .filter(([flag]) => !perms.has(PermissionFlagsBits[flag])).map(([, label]) => label);
+    // En priorité le salon où se trouve un membre suivi, sinon le salon de config.json
+    const followed = this.followedChannel(home.guild);
+    let channel = home;
+    if (followed && !this.missingPerms(followed).length) channel = followed;
+    else if (followed) console.log(`Discord : pas les droits sur « ${followed.name} » (salon suivi), on va dans « ${home.name} »`);
+
+    const missing = this.missingPerms(channel);
     if (missing.length) {
       throw new Error(`le bot n'a pas les droits ${missing.join(", ")} sur le salon « ${channel.name} ». ` +
         "Discord → clic droit sur le salon → Modifier le salon → Permissions → ajoute le rôle du bot et autorise ces droits.");
@@ -43,9 +48,54 @@ class DiscordVoice {
 
     this.connect(channel);
     await entersState(this.connection, VoiceConnectionStatus.Ready, 20000);
-    console.log(`Discord : dans le salon vocal « ${channel.name} »`);
+    console.log(`Discord : dans le salon vocal « ${channel.name} »${channel === followed ? " (salon suivi)" : ""}`);
+
+    // Si un membre suivi change de salon vocal, le bot le suit
+    this.client.on(Events.VoiceStateUpdate, (before, after) => {
+      if (!after.channel || !this.isFollowed(after.member)) return;
+      // Le membre suivi le plus prioritaire qui est en vocal décide du salon
+      const target = this.followedChannel(after.guild);
+      if (!target || target.id === this.channel.id) return;
+      if (this.missingPerms(target).length) return console.log(`Discord : pas les droits pour suivre dans « ${target.name} »`);
+      this.moveTo(target);
+    });
 
     await this.registerCommands(channel.guild);
+  }
+
+  // Sans ces droits, la connexion vocale reste bloquée sans message clair
+  missingPerms(channel) {
+    const perms = channel.permissionsFor(this.me);
+    return [["ViewChannel", "Voir le salon"], ["Connect", "Se connecter"], ["Speak", "Parler"]]
+      .filter(([flag]) => !perms || !perms.has(PermissionFlagsBits[flag])).map(([, label]) => label);
+  }
+
+  // Rang du membre dans la liste "suivre" (-1 s'il n'y est pas)
+  followRank(member) {
+    if (!member || member.user.bot) return -1;
+    const names = [member.id, member.user.username, member.user.globalName, member.displayName, member.nickname]
+      .filter(Boolean).map((x) => x.toLowerCase());
+    return this.follow.findIndex((f) => names.includes(f));
+  }
+
+  isFollowed(member) {
+    return this.followRank(member) >= 0;
+  }
+
+  // Salon vocal du membre suivi le plus prioritaire actuellement en vocal
+  followedChannel(guild) {
+    let best = null;
+    for (const state of guild.voiceStates.cache.values()) {
+      const rank = this.followRank(state.member);
+      if (rank >= 0 && state.channel && (!best || rank < best.rank)) best = { rank, channel: state.channel };
+    }
+    return best && best.channel;
+  }
+
+  moveTo(channel) {
+    this.channel = channel;
+    this.connection.rejoin({ channelId: channel.id, selfDeaf: true, selfMute: false });
+    console.log(`Discord : suit dans le salon vocal « ${channel.name} »`);
   }
 
   // builder : un SlashCommandBuilder ; handler(interaction) renvoie le texte de la réponse
@@ -77,6 +127,7 @@ class DiscordVoice {
   }
 
   connect(channel) {
+    this.channel = channel;
     this.connection = joinVoiceChannel({
       channelId: channel.id,
       guildId: channel.guild.id,
@@ -94,7 +145,7 @@ class DiscordVoice {
       } catch {
         this.connection.destroy();
         console.log("Discord : déconnecté du vocal, nouvelle tentative dans 5 s");
-        setTimeout(() => this.connect(channel), 5000);
+        setTimeout(() => this.connect(this.channel), 5000);
       }
     });
   }

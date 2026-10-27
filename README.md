@@ -53,6 +53,12 @@ Tout tourne **sur ton PC** : pas de serveur à louer.
 }
 ```
 
+### 3 bis. Suivre quelqu'un (optionnel)
+
+Dans `config.json` → `discord.suivre`, mets les membres Discord à suivre, par priorité (identifiant, nom d'utilisateur ou nom affiché), ex. `["MonPseudoDiscord", "UnPote"]`.
+Au lancement, le bot rejoint le salon vocal du premier d'entre eux qui est en vocal, et le suit s'il change de salon.
+Si aucun n'est en vocal, il va dans `salonVocalId`. Il lui faut les droits Voir le salon, Se connecter et Parler sur chaque salon.
+
 ### 4. Choisir les voix
 
 Le bot change de voix à chaque phrase parmi `voix.liste` dans `config.json`. `voix.rotation` vaut :

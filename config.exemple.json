@@ -2,7 +2,9 @@
   "discord": {
     "token": "COLLE_ICI_LE_TOKEN_DU_BOT",
     "salonVocalId": "ID_DU_SALON_VOCAL",
-    "salonTexteId": ""
+    "salonTexteId": "",
+    "_suivre": "Membres Discord à suivre, par priorité (identifiant, nom d'utilisateur ou nom affiché) : le bot rejoint leur salon vocal et les suit quand ils changent. Personne en vocal : salonVocalId.",
+    "suivre": []
   },
   "_commenter": "'notre-equipe' : seulement les joueurs de l'équipe où joue au moins un pseudo de la liste des surnoms. 'tout-le-monde' : les deux équipes. Modifiable pendant que le bot tourne.",
   "commenter": "notre-equipe",
