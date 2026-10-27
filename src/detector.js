@@ -84,6 +84,12 @@ class Detector extends EventEmitter {
     if (p && this.ourTeams().has(p.team)) this.emit("fait", { type, joueur: name });
   }
 
+  announceBenevole(t) {
+    const g = this.giveaway;
+    this.giveaway = null;
+    this.live("benevole.tir", { benevole: g.p, adversaire: g.shooter }, t);
+  }
+
   countBenevole(name) {
     this.benevoles.set(name, (this.benevoles.get(name) || 0) + 1);
     this.fact("benevole", name);
@@ -202,11 +208,11 @@ class Detector extends EventEmitter {
       for (const s of d.Players || []) this.tickPlayer(this.player(s.Name), s, dt, t);
     }
 
-    // Bénévole : tir adverse sans but derrière → on le dit après coup
+    // Bénévole : tir adverse sans but derrière → on le dit quand le danger est passé
+    // (normalement dès que son équipe reprend la balle, voir onHit ; ici au bout de 4 s au pire)
     const g = this.giveaway;
-    if (g && g.shotAt && t - g.shotAt >= 2500) {
-      this.live("benevole.tir", { benevole: g.p, adversaire: g.shooter }, t);
-      this.giveaway = null;
+    if (g && g.shotAt && t - g.shotAt >= 4000) {
+      this.announceBenevole(t);
     } else if (g && !g.shotAt && t - g.rT > S.benevoleFenetreMs) {
       this.giveaway = null;
     }
@@ -259,6 +265,9 @@ class Detector extends EventEmitter {
       const advanced = distOpp(pp.team, prev.loc.Y) - distOpp(pp.team, hit.loc.Y) >= S.fantomeAvanceeMin;
       if (keptByTeam || advanced) this.player(pp.name).idleMs = 0;
     }
+
+    // Bénévole : après le tir adverse, son équipe a repris la balle → l'action est finie, on peut le dire
+    if (this.giveaway && this.giveaway.shotAt && hit.players.some((p) => p.team === this.giveaway.pTeam)) this.announceBenevole(t);
 
     // Bénévole : la récupération adverse est-elle propre ?
     const g = this.giveaway;
