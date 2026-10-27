@@ -1,0 +1,4 @@
+node_modules/
+cache/
+# Contient le token du bot : ne jamais le committer
+config.json

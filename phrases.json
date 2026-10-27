@@ -1,0 +1,181 @@
+{
+  "_lisezmoi": "Une phrase est tirée au hasard dans la liste de la situation. Les {variables} sont remplacées par les pseudos. Écrit pour être lu par une voix de synthèse : pas d'emoji, pas d'abréviations.",
+
+  "tapin": {
+    "_variables": "{buteur} = celui qui marque, {passeur} = le coéquipier qui a tout fait",
+    "phrases": [
+      "{buteur} pousse la balle depuis la ligne. Applaudissez bien fort {passeur}, c'est lui qui a marqué.",
+      "Incroyable effort de {buteur}, il a dû parcourir au moins deux mètres. Merci {passeur} pour le service à domicile.",
+      "But de {buteur}. Enfin, but de {passeur}, mais c'est {buteur} qui signe le formulaire.",
+      "{buteur}, même ma grand-mère le met celui-là. Et elle ne joue pas à Rocket League.",
+      "{passeur} a fait quatre-vingt-dix-neuf pour cent du travail, {buteur} prend cent pour cent des points. Classique."
+    ]
+  },
+
+  "vol": {
+    "_variables": "{voleur} = celui qui s'attribue le but, {victime} = celui dont le tir rentrait",
+    "phrases": [
+      "Alerte, vol à l'étalage. La balle de {victime} rentrait toute seule et {voleur} a mis sa signature dessus.",
+      "{voleur} qui touche une balle déjà dans la cage. {victime}, porte plainte, on a les images.",
+      "Magnifique interception de {voleur}... sur le tir de son propre coéquipier. Bravo {victime}, au moins toi tu sais.",
+      "{voleur}, rends le but à {victime}. Tout le monde a vu, même l'arbitre qui n'existe pas.",
+      "Statistique du jour : {victime} tire, {voleur} encaisse les points. On appelle ça du travail en équipe, version {voleur}."
+    ]
+  },
+
+  "arretManque": {
+    "accompagne": {
+      "_variables": "{defenseur} = celui qui a touché sans arrêter, {buteur} = celui qui marque",
+      "phrases": [
+        "{defenseur} touche la balle, et la raccompagne poliment au fond de ses filets. Quel gentleman.",
+        "Il était là, {defenseur}. Il l'a touchée. Et elle est rentrée quand même. Remarquable.",
+        "Arrêt manqué de {defenseur}. Il avait la main sur la balle, il a juste oublié de la sortir.",
+        "{buteur} marque, avec l'aide précieuse de {defenseur} qui a donné la petite touche finale.",
+        "{defenseur}, la prochaine fois, essaie de la toucher dans l'autre sens. Ça marche mieux."
+      ]
+    },
+    "csc": {
+      "_variables": "{defenseur} = celui qui marque contre son camp",
+      "phrases": [
+        "Contre son camp de {defenseur}. Aucun adversaire n'a été nécessaire.",
+        "{defenseur} a vu que l'attaque adverse galérait, alors il a décidé de les aider. Quel grand cœur.",
+        "Personne ne tirait, et pourtant ça rentre. Merci {defenseur}, le meilleur attaquant de l'équipe adverse.",
+        "{defenseur} marque. Petit souci : c'est dans la mauvaise cage.",
+        "Et le but est pour l'équipe adverse, sur une passe décisive magistrale de {defenseur}."
+      ]
+    }
+  },
+
+  "lucarne": {
+    "lucarne": {
+      "_variables": "{buteur} = celui qui marque",
+      "phrases": [
+        "Pleine lucarne de {buteur}. Bon, ça arrive à tout le monde une fois par saison.",
+        "{buteur} en lucarne ! Profitez-en, la prochaine c'est dans six mois.",
+        "Lucarne de {buteur}. Je ne sais pas s'il l'a fait exprès, et lui non plus.",
+        "Frappe dans la lucarne de {buteur}. Quelqu'un vérifie qu'il n'a pas changé de joueur ?",
+        "{buteur} sort le but de l'année. Enfin, de sa carrière. On va le voir sur toutes ses vidéos."
+      ]
+    },
+    "rasDuSol": {
+      "_variables": "{buteur} = celui qui marque, {vitesse} = vitesse de la balle en kilomètres heure",
+      "phrases": [
+        "But de {buteur} à {vitesse} kilomètres heure. La balle a eu le temps de lire le règlement avant d'entrer.",
+        "{buteur} marque une balle qui roule. Le gardien adverse s'est sûrement endormi.",
+        "{vitesse} kilomètres heure. {buteur}, même une trottinette tire plus fort.",
+        "La balle de {buteur} a rampé jusqu'au but. Lentement. Très lentement. Mais elle est arrivée.",
+        "But au ras du sol de {buteur}. Pas beau, pas puissant, mais ça compte. Malheureusement."
+      ]
+    }
+  },
+
+  "passeAdmin": {
+    "_variables": "{passeur} = celui qui a la passe décisive, {buteur} = celui qui a vraiment fait l'action, {secondes} = temps entre la passe et le but",
+    "phrases": [
+      "Passe décisive pour {passeur}. Il a touché la balle il y a {secondes} secondes, ça compte apparemment.",
+      "{passeur} récupère une passe décisive purement administrative. Il peut la ranger avec ses autres papiers.",
+      "{buteur} a tout fait tout seul, mais {passeur} touche quand même sa commission.",
+      "Assistance de {passeur}. Assistance à quoi, on ne sait pas, mais le jeu dit que c'est lui.",
+      "{passeur}, cette passe décisive, tu l'as eue comme une attestation de présence. Tu étais là, c'est tout."
+    ]
+  },
+
+  "mvp": {
+    "leger": {
+      "_variables": "{mvp} = le joueur MVP, {vraiMvp} = le coéquipier qui a le plus bossé",
+      "phrases": [
+        "{mvp} est MVP. On va dire que oui. Mais {vraiMvp} mérite une petite pensée.",
+        "MVP pour {mvp}. Un titre un peu flatteur, mais on ne va pas gâcher sa soirée.",
+        "{mvp} récupère le MVP. {vraiMvp}, tu as fait le ménage, lui il a pris la photo.",
+        "Félicitations à {mvp}, MVP du match. Les vrais savent que {vraiMvp} y est pour beaucoup.",
+        "{mvp} MVP, d'accord. Mais regardez les touches de balle de {vraiMvp} avant de le couronner."
+      ]
+    },
+    "moqueur": {
+      "_variables": "{mvp} = le joueur MVP, {vraiMvp} = le coéquipier qui a le plus bossé",
+      "phrases": [
+        "{mvp} MVP ? Il a passé le match à attendre devant la cage que {vraiMvp} lui apporte la balle.",
+        "Le jeu a donné le MVP à {mvp}. Le jeu ne regarde que les buts, nous on a regardé le match.",
+        "{mvp}, MVP avec des buts poussés et des cadeaux. {vraiMvp}, on sait que c'est toi.",
+        "MVP pour {mvp}, sponsorisé par le travail de {vraiMvp}. Merci pour ta générosité.",
+        "{mvp} sur le podium. Il remercie {vraiMvp}, sans qui il n'aurait strictement rien fait."
+      ]
+    },
+    "rembourse": {
+      "_variables": "{mvp} = le joueur MVP, {vraiMvp} = le coéquipier qui a le plus bossé",
+      "phrases": [
+        "Remboursez le MVP de {mvp}. Tout de suite. {vraiMvp}, viens récupérer ce qui t'appartient.",
+        "{mvp} MVP. Je répète : {mvp} MVP. Je crois que le jeu a un bug.",
+        "Casseroles en série, et pourtant {mvp} est MVP. Le système de points de Rocket League est officiellement cassé.",
+        "{mvp}, ce MVP c'est un braquage. {vraiMvp} a travaillé, toi tu as volé la couronne.",
+        "On ouvre une enquête sur le MVP de {mvp}. Principal témoin à charge : {vraiMvp}."
+      ]
+    }
+  },
+
+  "mendiant": {
+    "_variables": "{joueur} = le joueur sans boost, {secondes} = durée sans boost",
+    "phrases": [
+      "{joueur} est à zéro boost depuis {secondes} secondes. Quelqu'un peut lui faire un virement ?",
+      "{joueur} roule à sec. Les pastilles sont par terre, il suffit de passer dessus.",
+      "Alerte mendicité : {joueur} n'a plus une goutte de boost. On organise une quête ?",
+      "{joueur}, ça fait {secondes} secondes que tu roules au pédalier. Va prendre du boost, sérieux.",
+      "Zéro boost pour {joueur}. Il est en mode économie d'énergie. Ou il a oublié comment ça marche."
+    ]
+  },
+
+  "fantome": {
+    "_variables": "{joueur} = le joueur absent, {secondes} = temps sans action utile",
+    "phrases": [
+      "Avis de recherche : {joueur}. Aucune action utile depuis {secondes} secondes. Si vous le voyez, prévenez son équipe.",
+      "{joueur} est toujours dans le match ? Son équipe joue à un de moins depuis un moment.",
+      "{secondes} secondes sans rien faire. {joueur}, ta voiture est en mode pilote automatique ?",
+      "Minute de silence pour {joueur}, porté disparu sur le terrain.",
+      "{joueur} fait du tourisme. Il visite le stade, mais il ne joue pas avec la balle."
+    ]
+  },
+
+  "craquage": {
+    "_variables": "{defenseur} = celui qui a raté l'arrêt, {buteur} = celui qui marque",
+    "phrases": [
+      "Dans les dix dernières secondes ! {defenseur} touche la balle et la laisse rentrer. On appelle ça craquer.",
+      "{defenseur} avait le match entre les mains. Il l'a lâché. Dans la cage. À quelques secondes de la fin.",
+      "Craquage total de {defenseur}. {buteur} n'en demandait pas tant.",
+      "Pression maximale, et {defenseur} a fondu comme un glaçon. Merci pour le cadeau de fin de match.",
+      "{defenseur}, tu viens de servir le but décisif à {buteur} sur un plateau. Les nerfs, ça se travaille."
+    ]
+  },
+
+  "benevole": {
+    "tir": {
+      "_variables": "{benevole} = celui qui a rendu la balle, {adversaire} = celui qui en profite",
+      "phrases": [
+        "{benevole} rend la balle gratuitement à {adversaire}. Le service après-vente est impeccable.",
+        "Passe parfaite de {benevole}... pour {adversaire}. Mauvaise couleur, mais très bonne passe.",
+        "{benevole} fait du bénévolat pour l'équipe adverse. {adversaire} dit merci.",
+        "Personne ne mettait la pression, et {benevole} a quand même offert la balle à {adversaire}.",
+        "{benevole}, c'est gentil de partager, mais pas avec {adversaire}."
+      ]
+    },
+    "but": {
+      "_variables": "{benevole} = celui qui a rendu la balle, {adversaire} = celui qui marque",
+      "phrases": [
+        "Bénévole de l'année : {benevole}. Il rend la balle, {adversaire} marque. Livraison express.",
+        "{adversaire} marque, mais le vrai passeur décisif, c'est {benevole}. Dans la mauvaise équipe.",
+        "But de {adversaire}, offert par {benevole}. Ça mérite une médaille, ou une suspension.",
+        "{benevole} a rendu la balle et {adversaire} ne s'est pas fait prier. Encore merci pour le cadeau.",
+        "Je résume : {benevole} rend la balle, {adversaire} marque, et toute l'équipe regarde {benevole}."
+      ]
+    },
+    "duMatch": {
+      "_variables": "{benevole} = celui qui a rendu le plus de ballons, {nombre} = nombre de ballons rendus",
+      "phrases": [
+        "Bénévole du match : {benevole}, avec {nombre} ballons rendus à l'adversaire. Quelle générosité.",
+        "{benevole} a rendu {nombre} ballons ce match. L'équipe adverse veut le recruter.",
+        "Trophée du bénévole pour {benevole} : {nombre} cadeaux distribués. Noël avant l'heure.",
+        "{nombre} balles offertes par {benevole}. À ce niveau-là, c'est du mécénat.",
+        "{benevole} termine avec {nombre} ballons rendus. Il jouait pour quelle équipe, au juste ?"
+      ]
+    }
+  }
+}

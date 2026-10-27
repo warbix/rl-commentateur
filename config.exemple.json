@@ -1,0 +1,47 @@
+{
+  "discord": {
+    "token": "COLLE_ICI_LE_TOKEN_DU_BOT",
+    "salonVocalId": "ID_DU_SALON_VOCAL",
+    "salonTexteId": ""
+  },
+  "_commenter": "'notre-equipe' : seulement les joueurs de l'équipe où joue au moins un pseudo de la liste des surnoms. 'tout-le-monde' : les deux équipes. Modifiable pendant que le bot tourne.",
+  "commenter": "notre-equipe",
+  "_surnoms": "Pseudo exact en jeu (majuscules sans importance) -> noms prononcés, un est tiré au hasard à chaque phrase. Un pseudo absent est lu tel quel. Modifiable pendant que le bot tourne.",
+  "surnoms": {
+    "MonPseudo": [
+      "Mon surnom",
+      "Le boss"
+    ],
+    "Coequipier1": [
+      "Coéquipier un",
+      "Le copain"
+    ],
+    "Coequipier2": [
+      "Coéquipier deux"
+    ]
+  },
+  "_prononciation": "Mots remplacés juste avant la voix, pour qu'elle les dise correctement. Modifiable pendant que le bot tourne.",
+  "prononciation": {
+    "MVP": "aime vie pie"
+  },
+  "_voix": "rotation : 'aleatoire' (au hasard, jamais deux fois de suite la même), 'alternee' (chacune son tour) ou 'fixe' (toujours la première). Modifiable pendant que le bot tourne, sauf le volume.",
+  "voix": {
+    "rotation": "aleatoire",
+    "liste": [
+      "fr-FR-HenriNeural",
+      "fr-FR-RemyMultilingualNeural",
+      "fr-FR-DeniseNeural",
+      "fr-FR-VivienneMultilingualNeural",
+      "fr-CA-AntoineNeural",
+      "fr-BE-GerardNeural"
+    ],
+    "vitesse": "+0%",
+    "hauteur": "+0Hz",
+    "volume": 1
+  },
+  "rocketLeague": {
+    "hote": "127.0.0.1",
+    "port": 49123
+  },
+  "python": "python"
+}
