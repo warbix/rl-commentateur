@@ -1,6 +1,7 @@
-// Bot Discord : rejoint le salon vocal et lit les fichiers audio à la suite.
+// Bot Discord : rejoint le salon vocal, lit les fichiers audio à la suite,
+// et répond aux commandes /… déclarées avec addCommand().
 
-const { Client, GatewayIntentBits, Events } = require("discord.js");
+const { Client, GatewayIntentBits, Events, MessageFlags } = require("discord.js");
 const {
   joinVoiceChannel, createAudioPlayer, createAudioResource, entersState,
   AudioPlayerStatus, VoiceConnectionStatus, NoSubscriberBehavior,
@@ -13,6 +14,7 @@ class DiscordVoice {
     this.textChannelId = salonTexteId;
     this.volume = volume;
     this.queue = [];
+    this.commands = new Map();
     this.player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Play } });
     this.player.on(AudioPlayerStatus.Idle, () => this.playNext());
     this.player.on("error", (e) => { console.error("Erreur de lecture :", e.message); this.playNext(); });
@@ -32,6 +34,36 @@ class DiscordVoice {
     this.connect(channel);
     await entersState(this.connection, VoiceConnectionStatus.Ready, 20000);
     console.log(`Discord : dans le salon vocal « ${channel.name} »`);
+
+    await this.registerCommands(channel.guild);
+  }
+
+  // builder : un SlashCommandBuilder ; handler(interaction) renvoie le texte de la réponse
+  addCommand(builder, handler) {
+    this.commands.set(builder.name, { builder, handler });
+  }
+
+  async registerCommands(guild) {
+    if (!this.commands.size) return;
+    try {
+      // Commandes du serveur (et pas globales) : disponibles immédiatement
+      await guild.commands.set([...this.commands.values()].map((c) => c.builder.toJSON()));
+      console.log(`Discord : commandes ${[...this.commands.keys()].map((n) => "/" + n).join(" ")} disponibles`);
+    } catch (e) {
+      console.log(`Discord : impossible d'ajouter les commandes (${e.message}). Réinvite le bot avec le scope applications.commands (voir README).`);
+    }
+    this.client.on(Events.InteractionCreate, async (interaction) => {
+      if (!interaction.isChatInputCommand()) return;
+      const command = this.commands.get(interaction.commandName);
+      if (!command) return;
+      try {
+        const reply = await command.handler(interaction);
+        if (reply) await interaction.reply(reply);
+      } catch (e) {
+        console.error(`Commande /${interaction.commandName} :`, e.message);
+        if (!interaction.replied) interaction.reply({ content: "Oups, ça a planté.", flags: MessageFlags.Ephemeral }).catch(() => {});
+      }
+    });
   }
 
   connect(channel) {

@@ -45,6 +45,28 @@ async function main() {
   } else if (!muet) {
     output = new (require("./discordVoice").DiscordVoice)(config.discord, config.voix);
   }
+  // Commandes Discord (avant start() : elles sont enregistrées à la connexion)
+  let muted = false;
+  if (output && output.addCommand) {
+    const { SlashCommandBuilder } = require("discord.js");
+    output.addCommand(new SlashCommandBuilder().setName("chut").setDescription("Coupe les commentaires"), () => {
+      muted = true;
+      return "🤐 Commentateur coupé. /parle pour le relancer.";
+    });
+    output.addCommand(new SlashCommandBuilder().setName("parle").setDescription("Relance les commentaires"), () => {
+      muted = false;
+      return "🎙️ Le commentateur reprend du service.";
+    });
+    output.addCommand(
+      new SlashCommandBuilder().setName("volume").setDescription("Volume du commentateur, en %")
+        .addIntegerOption((o) => o.setName("pourcentage").setDescription("De 0 à 200").setMinValue(0).setMaxValue(200).setRequired(true)),
+      (interaction) => {
+        const pct = interaction.options.getInteger("pourcentage");
+        output.volume = pct / 100;
+        return `🔊 Volume réglé à ${pct} %.`;
+      },
+    );
+  }
   if (output) await output.start();
 
   const pool = output && config.pregenerer !== false
@@ -65,7 +87,7 @@ async function main() {
     try { text = ready ? ready.text : phrases.pick(key, vars); } catch (e) { return console.error(e.message); }
     console.log(`${new Date(t).toLocaleTimeString()} [${key}${live ? ", direct" : ""}] ${text}`);
     if (recorder) recorder.comment(t, key, text);
-    if (!output) return;
+    if (!output || muted) return;
     chain = chain
       .then(() => (ready ? ready.file : tts.synth(text)))
       .then((file) => output.enqueue(file, text))

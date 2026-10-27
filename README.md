@@ -28,7 +28,7 @@ Tout tourne **sur ton PC** : pas de serveur à louer.
 1. Va sur <https://discord.com/developers/applications> et clique **New Application**. Donne-lui un nom (ex. « Le Commentateur »).
 2. Menu **Bot** → **Reset Token** → copie le token. ⚠️ C'est le mot de passe du bot : ne le partage jamais.
 3. Menu **OAuth2** → **URL Generator** :
-   - Scopes : coche **bot**
+   - Scopes : coche **bot** et **applications.commands** (pour les commandes /chut, /parle…)
    - Bot Permissions : coche **View Channels**, **Connect**, **Speak** (et **Send Messages** si tu veux aussi les phrases écrites)
 4. Copie l'URL générée en bas, ouvre-la dans ton navigateur et ajoute le bot sur votre serveur.
 
@@ -81,6 +81,18 @@ Autres voix possibles : `fr-FR-EloiseNeural`, `fr-CA-JeanNeural`, `fr-CA-Thierry
 **Double-clic sur `lancer.bat`** (ou `npm start` dans un terminal ouvert dans ce dossier).
 Le bot rejoint le salon vocal, puis attend Rocket League. L'ordre de lancement n'a pas d'importance.
 Ferme la fenêtre pour l'arrêter.
+
+### Commandes Discord
+
+Dans n'importe quel salon du serveur :
+
+| Commande | Effet |
+|---|---|
+| `/chut` | Coupe les commentaires (le bot reste dans le vocal) |
+| `/parle` | Les relance |
+| `/volume 80` | Règle le volume du commentateur (0 à 200 %) |
+
+Si les commandes n'apparaissent pas, le bot a été invité sans le scope `applications.commands` : régénère l'URL d'invitation (étape 1.3) et réinvite-le, sans le retirer du serveur.
 
 ### Tester sans jouer
 
