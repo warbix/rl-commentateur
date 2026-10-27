@@ -39,6 +39,9 @@
     "hauteur": "+0Hz",
     "volume": 1
   },
+  "_pregenerer": "Prépare à l'avance (en arrière-plan) les phrases qui ne citent que la bande, pour qu'elles sortent sans attendre la voix.",
+  "pregenerer": true,
+
   "_enregistrerMatchs": "Enregistre chaque match dans matchs/ (rejouable avec --rejouer), avec les commentaires du bot dedans.",
   "enregistrerMatchs": true,
 

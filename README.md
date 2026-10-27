@@ -116,6 +116,9 @@ Pour désactiver : `"enregistrerMatchs": false` dans `config.json`. `node captur
 | Token, salon, volume, vérification de l'API (`rocketLeague`) | `config.json` | Au prochain lancement |
 
 Les phrases déjà générées sont gardées dans `cache/` : elles ne repassent pas par internet et sont lues sans attente.
+Au lancement, le bot prépare aussi en arrière-plan les phrases qui ne citent que la bande (tap-in, vol, lucarne, MVP) pour toutes les
+combinaisons de pseudos de `surnoms` : elles sortent instantanément. La réserve se refait toute seule si tu changes les phrases,
+les surnoms ou les voix (`"pregenerer": false` pour désactiver).
 Tu peux vider ce dossier sans risque.
 
 ---

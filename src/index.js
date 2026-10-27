@@ -16,6 +16,7 @@ const { TTS } = require("./tts");
 const { readConfig, CONFIG_FILE } = require("./config");
 const { checkAndReport } = require("./apiStats");
 const { Recorder } = require("./recorder");
+const { PhrasePool } = require("./pool");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -46,6 +47,11 @@ async function main() {
   }
   if (output) await output.start();
 
+  const pool = output && config.pregenerer !== false
+    ? new PhrasePool({ phrases, tts, file: path.join(ROOT, "cache", "reserve.json") })
+    : null;
+  if (pool) pool.warm();
+
   // Les phrases sont générées une par une, dans l'ordre, pour ne pas mélanger les commentaires
   let chain = Promise.resolve();
   const detector = new Detector({ options: readConfig });
@@ -53,13 +59,15 @@ async function main() {
   const recorder = !replayFile && config.enregistrerMatchs !== false ? new Recorder(path.join(ROOT, "matchs")) : null;
   detector.on("warning", (msg) => console.log(msg));
   detector.on("comment", ({ key, vars, live, t }) => {
+    // Phrase déjà prête (voix comprise) si elle ne cite que la bande, sinon on la génère maintenant
+    const ready = pool && pool.take(key, vars);
     let text;
-    try { text = phrases.pick(key, vars); } catch (e) { return console.error(e.message); }
+    try { text = ready ? ready.text : phrases.pick(key, vars); } catch (e) { return console.error(e.message); }
     console.log(`${new Date(t).toLocaleTimeString()} [${key}${live ? ", direct" : ""}] ${text}`);
     if (recorder) recorder.comment(t, key, text);
     if (!output) return;
     chain = chain
-      .then(() => tts.synth(text))
+      .then(() => (ready ? ready.file : tts.synth(text)))
       .then((file) => output.enqueue(file, text))
       .catch((e) => console.error("Voix :", e.message));
   });
