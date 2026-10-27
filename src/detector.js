@@ -60,7 +60,7 @@ class Detector extends EventEmitter {
     this.overtime = false;
     this.teamSize = 3;
     this.scores = [0, 0];
-    this.kickoffScores = [0, 0];
+    this.kickoffScores = null; // score au dernier coup d'envoi (inconnu si on arrive en cours de manche)
     this.casseroles = new Map();
     this.benevoles = new Map();
     this.giveaway = null;
@@ -182,6 +182,8 @@ class Detector extends EventEmitter {
   onState(d, t) {
     const game = d.Game || {};
     if (Array.isArray(game.Teams)) for (const team of game.Teams) this.scores[team.TeamNum] = team.Score || 0;
+    // Arrivé en cours de manche (bot relancé) : le score actuel tient lieu de score au coup d'envoi
+    if (!this.kickoffScores && Array.isArray(game.Teams)) this.kickoffScores = [...this.scores];
     if (typeof game.TimeSeconds === "number") this.time = game.TimeSeconds;
     this.overtime = !!game.bOvertime;
 
@@ -337,7 +339,7 @@ class Detector extends EventEmitter {
         this.feed.some((f) => f.type === "Shot" && f.team === TS && f.t >= hits[iAtk].t && f.t <= hits[iAtk].t + S.shotDelayMs));
       found[onTarget ? "arretManque.accompagne" : "arretManque.csc"] = { defenseur: defender, buteur: scorer };
 
-      const [s, o] = [this.kickoffScores[TS], this.kickoffScores[TD]];
+      const [s, o] = this.kickoffScores ? [this.kickoffScores[TS], this.kickoffScores[TD]] : [NaN, NaN];
       if (!this.overtime && this.time <= S.craquageMaxSecondes && (s === o - 1 || s === o)) {
         found.craquage = { defenseur: defender, buteur: scorer };
       }
