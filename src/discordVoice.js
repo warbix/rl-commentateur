@@ -1,7 +1,7 @@
 // Bot Discord : rejoint le salon vocal, lit les fichiers audio à la suite,
 // et répond aux commandes /… déclarées avec addCommand().
 
-const { Client, GatewayIntentBits, Events, MessageFlags } = require("discord.js");
+const { Client, GatewayIntentBits, Events, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const {
   joinVoiceChannel, createAudioPlayer, createAudioResource, entersState,
   AudioPlayerStatus, VoiceConnectionStatus, NoSubscriberBehavior,
@@ -30,6 +30,16 @@ class DiscordVoice {
     const channel = await this.client.channels.fetch(this.voiceChannelId).catch(() => null);
     if (!channel || !channel.isVoiceBased()) throw new Error(`Salon vocal introuvable (salonVocalId = ${this.voiceChannelId}). Le bot est bien invité sur le serveur ?`);
     if (this.textChannelId) this.textChannel = await this.client.channels.fetch(this.textChannelId).catch(() => null);
+
+    // Sans ces droits, la connexion vocale reste bloquée sans message clair
+    const me = await channel.guild.members.fetchMe();
+    const perms = channel.permissionsFor(me);
+    const missing = [["ViewChannel", "Voir le salon"], ["Connect", "Se connecter"], ["Speak", "Parler"]]
+      .filter(([flag]) => !perms.has(PermissionFlagsBits[flag])).map(([, label]) => label);
+    if (missing.length) {
+      throw new Error(`le bot n'a pas les droits ${missing.join(", ")} sur le salon « ${channel.name} ». ` +
+        "Discord → clic droit sur le salon → Modifier le salon → Permissions → ajoute le rôle du bot et autorise ces droits.");
+    }
 
     this.connect(channel);
     await entersState(this.connection, VoiceConnectionStatus.Ready, 20000);
