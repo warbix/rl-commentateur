@@ -39,6 +39,16 @@ class Phrases {
       if (!said.has(vars[v])) said.set(vars[v], this.spokenName(vars[v], surnoms));
       return said.get(vars[v]);
     });
+    return this.pronounce(text, prononciation);
+  }
+
+  // Nom prononcé d'un joueur, d'après les surnoms de config.json
+  say(name) {
+    return this.spokenName(name, readConfig().surnoms || {});
+  }
+
+  // Corrections de prononciation de config.json (ex. MVP → aime vie pie)
+  pronounce(text, prononciation = readConfig().prononciation || {}) {
     for (const [mot, dit] of Object.entries(prononciation)) {
       text = text.replace(new RegExp(`\\b${escapeRegExp(mot)}\\b`, "g"), dit);
     }

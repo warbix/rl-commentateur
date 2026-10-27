@@ -70,12 +70,29 @@ class Detector extends EventEmitter {
     this.warnedNoTeam = false;
   }
 
+  // Les équipes où joue au moins un pseudo listé dans les surnoms
+  ourTeams() {
+    const { surnoms = {} } = this.options() || {};
+    const known = new Set(Object.keys(surnoms).map((n) => n.toLowerCase()));
+    return new Set([...this.players.values()].filter((p) => known.has(p.name.toLowerCase())).map((p) => p.team));
+  }
+
+  // Fait marquant pour le bilan de la soirée (toujours compté, même s'il n'est pas commenté)
+  fact(type, name) {
+    const p = this.players.get(name);
+    if (p && this.ourTeams().has(p.team)) this.emit("fait", { type, joueur: name });
+  }
+
+  countBenevole(name) {
+    this.benevoles.set(name, (this.benevoles.get(name) || 0) + 1);
+    this.fact("benevole", name);
+  }
+
   // "notre-equipe" : on ne commente que les équipes où joue au moins un pseudo listé dans les surnoms
   isTarget(key, vars) {
-    const { commenter = "notre-equipe", surnoms = {} } = this.options() || {};
+    const { commenter = "notre-equipe" } = this.options() || {};
     if (commenter === "tout-le-monde") return true;
-    const known = new Set(Object.keys(surnoms).map((n) => n.toLowerCase()));
-    const ourTeams = new Set([...this.players.values()].filter((p) => known.has(p.name.toLowerCase())).map((p) => p.team));
+    const ourTeams = this.ourTeams();
     if (!ourTeams.size) {
       if (!this.warnedNoTeam && this.players.size) {
         this.warnedNoTeam = true;
@@ -97,6 +114,9 @@ class Detector extends EventEmitter {
   live(key, vars, t) {
     if (!this.inPlay || t - this.lastLiveT < S.liveCooldownMs || !this.isTarget(key, vars)) return false;
     this.lastLiveT = t;
+    const type = key.split(".")[0];
+    // Les bénévoles sont comptés à la récupération de balle, pas ici
+    if (type !== "benevole") this.fact(type, vars[TARGET[type]]);
     return this.emitComment(key, vars, true);
   }
 
@@ -117,6 +137,11 @@ class Detector extends EventEmitter {
   handle(event, d, t) {
     this.now = t;
     if (d && d.MatchGuid && d.MatchGuid !== this.guid && event !== "PlayerLeft") this.resetMatch(d.MatchGuid);
+
+    if (event === "MatchEnded" && typeof d.WinnerTeamNum === "number") {
+      const ours = this.ourTeams();
+      if (ours.size === 1) this.emit("resultat", { gagne: ours.has(d.WinnerTeamNum) });
+    }
 
     switch (event) {
       case "RoundStarted":
@@ -237,7 +262,7 @@ class Detector extends EventEmitter {
     if (g && !g.clean && g.rHit === prev) {
       if (onlyTeam(hit, g.rTeam)) {
         g.clean = true;
-        this.benevoles.set(g.p, (this.benevoles.get(g.p) || 0) + 1);
+        this.countBenevole(g.p);
       } else {
         this.giveaway = null;
       }
@@ -320,7 +345,7 @@ class Detector extends EventEmitter {
     // Bénévole de l'année
     const g = this.giveaway;
     if (g && g.rTeam === TS && t - g.rT <= S.benevoleFenetreMs) {
-      if (!g.clean) this.benevoles.set(g.p, (this.benevoles.get(g.p) || 0) + 1);
+      if (!g.clean) this.countBenevole(g.p);
       found["benevole.but"] = { benevole: g.p, adversaire: scorer };
       this.giveaway = null;
     }
@@ -348,6 +373,12 @@ class Detector extends EventEmitter {
     const arret = found["arretManque.accompagne"] || found["arretManque.csc"];
     if (arret) this.addCasserole(arret.defenseur);
 
+    // Tout compte pour le bilan (le craquage est déjà un arrêt manqué, le bénévole est compté à part)
+    for (const [k, vars] of Object.entries(found)) {
+      const type = k.split(".")[0];
+      if (type !== "craquage" && type !== "benevole") this.fact(type, vars[TARGET[type]]);
+    }
+
     // La situation la plus piquante parmi celles qui visent un joueur de notre équipe
     const key = GOAL_PRIORITY.find((k) => found[k] && this.isTarget(k, found[k]));
     if (key) {
@@ -365,6 +396,7 @@ class Detector extends EventEmitter {
     this.pendingGoal = null;
     const { X, Z } = d.ImpactLocation;
     if (Z >= S.lucarneMinZ && Math.abs(X) >= S.lucarneMinX) {
+      this.fact("lucarne", g.scorer);
       this.emitComment("lucarne.lucarne", { buteur: g.scorer });
     } else if (Z <= S.rasDuSolMaxZ && g.speed <= S.rasDuSolMaxSpeed) {
       this.emitComment("lucarne.rasDuSol", { buteur: g.scorer, vitesse: Math.round(g.speed) });
@@ -384,6 +416,7 @@ class Detector extends EventEmitter {
     const vrai = mates.filter((p) => p !== mvp).sort((a, b) => (b.stats.Touches || 0) - (a.stats.Touches || 0))[0];
     if (vrai && ratio >= S.mvpMinRatio && (m.Touches || 0) <= avgTouches && !(m.Saves > 0) && cas >= 1) {
       const tier = cas >= 3 ? "rembourse" : cas === 2 ? "moqueur" : "leger";
+      this.fact("mvpVole", mvp.name);
       this.emitComment(`mvp.${tier}`, { mvp: mvp.name, vraiMvp: vrai.name });
     }
   }

@@ -17,6 +17,7 @@ const { readConfig, CONFIG_FILE } = require("./config");
 const { checkAndReport } = require("./apiStats");
 const { Recorder } = require("./recorder");
 const { PhrasePool } = require("./pool");
+const { Bilan } = require("./bilan");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -45,6 +46,9 @@ async function main() {
   } else if (!muet) {
     output = new (require("./discordVoice").DiscordVoice)(config.discord, config.voix);
   }
+  const bilan = new Bilan();
+  const bilanTexte = () => bilan.texte((name) => phrases.say(name));
+
   // Commandes Discord (avant start() : elles sont enregistrées à la connexion)
   let muted = false;
   if (output && output.addCommand) {
@@ -66,6 +70,13 @@ async function main() {
         return `🔊 Volume réglé à ${pct} %.`;
       },
     );
+    output.addCommand(new SlashCommandBuilder().setName("bilan").setDescription("Bilan de la soirée, en vocal et par écrit"), async (interaction) => {
+      const text = bilanTexte();
+      await interaction.deferReply();
+      const file = await tts.synth(phrases.pronounce(text.replace(/\n/g, " ")));
+      output.enqueue(file);
+      await interaction.editReply(`📋 ${text}`);
+    });
   }
   if (output) await output.start();
 
@@ -80,6 +91,10 @@ async function main() {
   const replayFile = option("--rejouer");
   const recorder = !replayFile && config.enregistrerMatchs !== false ? new Recorder(path.join(ROOT, "matchs")) : null;
   detector.on("warning", (msg) => console.log(msg));
+  detector.on("fait", (f) => bilan.addFait(f));
+  detector.on("resultat", (r) => bilan.addResultat(r));
+  // Ctrl+C ou fermeture : on affiche le bilan avant de partir
+  process.on("SIGINT", () => { console.log(`\n${bilanTexte()}`); process.exit(0); });
   detector.on("comment", ({ key, vars, live, t }) => {
     // Phrase déjà prête (voix comprise) si elle ne cite que la bande, sinon on la génère maintenant
     const ready = pool && pool.take(key, vars);
@@ -94,7 +109,10 @@ async function main() {
       .catch((e) => console.error("Voix :", e.message));
   });
 
-  if (replayFile) return replay(replayFile, Number(option("--vitesse") || 1), detector);
+  if (replayFile) {
+    await replay(replayFile, Number(option("--vitesse") || 1), detector);
+    return console.log(bilanTexte());
+  }
 
   // Une mise à jour du jeu peut remettre PacketSendRate à 0 : on vérifie au lancement, puis toutes les 10 minutes
   const checkApi = (verbose) => {
