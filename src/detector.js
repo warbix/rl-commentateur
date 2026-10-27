@@ -3,6 +3,7 @@
 // Le temps t est passé en paramètre (et pas lu avec Date.now()) pour pouvoir rejouer une capture.
 
 const EventEmitter = require("events");
+const { findKey } = require("./names");
 
 const GOAL_LINE = 5120;
 const THIRD = (2 * GOAL_LINE) / 3;
@@ -73,8 +74,8 @@ class Detector extends EventEmitter {
   // Les équipes où joue au moins un pseudo listé dans les surnoms
   ourTeams() {
     const { surnoms = {} } = this.options() || {};
-    const known = new Set(Object.keys(surnoms).map((n) => n.toLowerCase()));
-    return new Set([...this.players.values()].filter((p) => known.has(p.name.toLowerCase())).map((p) => p.team));
+    const known = Object.keys(surnoms);
+    return new Set([...this.players.values()].filter((p) => findKey(known, p.name) !== undefined).map((p) => p.team));
   }
 
   // Fait marquant pour le bilan de la soirée (toujours compté, même s'il n'est pas commenté)

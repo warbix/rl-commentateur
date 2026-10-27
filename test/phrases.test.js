@@ -47,3 +47,12 @@ test("prononciation : MVP et pseudos inconnus", () => {
   assert.strictEqual(phrases.pronounce("Le MVP du match"), "Le aime vie pie du match");
   assert.strictEqual(phrases.say(".officer_tom"), "officer tom");
 });
+
+test("pseudos : accents, espaces et pseudos tronqués", () => {
+  const { sameName } = require("../src/names");
+  assert.ok(sameName("MonSuperPséudo20", "MonSuperPseudo2000"));
+  assert.ok(sameName("Jean Michel", "JeanMichel"));
+  assert.ok(sameName("BOBBY", "bobby"));
+  assert.ok(!sameName("bob", "bobby_fan"), "trop court pour un préfixe");
+  assert.ok(!sameName("Adversaire1", "MonSuperPseudo2000"));
+});

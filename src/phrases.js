@@ -3,6 +3,7 @@
 
 const fs = require("fs");
 const { readConfig } = require("./config");
+const { findKey } = require("./names");
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -14,7 +15,7 @@ class Phrases {
   }
 
   spokenName(name, surnoms) {
-    const key = Object.keys(surnoms).find((k) => k.toLowerCase() === String(name).toLowerCase());
+    const key = findKey(Object.keys(surnoms), name);
     if (key && surnoms[key].length) return randomItem(surnoms[key]);
     // Pseudo inconnu : on enlève les points et tirets bas que la voix lirait mal
     return String(name).replace(/[._]+/g, " ").trim() || String(name);

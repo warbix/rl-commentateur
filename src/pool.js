@@ -7,6 +7,7 @@
 const fs = require("fs");
 const crypto = require("crypto");
 const { readConfig } = require("./config");
+const { normalize, findKey } = require("./names");
 
 // Situations dont toutes les variables sont des joueurs de notre équipe
 const SITUATIONS = {
@@ -48,7 +49,9 @@ class PhrasePool {
 
   poolKey(key, vars) {
     const names = SITUATIONS[key];
-    return names ? `${key}|${names.map((n) => String(vars[n]).toLowerCase()).join("|")}` : null;
+    // Le pseudo du jeu (ex. tronqué) est ramené à la clé de surnoms correspondante
+    const keys = Object.keys(readConfig().surnoms || {});
+    return names ? `${key}|${names.map((n) => normalize(findKey(keys, vars[n]) || vars[n])).join("|")}` : null;
   }
 
   save() {
