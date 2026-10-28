@@ -30,6 +30,10 @@ const DEFAULTS = {
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
   // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
   giveawayBackwardNoShot: 1500,
+  // Near assist to the opponent: a touch in one's own half that does not go forward, picked up by an opponent
+  // (not a 50/50), who shoots, and the shot is saved by the giver's team
+  nearAssistMaxOwnGoalDistance: 5120, nearAssistMaxForward: 500, nearAssistMinMs: 1000,
+  nearAssistShotWindowMs: 4000, nearAssistSaveWindowMs: 2500,
   liveCooldownMs: 15000,
   topCornerWaitMs: 20000,
   // Near miss: every failed measure misses its threshold by less than 30 %
@@ -83,6 +87,7 @@ class Detector extends EventEmitter {
     this.blunders = new Map(); // player → count, for the undeserved MVP
     this.giveaways = new Map();
     this.giveaway = null;
+    this.nearAssist = null;
     this.pendingGoal = null;
     this.lastLiveT = -Infinity;
     this.lastGhostT = -Infinity; // two ghosts (of different players) at least a minute apart
@@ -146,34 +151,53 @@ class Detector extends EventEmitter {
     return !!player && ourTeams.has(player.team);
   }
 
-  // What comes with each comment or near miss: who is targeted, when, in which match
+  // What comes with each comment, detection or near miss: who is targeted, when, in which match
   context(key, vars, measures) {
+    const target = vars[TARGET[key.split(".")[0]]];
+    const p = this.players.get(target);
     return {
-      key, vars, measures: measures || [], target: vars[TARGET[key.split(".")[0]]],
+      key, vars, measures: measures || [], target, team: p ? p.team : null, ours: !!p && this.ourTeams().has(p.team),
       clock: { seconds: this.time, overtime: this.overtime }, match: { guid: this.guid, start: this.matchStart }, t: this.now,
     };
   }
 
+  // Said out loud: only for a player of our team (see isTarget)
   emitComment(key, vars, live = false, measures) {
     if (!this.isTarget(key, vars)) return false;
     this.emit("comment", { ...this.context(key, vars, measures), live });
     return true;
   }
 
+  // Detected but not said (other team, or not the priority on this goal): kept for the votes
+  emitDetection(key, vars, live = false, measures) {
+    this.emit("detection", { ...this.context(key, vars, measures), live });
+  }
+
+  // Said if it targets our team, otherwise only detected
+  report(key, vars, measures) {
+    if (!this.emitComment(key, vars, false, measures)) this.emitDetection(key, vars, false, measures);
+  }
+
   emitNearMiss(key, vars, measures) {
-    if (!this.isTarget(key, vars)) return false;
     this.emit("nearMiss", this.context(key, vars, measures));
     return true;
   }
 
-  // Live comment: never during a replay, and spaced out from the others
+  // Live comment: never during a replay, and spaced out from the others. Returns "spoken",
+  // "detected" (other team: kept for the votes, without using up the spacing) or false.
   live(key, vars, t, measures) {
-    if (!this.inPlay || t - this.lastLiveT < this.S.liveCooldownMs || !this.isTarget(key, vars)) return false;
+    if (!this.inPlay) return false;
+    if (!this.isTarget(key, vars)) {
+      this.emitDetection(key, vars, true, measures);
+      return "detected";
+    }
+    if (t - this.lastLiveT < this.S.liveCooldownMs) return false;
     this.lastLiveT = t;
     const type = key.split(".")[0];
     // Giveaways are counted when the ball is picked up, not here
     if (type !== "giveaway") this.fact(type, vars[TARGET[type]]);
-    return this.emitComment(key, vars, true, measures);
+    this.emitComment(key, vars, true, measures);
+    return "spoken";
   }
 
   player(name, team) {
@@ -275,6 +299,10 @@ class Detector extends EventEmitter {
       this.announceGiveaway(t);
     }
 
+    // Near assist: no shot, or no save after the shot, in time → forgotten
+    const na = this.nearAssist;
+    if (na && ((!na.shotAt && t - na.pickedUpAt > S.nearAssistShotWindowMs) || (na.shotAt && t - na.shotAt > S.nearAssistSaveWindowMs))) this.nearAssist = null;
+
     if (this.pendingGoal && t - this.pendingGoal.t > S.topCornerWaitMs) this.pendingGoal = null;
   }
 
@@ -285,9 +313,14 @@ class Detector extends EventEmitter {
     // Ghost
     p.idleMs += dt;
     const ghostKey = this.teamSize >= 3 ? "ghost3v3Ms" : this.teamSize === 2 ? "ghost2v2Ms" : null;
-    if (ghostKey && p.idleMs >= S[ghostKey] && t - p.lastGhostT >= S.ghostCooldownMs && t - this.lastGhostT >= S.ghostSpacingMs) {
+    // The minute between two ghosts only applies to the ones said out loud
+    const vars = { player: p.name, seconds: Math.round(p.idleMs / 1000) };
+    if (ghostKey && p.idleMs >= S[ghostKey] && t - p.lastGhostT >= S.ghostCooldownMs &&
+        (t - this.lastGhostT >= S.ghostSpacingMs || !this.isTarget("ghost", vars))) {
       const measures = [{ ...condition("sans action utile", ghostKey, p.idleMs, "min", "ms"), threshold: S[ghostKey], ok: true }];
-      if (this.live("ghost", { player: p.name, seconds: Math.round(p.idleMs / 1000) }, t, measures)) p.lastGhostT = this.lastGhostT = t;
+      const r = this.live("ghost", vars, t, measures);
+      if (r) p.lastGhostT = t;
+      if (r === "spoken") this.lastGhostT = t;
     }
 
     // Beggar
@@ -329,8 +362,10 @@ class Detector extends EventEmitter {
 
     // Giveaway: after the opponent's shot (or a clean pick-up of a ball sent far back), the giver's team
     // got the ball back → the action is over, it can be said
+    // (not when the same ball can still become a near assist: the game reports the save just after the touch)
     const ga = this.giveaway;
-    if (ga && (ga.shotAt || (ga.clean && ga.backward.ok)) && hit.players.some((p) => p.team === ga.giverTeam)) this.announceGiveaway(t);
+    const naPending = this.nearAssist && this.nearAssist.shotAt && ga && this.nearAssist.giver === ga.giver;
+    if (ga && !naPending && (ga.shotAt || (ga.clean && ga.backward.ok)) && hit.players.some((p) => p.team === ga.giverTeam)) this.announceGiveaway(t);
 
     // Giveaway: was the opponent's pick-up clean?
     const g = this.giveaway;
@@ -340,6 +375,21 @@ class Detector extends EventEmitter {
         this.countGiveaway(g.giver);
       } else {
         this.giveaway = null;
+      }
+    }
+
+    // Near assist to the opponent: a ball played in one's own half, not forward, picked up by an opponent
+    if (prev.players.length === 1 && hit.players.length === 1 && prev.players[0].team !== hit.players[0].team) {
+      const giver = prev.players[0], taker = hit.players[0];
+      const ownGiver = distToOwnGoal(giver.team, prev.loc.Y);
+      const wasShot = this.feed.some((f) => f.type === "Shot" && f.name === giver.name && f.t >= prev.t && f.t <= prev.t + S.shotDelayMs);
+      const r = this.evaluate([
+        condition("touche à sa propre ligne", "nearAssistMaxOwnGoalDistance", ownGiver, "max", "uu"),
+        condition("balle envoyée vers l'avant", "nearAssistMaxForward", distToOwnGoal(giver.team, hit.loc.Y) - ownGiver, "max", "uu"),
+        condition("délai avant la récupération", "nearAssistMinMs", t - prev.t, "min", "ms"),
+      ]);
+      if (!wasShot && r.ok) {
+        this.nearAssist = { giver: giver.name, giverTeam: giver.team, takerTeam: taker.team, pickedUpAt: t, shotAt: null, shooter: null, measures: r.measures };
       }
     }
 
@@ -378,6 +428,19 @@ class Detector extends EventEmitter {
     if (f.type === "Shot" && g && f.team === g.takerTeam && !g.shotAt && t - g.pickedUpAt <= S.giveawayWindowMs) {
       g.shotAt = t;
       g.shooter = f.name;
+    }
+
+    // Near assist: the opponent shoots in time, then the giver's team saves it → said (instead of a plain giveaway)
+    const na = this.nearAssist;
+    if (na && f.type === "Shot" && f.team === na.takerTeam && !na.shotAt && t - na.pickedUpAt <= S.nearAssistShotWindowMs) {
+      na.shotAt = t;
+      na.shooter = f.name;
+    } else if (na && na.shotAt && ["Save", "EpicSave"].includes(f.type) && f.team === na.giverTeam && t - na.shotAt <= S.nearAssistSaveWindowMs) {
+      this.nearAssist = null;
+      const measures = [...na.measures, { name: "tir adverse après la récupération", value: na.shotAt - na.pickedUpAt, unit: "ms" }, { name: "arrêt", value: f.type === "EpicSave" ? "miraculeux" : "simple" }];
+      if (this.giveaway && this.giveaway.giver === na.giver) this.giveaway = null;
+      else this.countGiveaway(na.giver);
+      this.live("giveaway.saved", { giver: na.giver, opponent: na.shooter, saver: f.name }, t, measures);
     }
 
     if (f.type === "MVP") this.checkMvp(f.name);
@@ -448,7 +511,14 @@ class Detector extends EventEmitter {
       }
     }
 
-    // Giveaway of the year
+    // Giveaway of the year (also when a near assist to the opponent ends in a goal)
+    const na = this.nearAssist;
+    this.nearAssist = null;
+    if (na && na.takerTeam === TS && t - na.pickedUpAt <= S.nearAssistShotWindowMs + S.nearAssistSaveWindowMs &&
+        !(this.giveaway && this.giveaway.takerTeam === TS && t - this.giveaway.pickedUpAt <= S.giveawayWindowMs)) {
+      this.countGiveaway(na.giver);
+      found["giveaway.goal"] = { vars: { giver: na.giver, opponent: scorer }, measures: na.measures };
+    }
     const g = this.giveaway;
     if (g && g.takerTeam === TS && t - g.pickedUpAt <= S.giveawayWindowMs) {
       if (!g.clean) this.countGiveaway(g.giver);
@@ -494,17 +564,20 @@ class Detector extends EventEmitter {
       if (type !== "choke" && type !== "giveaway") this.fact(type, vars[TARGET[type]]);
     }
 
-    // The spiciest situation among those targeting a player of our team
+    // The spiciest situation among those targeting a player of our team is said; all the others are detections
     const key = GOAL_PRIORITY.find((k) => found[k] && this.isTarget(k, found[k].vars));
+    if (key) this.emitComment(key, found[key].vars, false, found[key].measures);
+    for (const k of GOAL_PRIORITY) {
+      if (found[k] && k !== key) this.emitDetection(k, found[k].vars, false, found[k].measures);
+    }
     if (key) {
       this.pendingGoal = null;
-      this.emitComment(key, found[key].vars, false, found[key].measures);
     } else {
       // Nothing spicy: wait for the 2nd GoalScored (replay) for the top corner
       this.pendingGoal = { t, scorer, speed: d.GoalSpeed || 0 };
     }
 
-    // One near miss per goal at most, from another family than the comment made
+    // One near miss per goal at most (any team), from another family than the comment made
     const done = key ? key.split(".")[0] : null;
     for (const family of NEAR_MISS_PRIORITY) {
       const n = nearMisses[family];
@@ -528,9 +601,9 @@ class Detector extends EventEmitter {
     ]);
     if (topCorner.ok) {
       this.fact("finish", g.scorer);
-      this.emitComment("finish.topCorner", vars, false, topCorner.measures);
+      this.report("finish.topCorner", vars, topCorner.measures);
     } else if (ground.ok) {
-      this.emitComment("finish.groundRoller", { ...vars, speed: Math.round(g.speed) }, false, ground.measures);
+      this.report("finish.groundRoller", { ...vars, speed: Math.round(g.speed) }, ground.measures);
     } else if (topCorner.nearMiss) {
       this.emitNearMiss("finish.topCorner", vars, topCorner.measures);
     }
@@ -555,7 +628,7 @@ class Detector extends EventEmitter {
         { name: "casseroles", value: blunders, ok: true },
       ];
       this.fact("mvp", mvp.name);
-      this.emitComment(`mvp.${tier}`, { mvp: mvp.name, realMvp: real.name }, false, measures);
+      this.report(`mvp.${tier}`, { mvp: mvp.name, realMvp: real.name }, measures);
     }
   }
 
@@ -565,7 +638,7 @@ class Detector extends EventEmitter {
     const [best, count] = [...this.giveaways.entries()].sort((a, b) => b[1] - a[1])[0] || [];
     if (best && count >= this.S.giveawayOfTheMatchMin) {
       const measures = [{ ...condition("ballons rendus", "giveawayOfTheMatchMin", count, "min", "n"), threshold: this.S.giveawayOfTheMatchMin, ok: true }];
-      this.emitComment("giveaway.ofTheMatch", { giver: best, count }, false, measures);
+      this.report("giveaway.ofTheMatch", { giver: best, count }, measures);
     }
   }
 }

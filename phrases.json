@@ -148,6 +148,16 @@
       ]
     },
     "backward": "giveaway.shot",
+    "saved": {
+      "_variables": "{giver} = the player who gave the ball away, {opponent} = the opponent who shot, {saver} = the teammate who saved it",
+      "phrases": [
+        "{giver} a délivré une passe décisive parfaite à {opponent}. Heureusement, {saver} a annulé le cadeau.",
+        "Passe en retrait de {giver}, directement pour {opponent}. {saver}, tu peux lui envoyer la facture.",
+        "{giver} a failli faire une passe décisive. Dans la mauvaise équipe. Merci {saver} d'avoir rattrapé le coup.",
+        "{opponent} remercie {giver} pour l'offrande, mais {saver} a refusé de signer le reçu.",
+        "Sans {saver}, {giver} avait une passe décisive à son compteur. Pour l'équipe d'en face."
+      ]
+    },
     "goal": {
       "_variables": "{giver} = the player who gave the ball away, {opponent} = the opponent who took advantage",
       "phrases": [

@@ -1,10 +1,11 @@
 // Journal of the (numbered) triggers and of the squad's votes, to tune the thresholds.
-// feedback/triggers.jsonl : one trigger per line (comment or near miss), with its measures
+// feedback/triggers.jsonl : one trigger per line (comment, detection or near miss), with its measures
 // feedback/votes.json     : for each number, who voted for / against, and the written notes
 // The messages posted in Discord are in French, like the rest of what the squad reads and hears.
 
 const fs = require("fs");
 const path = require("path");
+const { findKey } = require("./names");
 
 // ✅ and 👍 = "well spotted" / "it should have been said"; ❌ and 👎 = the opposite
 const FOR = ["✅", "👍"];
@@ -16,8 +17,18 @@ const LABELS = {
   "finish.topCorner": "Lucarne", "finish.groundRoller": "But au ras du sol",
   adminAssist: "Passe administrative", beggar: "Mendiant", ghost: "Fantôme",
   "mvp.light": "MVP illégitime (léger)", "mvp.mocking": "MVP illégitime", "mvp.refund": "MVP illégitime (remboursez)",
-  "giveaway.shot": "Bénévole", "giveaway.backward": "Balle rendue", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
+  "giveaway.shot": "Bénévole", "giveaway.backward": "Balle rendue", "giveaway.saved": "Presque passe décisive à l'adversaire", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
 };
+
+// Only the player concerned can judge these (a teammate's or an opponent's boost or idleness is not visible)
+const PERSONAL = ["ghost", "beggar"];
+
+// Should the squad be asked to vote on this trigger? Everything that can be seen on the pitch or in the replay
+// (goals, saves, giveaways, MVP…) for both teams; ghost and beggar only for a player listed in nicknames.
+function isVotable(e, nicknames = {}) {
+  if (!PERSONAL.includes(e.key.split(".")[0])) return true;
+  return findKey(Object.keys(nicknames), e.target) !== undefined;
+}
 
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -46,11 +57,16 @@ function format(e) {
   const start = new Date(e.match.start);
   const head = `⏱ ${clockText(e.clock)} · match de ${pad(start.getHours())}:${pad(start.getMinutes())}`;
   const label = LABELS[e.key] || e.key;
+  const target = `${e.target}${e.ours === false ? " (adversaire)" : ""}`;
   const measures = e.measures.map(measureText).join(" · ");
   if (e.type === "nearMiss") {
-    return `**#${e.id} ?** · ${head} · *presque* **${label.toLowerCase()}** → ${e.target}\n${measures}\nFallait-il le dire ? 👍 / 👎`;
+    return `**#${e.id} ?** · ${head} · *presque* **${label.toLowerCase()}** → ${target}\n${measures}\nFallait-il le dire ? 👍 / 👎`;
   }
-  return `**#${e.id}** · ${head} · **${label}** → ${e.target}\n${measures}\n> ${e.phrase}`;
+  if (e.type === "detection") {
+    const why = e.ours === false ? "équipe adverse" : "un autre commentaire passait avant";
+    return `**#${e.id}** · ${head} · **${label}** → ${target}\n${measures}\n*Non dit (${why}).* Bien vu ? ✅ / ❌`;
+  }
+  return `**#${e.id}** · ${head} · **${label}** → ${target}\n${measures}\n> ${e.phrase}`;
 }
 
 class Feedback {
@@ -76,9 +92,9 @@ class Feedback {
     try { this.votes = JSON.parse(fs.readFileSync(this.votesFile, "utf8")); } catch { this.votes = {}; }
   }
 
-  // type: "comment" or "nearMiss". Returns the trigger with its number.
-  add({ type, key, target, vars, measures, clock, match, phrase, t }) {
-    const e = { id: this.next++, type, key, target, vars, measures, clock, match, phrase, t };
+  // type: "comment" (said), "detection" (not said) or "nearMiss". Returns the trigger with its number.
+  add({ type, key, target, ours, vars, measures, clock, match, phrase, t }) {
+    const e = { id: this.next++, type, key, target, ours, vars, measures, clock, match, phrase, t };
     this.entries.set(e.id, e);
     fs.appendFileSync(this.journal, JSON.stringify(e) + "\n");
     return e;
@@ -133,4 +149,4 @@ class Feedback {
   }
 }
 
-module.exports = { Feedback, format, clockText, valueText, FOR, AGAINST };
+module.exports = { Feedback, format, isVotable, clockText, valueText, FOR, AGAINST };

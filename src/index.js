@@ -19,7 +19,7 @@ const { Recorder } = require("./recorder");
 const { PhrasePool } = require("./pool");
 const { Recap } = require("./recap");
 const { jingleFile } = require("./jingle");
-const { Feedback, format, clockText } = require("./feedback");
+const { Feedback, format, isVotable, clockText } = require("./feedback");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -145,11 +145,12 @@ async function main() {
   // Ctrl+C or closing: print the recap before leaving
   process.on("SIGINT", () => { console.log(`\n${recapText()}`); process.exit(0); });
 
-  // Numbers the trigger and posts it in the text channel (right away, to vote during the replay)
+  // Numbers every trigger (said or not, both teams). Only the ones the squad can judge are posted in the
+  // text channel, right away, to vote during the replay; the others are only kept in feedback/.
   const publish = (type, c, phrase) => {
     if (!feedback) return "";
     const e = feedback.add({ type, ...c, phrase });
-    if (output && output.post) {
+    if (output && output.post && isVotable(e, readConfig().nicknames)) {
       output.post(format(e), type === "nearMiss" ? ["👍", "👎"] : ["✅", "❌"])
         .then((messageId) => messageId && feedback.setMessage(e.id, messageId));
     }
@@ -158,7 +159,12 @@ async function main() {
 
   detector.on("nearMiss", (c) => {
     const num = publish("nearMiss", c);
-    console.log(`${new Date(c.t).toLocaleTimeString()} ${num}[near miss ${c.key}] ${c.target}`);
+    console.log(`${new Date(c.t).toLocaleTimeString()} ${num}[near miss ${c.key}] ${c.target}${c.ours ? "" : " (opponent)"}`);
+  });
+
+  detector.on("detection", (c) => {
+    const num = publish("detection", c);
+    console.log(`${new Date(c.t).toLocaleTimeString()} ${num}[not said: ${c.key}] ${c.target}${c.ours ? "" : " (opponent)"}`);
   });
 
   detector.on("comment", (c) => {

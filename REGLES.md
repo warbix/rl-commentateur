@@ -171,11 +171,29 @@ le bot le dit quand même (« balle rendue »), dès que son équipe récupère 
 
 ---
 
+## 11. Presque passe décisive à l'adversaire 🎁🧤
+**Idée** : une passe dangereuse dans son propre camp (souvent en retrait), récupérée par un adversaire qui tire, et le tir est arrêté.
+
+**Règle** — touche du joueur P, touche suivante par un adversaire :
+- Touche **dans son propre camp** (à ≤ 51 m de sa ligne, `nearAssistMaxOwnGoalDistance`), y compris devant sa cage
+- La balle **ne part pas vers l'avant** : au plus 5 m (`nearAssistMaxForward`) — ce n'est pas un dégagement
+- **Pas un duel** : l'adversaire la récupère après ≥ 1 s (`nearAssistMinMs`)
+- L'adversaire **tire dans les 4 s** (`nearAssistShotWindowMs`), puis **l'équipe de P arrête le tir** (arrêt ou arrêt miraculeux) dans les 2,5 s (`nearAssistSaveWindowMs`)
+
+**Cible** : P, en citant le tireur et le sauveur. **Quand** : en direct, à l'arrêt. Remplace le « bénévole » simple sur la même balle.
+Si l'adversaire marque à la place : « bénévole de l'année ».
+
+---
+
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un pseudo de la liste des surnoms.
 Le joueur visé (buteur du tap-in, voleur, défenseur de l'arrêt manqué, passeur, MVP, mendiant, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible.
+
+**Détection pour tout le monde, voix pour notre équipe** : le bot détecte les situations des deux équipes. Seules celles de notre équipe sont dites ;
+les autres sont postées « non dit » pour voter. Les votes ne sont demandés que sur ce qui se voit (buts, arrêts, ballons rendus, MVP…) :
+fantôme et mendiant seulement pour un joueur listé dans les surnoms, qui est seul à pouvoir en juger.
 
 ## Priorités (1 seul commentaire par but)
 
