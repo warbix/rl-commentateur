@@ -15,10 +15,10 @@ const S = {
   volMaxDist: 1500,
   arretMaxMs: 1000, arretMaxDist: 1500, arretTirSurLigne: 1000, arretTirAvantMs: 3000,
   lucarneMinZ: 450, lucarneMinX: 550, rasDuSolMaxZ: 110, rasDuSolMaxSpeed: 60,
-  passeAdminMinMs: 3000, passeAdminMinTouches: 3,
+  passeAdminMinMs: 4000, passeAdminMinTouches: 3,
   mvpMinRatio: 0.7,
   mendiantMs: 8000, mendiantAggravantMs: 5000, mendiantApresTouchMs: 3000, mendiantApresEngagementMs: 10000, mendiantCooldownMs: 90000,
-  fantome3v3Ms: 45000, fantome2v2Ms: 30000, fantomeAvanceeMin: 1500, fantomeCooldownMs: 120000,
+  fantome3v3Ms: 45000, fantome2v2Ms: 40000, fantomeAvanceeMin: 1500, fantomeCooldownMs: 120000, fantomeEntreDeuxMs: 60000,
   craquageMaxSecondes: 10,
   benevoleMinMs: 1000, benevoleMinDist: 1500, benevoleMinDistOwn: 2500, benevoleRecul: 800, benevoleFenetreMs: 6000, benevoleDuMatchMin: 3,
   liveCooldownMs: 15000,
@@ -66,6 +66,7 @@ class Detector extends EventEmitter {
     this.giveaway = null;
     this.pendingGoal = null;
     this.lastLiveT = -Infinity;
+    this.lastFantomeT = -Infinity; // deux fantômes (de joueurs différents) espacés d'au moins une minute
     this.mvpChecked = false;
     this.benevoleDone = false;
     this.warnedNoTeam = false;
@@ -232,8 +233,8 @@ class Detector extends EventEmitter {
     // Fantôme
     p.idleMs += dt;
     const fantomeMs = this.teamSize >= 3 ? S.fantome3v3Ms : this.teamSize === 2 ? S.fantome2v2Ms : Infinity;
-    if (p.idleMs >= fantomeMs && t - p.lastFantomeT >= S.fantomeCooldownMs) {
-      if (this.live("fantome", { joueur: p.name, secondes: Math.round(p.idleMs / 1000) }, t)) p.lastFantomeT = t;
+    if (p.idleMs >= fantomeMs && t - p.lastFantomeT >= S.fantomeCooldownMs && t - this.lastFantomeT >= S.fantomeEntreDeuxMs) {
+      if (this.live("fantome", { joueur: p.name, secondes: Math.round(p.idleMs / 1000) }, t)) p.lastFantomeT = this.lastFantomeT = t;
     }
 
     // Mendiant

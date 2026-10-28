@@ -80,7 +80,7 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 **Idée** : la passe a été comptée mais n'y est pour rien.
 
 **Règle** — sur `GoalScored` avec `Assister` :
-- Dernière touche du passeur → but : **≥ 3 s** ⚙️
+- Dernière touche du passeur → but : **≥ 4 s** ⚙️
 - **ou** le buteur a fait **≥ 3 touches** entre la passe et le but (il a tout fait seul)
 - **ou** une touche adverse a eu lieu entre la passe et la touche du buteur
 
@@ -126,10 +126,10 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 - la balle a avancé de **≥ 1500** vers le but adverse avant la touche suivante
 
 **Règle** — en direct :
-- Aucune touche utile depuis **≥ 45 s en 3v3**, **≥ 30 s en 2v2** ⚙️ (pas de fantôme en 1v1)
+- Aucune touche utile depuis **≥ 45 s en 3v3**, **≥ 40 s en 2v2** ⚙️ (pas de fantôme en 1v1)
 - On ne compte que le temps de jeu effectif (pas les replays ni les comptes à rebours)
 
-**Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 2 min.
+**Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 2 min, et au moins 1 min entre deux fantômes. Le chrono s'arrête au but et repart de zéro à chaque coup d'envoi.
 
 ## 9. Craquage 💥
 **Idée** : le but qui fait mal, au pire moment, avec une erreur défensive.

@@ -36,7 +36,7 @@ test("toutes les variables sont remplacées, un seul surnom par joueur", () => {
     for (let i = 0; i < 10; i++) {
       const text = phrases.pick(key, vars);
       assert.doesNotMatch(text, /\{\w+\}/, `${key} : ${text}`);
-      const said = ["Mon surnom", "Le boss"].filter((s) => text.includes(s));
+      const said = ["Mon surnom", "Jojo"].filter((s) => text.includes(s));
       assert.ok(said.length <= 1, `${key} : deux surnoms différents : ${text}`);
     }
   }
