@@ -100,6 +100,7 @@ Dans n'importe quel salon du serveur :
 | `/idea 2:10 Marcel et moi on est partis tous les deux` | Propose une situation que le bot devrait repérer : elle est notée avec le match et son chrono, et apparaît dans `npm run calibrate` |
 | `/recap` | Bilan de la soirée en vocal et par écrit : victoires, roi du tap-in, passoire d'or, bénévole, fantôme… |
 
+Quand tu fermes Rocket League (depuis plus d'une minute), le bot lit et poste le bilan tout seul.
 Le bilan compte tout ce qui s'est passé dans la soirée, même ce qui n'a pas été commenté, et survit aux relances du bot (il repart à zéro après 6 h sans match). Il s'affiche aussi dans la console quand on arrête le bot (Ctrl+C).
 
 Si les commandes n'apparaissent pas, le bot a été invité sans le scope `applications.commands` : régénère l'URL d'invitation (étape 1.3) et réinvite-le, sans le retirer du serveur.

@@ -98,7 +98,7 @@ function checkAndReport(options, { verbose = true } = {}) {
   return changed;
 }
 
-module.exports = { checkStatsApi, checkAndReport };
+module.exports = { checkStatsApi, checkAndReport, gameRunning };
 
 if (require.main === module) {
   const { readConfig } = require("./config");

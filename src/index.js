@@ -14,7 +14,7 @@ const { Detector } = require("./detector");
 const { Phrases } = require("./phrases");
 const { TTS } = require("./tts");
 const { readConfig, CONFIG_FILE } = require("./config");
-const { checkAndReport } = require("./apiStats");
+const { checkAndReport, gameRunning } = require("./apiStats");
 const { Recorder } = require("./recorder");
 const { PhrasePool } = require("./pool");
 const { Recap } = require("./recap");
@@ -197,8 +197,28 @@ async function main() {
   setInterval(() => checkApi(false), 10 * 60 * 1000);
 
   const rl = new RLClient(config.rocketLeague);
-  rl.on("connected", () => console.log("Rocket League: connected to the Stats API"));
-  rl.on("disconnected", () => console.log("Rocket League: connection lost, waiting for the game…"));
+  // End of the session: when Rocket League has been closed for a minute, the recap is read out and posted on its own
+  // (once per batch of new matches: closing the game twice in a row does not repeat it)
+  let closedTimer = null;
+  let announcedMatches = recap.wins + recap.losses;
+  rl.on("connected", () => {
+    clearTimeout(closedTimer);
+    console.log("Rocket League: connected to the Stats API");
+  });
+  rl.on("disconnected", () => {
+    console.log("Rocket League: connection lost, waiting for the game…");
+    clearTimeout(closedTimer);
+    closedTimer = setTimeout(async () => {
+      const matches = recap.wins + recap.losses;
+      if (gameRunning() || matches === announcedMatches) return;
+      announcedMatches = matches;
+      const text = recapText();
+      console.log(`Rocket League closed: end-of-session recap\n${text}`);
+      if (!output) return;
+      if (output.post) output.post(`📋 **Fin de session**\n${text}`);
+      try { play(await tts.synth(phrases.pronounce(text.replace(/\n/g, " ")))); } catch (e) { console.error("Voice:", e.message); }
+    }, 60 * 1000);
+  });
   rl.on("event", (event, data) => {
     const t = Date.now();
     if (recorder) recorder.handle(event, data || {}, t);
