@@ -120,10 +120,12 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 ## 8. Le fantôme 👻
 **Idée** : pas de contribution utile depuis trop longtemps (toucher la balle ne suffit pas).
 
-**Touche utile** = au moins une des conditions :
-- elle est suivie d'un `Shot`, `Save`, `EpicSave`, `Goal` ou `Assist` du joueur
+**Action utile** = au moins une des conditions :
 - la touche suivante est faite par **son équipe** (il a gardé ou donné la balle)
-- la balle a avancé de **≥ 1500** vers le but adverse avant la touche suivante
+- le jeu lui donne **≥ 10 points** d'un coup : centre (+10), dégagement ou tir cadré (+20), arrêt (+50), arrêt miraculeux (+75), but (+100)… Une simple touche ne rapporte que +2 et ne compte pas ⚙️
+- le jeu lui attribue un `Shot`, `Save`, `EpicSave`, `Savior`, `Goal`, `Assist` ou une **démo** (`Demolish`)
+
+Une balle poussée vers l'avant puis perdue, sans points du jeu, ne compte pas : c'est souvent une balle rendue.
 
 **Règle** — en direct :
 - Aucune touche utile depuis **≥ 45 s en 3v3**, **≥ 40 s en 2v2** ⚙️ (pas de fantôme en 1v1)

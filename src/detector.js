@@ -23,7 +23,9 @@ const DEFAULTS = {
   adminAssistMinMs: 4000, adminAssistMinTouches: 3,
   mvpMinHighlightRatio: 0.7,
   beggarMs: 8000, beggarUnderPressureMs: 5000, beggarAfterTouchMs: 3000, beggarAfterKickoffMs: 10000, beggarCooldownMs: 90000,
-  ghost3v3Ms: 45000, ghost2v2Ms: 40000, ghostMinAdvance: 1500, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
+  // Useful action for the ghost: a touch kept by the team, a demo, or anything the game rewards with ≥ 10 points
+  // (center 10, clear 20, shot 20, save 50, goal 100… — a plain touch is only worth 2)
+  ghost3v3Ms: 45000, ghost2v2Ms: 40000, ghostMinScoreGain: 10, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
   chokeMaxSecondsLeft: 10,
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
   liveCooldownMs: 15000,
@@ -247,6 +249,8 @@ class Detector extends EventEmitter {
     const perTeam = [0, 0];
     for (const s of d.Players || []) {
       const p = this.player(s.Name, s.TeamNum);
+      // Ghost: the game rewarded an action (center, clear, shot, save…) → it was useful
+      if (p.stats.Score !== undefined && (s.Score || 0) - (p.stats.Score || 0) >= S.ghostMinScoreGain) p.idleMs = 0;
       p.stats = s;
       perTeam[s.TeamNum]++;
     }
@@ -314,11 +318,10 @@ class Detector extends EventEmitter {
 
     if (!prev) return;
 
-    // Ghost: was the previous touch useful?
+    // Ghost: the previous touch was kept by the team (pass, possession) → it was useful.
+    // A ball pushed forward and lost counts only if the game rewarded it (see onState).
     for (const pp of prev.players) {
-      const keptByTeam = hit.players.some((p) => p.team === pp.team);
-      const advanced = distToOpponentGoal(pp.team, prev.loc.Y) - distToOpponentGoal(pp.team, hit.loc.Y) >= S.ghostMinAdvance;
-      if (keptByTeam || advanced) this.player(pp.name).idleMs = 0;
+      if (hit.players.some((p) => p.team === pp.team)) this.player(pp.name).idleMs = 0;
     }
 
     // Giveaway: after the opponent's shot, the giver's team got the ball back → the action is over, it can be said
@@ -363,7 +366,7 @@ class Detector extends EventEmitter {
     this.feed.push(f);
     this.feed = this.feed.filter((x) => t - x.t <= 60000);
 
-    if (["Shot", "Save", "EpicSave", "Goal", "Assist"].includes(f.type) && f.name) this.player(f.name).idleMs = 0;
+    if (["Shot", "Save", "EpicSave", "Savior", "Goal", "Assist", "Demolish"].includes(f.type) && f.name) this.player(f.name).idleMs = 0;
 
     const g = this.giveaway;
     if (f.type === "Shot" && g && f.team === g.takerTeam && !g.shotAt && t - g.pickedUpAt <= S.giveawayWindowMs) {

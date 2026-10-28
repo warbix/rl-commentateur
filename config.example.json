@@ -73,7 +73,7 @@
     "beggarCooldownMs": 90000,
     "ghost3v3Ms": 45000,
     "ghost2v2Ms": 40000,
-    "ghostMinAdvance": 1500,
+    "ghostMinScoreGain": 10,
     "ghostCooldownMs": 120000,
     "ghostSpacingMs": 60000,
     "chokeMaxSecondsLeft": 10,
