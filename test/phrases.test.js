@@ -65,3 +65,11 @@ test("élision devant un nom qui commence par une voyelle", () => {
   }
   assert.strictEqual(phrases.say("XX-_Pseudo_-XX"), "XX Pseudo XX");
 });
+
+test("les 5 phrases d'une situation sortent avant qu'une revienne, jamais deux fois de suite", () => {
+  const phrases = new Phrases(path.join(ROOT, "phrases.json"));
+  const seen = [];
+  for (let i = 0; i < 50; i++) seen.push(phrases.nextIndex("tapin", 5));
+  for (let k = 0; k < 50; k += 5) assert.strictEqual(new Set(seen.slice(k, k + 5)).size, 5, `tour ${k / 5} : ${seen.slice(k, k + 5)}`);
+  for (let k = 1; k < 50; k++) assert.notStrictEqual(seen[k], seen[k - 1], `répétition à ${k}`);
+});

@@ -13,7 +13,7 @@ const VOWEL = "[aeiouyhAEIOUYHàâäéèêëîïôöûùüÀÂÄÉÈÊËÎÏÔÖ
 class Phrases {
   constructor(phrasesFile) {
     this.phrasesFile = phrasesFile;
-    this.lastIndex = new Map();
+    this.bags = new Map();
   }
 
   spokenName(name, surnoms) {
@@ -28,10 +28,7 @@ class Phrases {
     const node = key.split(".").reduce((n, k) => (n ? n[k] : undefined), all);
     if (!node || !node.phrases || !node.phrases.length) throw new Error(`Pas de phrases pour "${key}" dans phrases.json`);
 
-    // Jamais deux fois de suite la même phrase pour une situation
-    let i = Math.floor(Math.random() * node.phrases.length);
-    if (node.phrases.length > 1 && i === this.lastIndex.get(key)) i = (i + 1) % node.phrases.length;
-    this.lastIndex.set(key, i);
+    const i = this.nextIndex(key, node.phrases.length);
 
     const { surnoms = {}, prononciation = {} } = readConfig();
     // Un seul surnom par joueur dans une même phrase. Chaque nom inséré est précédé d'un repère
@@ -48,6 +45,20 @@ class Phrases {
       .replace(new RegExp(`\\b([qQ]u)e ${NAME}(?=${VOWEL})`, "g"), "$1'")
       .split(NAME).join("");
     return this.pronounce(text, prononciation);
+  }
+
+  // Les phrases d'une situation sortent toutes une fois (dans le désordre) avant qu'une revienne,
+  // et jamais deux fois de suite la même, même d'un tour à l'autre
+  nextIndex(key, count) {
+    let bag = this.bags.get(key);
+    if (!bag || bag.count !== count || !bag.left.length) {
+      const left = [...Array(count).keys()].sort(() => Math.random() - 0.5);
+      if (count > 1 && bag && left[left.length - 1] === bag.last) left.unshift(left.pop());
+      bag = { count, left, last: bag && bag.last };
+      this.bags.set(key, bag);
+    }
+    bag.last = bag.left.pop();
+    return bag.last;
   }
 
   // Nom prononcé d'un joueur, d'après les surnoms de config.json
