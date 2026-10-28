@@ -116,6 +116,11 @@ class Detector extends EventEmitter {
     return new Set([...this.players.values()].filter((p) => findKey(known, p.name) !== undefined).map((p) => p.team));
   }
 
+  // Did the game report a shot on target or a save for this touch? Then it is not a ball handed back or a mere pass.
+  wasShotOrSave(name, t) {
+    return this.feed.some((f) => ["Shot", "Save", "EpicSave"].includes(f.type) && f.name === name && f.t >= t - 100 && f.t <= t + this.S.shotDelayMs);
+  }
+
   // Fact for the evening recap (always counted, even when not commented)
   fact(type, name) {
     const p = this.players.get(name);
@@ -382,7 +387,7 @@ class Detector extends EventEmitter {
     if (prev.players.length === 1 && hit.players.length === 1 && prev.players[0].team !== hit.players[0].team) {
       const giver = prev.players[0], taker = hit.players[0];
       const ownGiver = distToOwnGoal(giver.team, prev.loc.Y);
-      const wasShot = this.feed.some((f) => f.type === "Shot" && f.name === giver.name && f.t >= prev.t && f.t <= prev.t + S.shotDelayMs);
+      const wasShot = this.wasShotOrSave(giver.name, prev.t);
       const r = this.evaluate([
         condition("touche à sa propre ligne", "nearAssistMaxOwnGoalDistance", ownGiver, "max", "uu"),
         condition("balle envoyée vers l'avant", "nearAssistMaxForward", distToOwnGoal(giver.team, hit.loc.Y) - ownGiver, "max", "uu"),
@@ -399,7 +404,7 @@ class Detector extends EventEmitter {
     if (giver.team === taker.team) return;
     const dist = Math.hypot(prev.loc.X - hit.loc.X, prev.loc.Y - hit.loc.Y);
     const ownGiver = distToOwnGoal(giver.team, prev.loc.Y), ownTaker = distToOwnGoal(giver.team, hit.loc.Y);
-    const wasShot = this.feed.some((f) => f.type === "Shot" && f.name === giver.name && f.t >= prev.t && f.t <= prev.t + S.shotDelayMs);
+    const wasShot = this.wasShotOrSave(giver.name, prev.t);
     if (wasShot || !(ownGiver - ownTaker >= S.giveawayMinBackward || ownTaker < GOAL_LINE)) return;
     const r = this.evaluate([
       condition("délai avant la récupération", "giveawayMinMs", t - prev.t, "min", "ms"),
@@ -438,11 +443,12 @@ class Detector extends EventEmitter {
     } else if (na && na.shotAt && ["Save", "EpicSave"].includes(f.type) && f.team === na.giverTeam && t - na.shotAt <= S.nearAssistSaveWindowMs) {
       this.nearAssist = null;
       const measures = [...na.measures, { name: "tir adverse après la récupération", value: na.shotAt - na.pickedUpAt, unit: "ms" }, { name: "arrêt", value: f.type === "EpicSave" ? "miraculeux" : "simple" }];
-      if (this.giveaway && this.giveaway.giver === na.giver) this.giveaway = null;
-      else this.countGiveaway(na.giver);
-      // Saved by the giver himself: lines of their own ("savedSelf")
-      const key = f.name === na.giver ? "giveaway.savedSelf" : "giveaway.saved";
-      this.live(key, { giver: na.giver, opponent: na.shooter, saver: f.name }, t, measures);
+      const sameBall = this.giveaway && this.giveaway.giver === na.giver;
+      if (sameBall) this.giveaway = null;
+      // Saved by the giver himself: it does not really count, nothing is said
+      if (f.name === na.giver) return;
+      if (!sameBall) this.countGiveaway(na.giver);
+      this.live("giveaway.saved", { giver: na.giver, opponent: na.shooter, saver: f.name }, t, measures);
     }
 
     if (f.type === "MVP") this.checkMvp(f.name);
@@ -548,8 +554,11 @@ class Detector extends EventEmitter {
           { name: "la passe avance la balle de", value: distToOpponentGoal(TS, hits[iA].loc.Y) - distToOpponentGoal(TS, scorerHit.loc.Y), unit: "uu" },
         ] : [];
         const measures = [...r.measures, ...touches.measures, { name: "adversaire touche entre les deux", value: opponentBetween ? "oui" : "non", ok: opponentBetween }, ...info];
-        if (r.ok || touches.ok || opponentBetween) found.adminAssist = { vars, measures };
-        else if (r.nearMiss) nearMisses.adminAssist = { key: "adminAssist", vars, measures };
+        // A shot on target by the passer (saved, then scored on the rebound) is a real contribution: never admin
+        if (!this.wasShotOrSave(assister, hits[iA].t)) {
+          if (r.ok || touches.ok || opponentBetween) found.adminAssist = { vars, measures };
+          else if (r.nearMiss) nearMisses.adminAssist = { key: "adminAssist", vars, measures };
+        }
       }
     }
 

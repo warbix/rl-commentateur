@@ -158,16 +158,6 @@
         "Sans {saver}, {giver} avait une passe décisive à son compteur. Pour l'équipe d'en face."
       ]
     },
-    "savedSelf": {
-      "_variables": "{giver} = the player who gave the ball away and saved the shot himself, {opponent} = the opponent who shot",
-      "phrases": [
-        "{giver} offre une passe décisive à {opponent}, puis la reprend lui-même sur sa ligne. Le pompier pyromane a encore frappé.",
-        "{giver} a créé le danger tout seul, et l'a éteint tout seul. Merci de ne déranger personne.",
-        "Passe en retrait de {giver} pour {opponent}, arrêt de {giver}. Il joue dans les deux équipes en même temps.",
-        "{giver} met le feu, {giver} éteint le feu. Personne n'est dupe.",
-        "Cadeau de {giver} à {opponent}, remboursé par {giver} lui-même. Opération blanche, mais quelle frayeur."
-      ]
-    },
     "goal": {
       "_variables": "{giver} = the player who gave the ball away, {opponent} = the opponent who took advantage",
       "phrases": [
