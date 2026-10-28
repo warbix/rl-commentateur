@@ -7,6 +7,8 @@ const { findKey } = require("./names");
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const NAME = "\u0001"; // repère placé devant chaque nom inséré
+const VOWEL = "[aeiouyhAEIOUYHàâäéèêëîïôöûùüÀÂÄÉÈÊËÎÏÔÖÛÙÜ]";
 
 class Phrases {
   constructor(phrasesFile) {
@@ -17,8 +19,8 @@ class Phrases {
   spokenName(name, surnoms) {
     const key = findKey(Object.keys(surnoms), name);
     if (key && surnoms[key].length) return randomItem(surnoms[key]);
-    // Pseudo inconnu : on enlève les points et tirets bas que la voix lirait mal
-    return String(name).replace(/[._]+/g, " ").trim() || String(name);
+    // Pseudo inconnu : on enlève les points, tirets et tirets bas que la voix lirait mal (« XX-_Pseudo_-XX » → « XX Pseudo XX »)
+    return String(name).replace(/[._\-]+/g, " ").replace(/\s+/g, " ").trim() || String(name);
   }
 
   pick(key, vars) {
@@ -32,14 +34,19 @@ class Phrases {
     this.lastIndex.set(key, i);
 
     const { surnoms = {}, prononciation = {} } = readConfig();
-    // Un seul surnom par joueur dans une même phrase
+    // Un seul surnom par joueur dans une même phrase. Chaque nom inséré est précédé d'un repère
+    // pour faire l'élision juste devant lui (« de Arnaud » → « d'Arnaud »).
     const said = new Map();
     let text = node.phrases[i].replace(/\{(\w+)\}/g, (m, v) => {
       if (!(v in vars)) return m;
       if (typeof vars[v] === "number") return String(vars[v]);
       if (!said.has(vars[v])) said.set(vars[v], this.spokenName(vars[v], surnoms));
-      return said.get(vars[v]);
+      return NAME + said.get(vars[v]);
     });
+    text = text
+      .replace(new RegExp(`\\b([dD])e ${NAME}(?=${VOWEL})`, "g"), "$1'")
+      .replace(new RegExp(`\\b([qQ]u)e ${NAME}(?=${VOWEL})`, "g"), "$1'")
+      .split(NAME).join("");
     return this.pronounce(text, prononciation);
   }
 

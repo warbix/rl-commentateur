@@ -56,3 +56,12 @@ test("pseudos : accents, espaces et pseudos tronqués", () => {
   assert.ok(!sameName("bob", "bobby_fan"), "trop court pour un préfixe");
   assert.ok(!sameName("Adversaire1", "MonSuperPseudo2000"));
 });
+
+test("élision devant un nom qui commence par une voyelle", () => {
+  const phrases = new Phrases(path.join(ROOT, "phrases.json"));
+  for (let i = 0; i < 20; i++) {
+    const text = phrases.pick("arretManque.accompagne", { defenseur: "Arnaud", buteur: "Adversaire1" });
+    assert.doesNotMatch(text, /\b[dD]e Arnaud|\b[qQ]ue Arnaud|\bde Adversaire1/, text);
+  }
+  assert.strictEqual(phrases.say("XX-_Pseudo_-XX"), "XX Pseudo XX");
+});
