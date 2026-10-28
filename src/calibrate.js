@@ -110,6 +110,11 @@ if (require.main === module) {
   const { suggestions, report } = calibrate(feedback, thresholds);
   console.log(`${feedback.entries.size} triggers, ${Object.keys(feedback.votes).length} with votes or notes`);
   console.log(report);
+  const ideas = feedback.ideas();
+  if (ideas.length) {
+    console.log("\n■ ideas");
+    for (const i of ideas) console.log(`  💡 ${i.by}${i.clock ? ` (match of ${new Date(i.match.start).toLocaleString()}, clock ${i.clock.overtime ? "+" : ""}${Math.round(i.clock.seconds)} s)` : ""}: ${i.text}`);
+  }
   const n = Object.keys(suggestions).length;
   if (!n) console.log("\nNo threshold to change for now.");
   else if (process.argv.includes("--apply")) {

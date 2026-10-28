@@ -62,3 +62,11 @@ test("votes survive a restart, and a removed reaction no longer counts", () => {
   assert.strictEqual(again.byMessage.get("msg"), e.id);
   assert.strictEqual(again.next, e.id + 1);
 });
+
+test("ideas are kept with their match and clock", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "idea-"));
+  new Feedback(dir).addIdea({ by: "Bob", text: "double commit à 2:10", match: { guid: "G", start: 0 }, clock: { seconds: 130, overtime: false } });
+  const [idea] = new Feedback(dir).ideas();
+  assert.strictEqual(idea.text, "double commit à 2:10");
+  assert.deepStrictEqual(idea.clock, { seconds: 130, overtime: false });
+});

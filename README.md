@@ -97,6 +97,7 @@ Dans n'importe quel salon du serveur :
 | `/mute` | Coupe les commentaires (le bot reste dans le vocal) |
 | `/unmute` | Les relance |
 | `/volume 80` | Règle le volume du commentateur (0 à 200 %) |
+| `/idea 2:10 Marcel et moi on est partis tous les deux` | Propose une situation que le bot devrait repérer : elle est notée avec le match et son chrono, et apparaît dans `npm run calibrate` |
 | `/recap` | Bilan de la soirée en vocal et par écrit : victoires, roi du tap-in, passoire d'or, bénévole, fantôme… |
 
 Le bilan compte tout ce qui s'est passé dans la soirée, même ce qui n'a pas été commenté, et survit aux relances du bot (il repart à zéro après 6 h sans match). Il s'affiche aussi dans la console quand on arrête le bot (Ctrl+C).

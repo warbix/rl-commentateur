@@ -19,7 +19,7 @@ const { Recorder } = require("./recorder");
 const { PhrasePool } = require("./pool");
 const { Recap } = require("./recap");
 const { jingleFile } = require("./jingle");
-const { Feedback, format } = require("./feedback");
+const { Feedback, format, clockText } = require("./feedback");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -63,6 +63,9 @@ async function main() {
   const recap = new Recap(replayFile ? null : path.join(ROOT, "cache", "recap.json"));
   const recapText = () => recap.text((name) => phrases.say(name));
 
+  // Created once Discord is up, but already known to the commands (/idea reads the match clock)
+  let detector = null;
+
   // Discord commands (before start(): they are registered on connection). Replies are in French for the squad.
   let muted = false;
   if (output && output.addCommand) {
@@ -97,6 +100,25 @@ async function main() {
         return `📝 Noté pour #${id} : « ${text} »`;
       },
     );
+    output.addCommand(
+      new SlashCommandBuilder().setName("idea").setDescription("Suggest a situation the commentator should notice")
+        .addStringOption((o) => o.setName("text").setDescription("E.g. 2:10, Marcel and I both went for the ball").setRequired(true)),
+      (interaction) => {
+        if (!feedback) return { content: "Pas d'idées pendant un rejeu.", flags: MessageFlags.Ephemeral };
+        const text = interaction.options.getString("text");
+        const inMatch = detector && detector.guid;
+        const idea = feedback.addIdea({
+          by: interaction.user.displayName || interaction.user.username, text,
+          match: inMatch ? { guid: detector.guid, start: detector.matchStart } : null,
+          clock: inMatch ? { seconds: detector.time, overtime: detector.overtime } : null,
+        });
+        console.log(`Idea from ${idea.by}: ${text}`);
+        if (!inMatch) return `💡 Idée notée (hors match) : « ${text} »`;
+        const start = new Date(idea.match.start);
+        const hhmm = `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`;
+        return `💡 Idée notée · match de ${hhmm} · ⏱ ${clockText(idea.clock)} : « ${text} »`;
+      },
+    );
     output.addCommand(new SlashCommandBuilder().setName("recap").setDescription("Evening recap, read out and posted"), async (interaction) => {
       const text = recapText();
       await interaction.deferReply();
@@ -115,7 +137,7 @@ async function main() {
 
   // Lines are generated one at a time, in order, so that comments don't get mixed up
   let chain = Promise.resolve();
-  const detector = new Detector({ options: readConfig });
+  detector = new Detector({ options: readConfig });
   const recorder = !replayFile && config.recordMatches !== false ? new Recorder(path.join(ROOT, "matches")) : null;
   detector.on("warning", (msg) => console.log(msg));
   detector.on("fact", (f) => recap.addFact(f));

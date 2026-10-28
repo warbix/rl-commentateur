@@ -110,6 +110,21 @@ class Feedback {
     return id;
   }
 
+  // An idea for a new situation, with the match and its clock when it was given (feedback/ideas.jsonl)
+  addIdea({ by, text, match, clock, t = Date.now() }) {
+    const idea = { by, text, match, clock, t };
+    fs.appendFileSync(path.join(path.dirname(this.journal), "ideas.jsonl"), JSON.stringify(idea) + "\n");
+    return idea;
+  }
+
+  ideas() {
+    try {
+      return fs.readFileSync(path.join(path.dirname(this.journal), "ideas.jsonl"), "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l));
+    } catch {
+      return [];
+    }
+  }
+
   note(id, by, text) {
     if (!this.entries.has(id)) return false;
     this.votesOf(id).notes.push({ by, text, t: Date.now() });
