@@ -25,7 +25,10 @@ class Phrases {
 
   pick(key, vars) {
     const all = JSON.parse(fs.readFileSync(this.phrasesFile, "utf8"));
-    const node = key.split(".").reduce((n, k) => (n ? n[k] : undefined), all);
+    const find = (k) => k.split(".").reduce((n, part) => (n ? n[part] : undefined), all);
+    let node = find(key);
+    // A situation can borrow the lines of another one: "backward": "giveaway.shot"
+    if (typeof node === "string") node = find(node);
     if (!node || !node.phrases || !node.phrases.length) throw new Error(`No lines for "${key}" in phrases.json`);
 
     const i = this.nextIndex(key, node.phrases.length);

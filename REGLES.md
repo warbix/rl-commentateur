@@ -162,6 +162,8 @@ adverse : normal, pas un cadeau. On ne garde que les balles rendues **vers l'arr
 - **Ça coûte** : `Shot` ou `Goal` de l'équipe B **≤ 6 s** après la récupération ⚙️
 
 **Paliers** : `Shot` adverse → « bénévole » ; but adverse → « bénévole de l'année » (le commentaire du but le cite).
+**Sans tir** : si la balle est renvoyée d'au moins **15 m vers son propre but** (`giveawayBackwardNoShot`) et récupérée proprement,
+le bot le dit quand même (« balle rendue »), dès que son équipe récupère la balle ou au bout de 6 s.
 **Cible** : P. **Quand** : au `Shot` adverse (en direct) ou pendant le replay du but.
 **Fréquence attendue** : ~2-3 par match en 3v3 (mesuré sur la capture : 3 cas).
 **Limite** : sans position des voitures, on ne sait pas si c'était une passe vers un coéquipier mal placé

@@ -1,5 +1,5 @@
 {
-  "_readme": "One line is drawn at random from the list of the situation (all lines go round before one comes back). {variables} are replaced by the spoken nicknames. Written to be read by a text-to-speech voice: no emoji, no abbreviations.",
+  "_readme": "One line is drawn at random from the list of the situation (all lines go round before one comes back). {variables} are replaced by the spoken nicknames. Written to be read by a text-to-speech voice: no emoji, no abbreviations. A situation given as a string (\"backward\": \"giveaway.shot\") uses the lines of that other situation.",
   "tapIn": {
     "_variables": "{scorer} = the scorer, {passer} = the teammate who passed",
     "phrases": [
@@ -147,6 +147,7 @@
         "{giver}, c'est gentil de partager, mais pas avec {opponent}."
       ]
     },
+    "backward": "giveaway.shot",
     "goal": {
       "_variables": "{giver} = the player who gave the ball away, {opponent} = the opponent who took advantage",
       "phrases": [

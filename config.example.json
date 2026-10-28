@@ -83,6 +83,7 @@
     "giveawayMinBackward": 800,
     "giveawayWindowMs": 6000,
     "giveawayOfTheMatchMin": 3,
+    "giveawayBackwardNoShot": 1500,
     "liveCooldownMs": 15000,
     "topCornerWaitMs": 20000,
     "nearMissMargin": 0.3

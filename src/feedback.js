@@ -16,7 +16,7 @@ const LABELS = {
   "finish.topCorner": "Lucarne", "finish.groundRoller": "But au ras du sol",
   adminAssist: "Passe administrative", beggar: "Mendiant", ghost: "Fantôme",
   "mvp.light": "MVP illégitime (léger)", "mvp.mocking": "MVP illégitime", "mvp.refund": "MVP illégitime (remboursez)",
-  "giveaway.shot": "Bénévole", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
+  "giveaway.shot": "Bénévole", "giveaway.backward": "Balle rendue", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
 };
 
 const pad = (n) => String(n).padStart(2, "0");

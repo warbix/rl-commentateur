@@ -28,6 +28,8 @@ const DEFAULTS = {
   ghost3v3Ms: 45000, ghost2v2Ms: 40000, ghostMinScoreGain: 10, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
   chokeMaxSecondsLeft: 10,
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
+  // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
+  giveawayBackwardNoShot: 1500,
   liveCooldownMs: 15000,
   topCornerWaitMs: 20000,
   // Near miss: every failed measure misses its threshold by less than 30 %
@@ -115,10 +117,12 @@ class Detector extends EventEmitter {
     if (p && this.ourTeams().has(p.team)) this.emit("fact", { type, player: name });
   }
 
+  // With an opponent shot: "giveaway.shot". Without one, only for a ball sent far back: "giveaway.backward".
   announceGiveaway(t) {
     const g = this.giveaway;
     this.giveaway = null;
-    this.live("giveaway.shot", { giver: g.giver, opponent: g.shooter }, t, g.measures);
+    if (g.shotAt) this.live("giveaway.shot", { giver: g.giver, opponent: g.shooter }, t, g.measures);
+    else if (g.clean && g.backward.ok) this.live("giveaway.backward", { giver: g.giver, opponent: g.taker }, t, [...g.measures, ...g.backward.measures]);
   }
 
   countGiveaway(name) {
@@ -264,12 +268,11 @@ class Detector extends EventEmitter {
     }
 
     // Giveaway: opponent shot without a goal → said once the danger is over
-    // (normally as soon as the giver's team gets the ball back, see onHit; here after 4 s at worst)
+    // (normally as soon as the giver's team gets the ball back, see onHit; here after 4 s at worst).
+    // No shot within the window: said only for a ball sent far back, otherwise forgotten.
     const g = this.giveaway;
-    if (g && g.shotAt && t - g.shotAt >= 4000) {
+    if (g && ((g.shotAt && t - g.shotAt >= 4000) || (!g.shotAt && t - g.pickedUpAt > S.giveawayWindowMs))) {
       this.announceGiveaway(t);
-    } else if (g && !g.shotAt && t - g.pickedUpAt > S.giveawayWindowMs) {
-      this.giveaway = null;
     }
 
     if (this.pendingGoal && t - this.pendingGoal.t > S.topCornerWaitMs) this.pendingGoal = null;
@@ -324,8 +327,10 @@ class Detector extends EventEmitter {
       if (hit.players.some((p) => p.team === pp.team)) this.player(pp.name).idleMs = 0;
     }
 
-    // Giveaway: after the opponent's shot, the giver's team got the ball back → the action is over, it can be said
-    if (this.giveaway && this.giveaway.shotAt && hit.players.some((p) => p.team === this.giveaway.giverTeam)) this.announceGiveaway(t);
+    // Giveaway: after the opponent's shot (or a clean pick-up of a ball sent far back), the giver's team
+    // got the ball back → the action is over, it can be said
+    const ga = this.giveaway;
+    if (ga && (ga.shotAt || (ga.clean && ga.backward.ok)) && hit.players.some((p) => p.team === ga.giverTeam)) this.announceGiveaway(t);
 
     // Giveaway: was the opponent's pick-up clean?
     const g = this.giveaway;
@@ -352,9 +357,10 @@ class Detector extends EventEmitter {
       condition("distance à sa propre ligne", "giveawayMinOwnGoalDistance", ownGiver, "min", "uu"),
     ]);
     if (r.ok) {
+      const backward = this.evaluate([condition("recul vers son propre but", "giveawayBackwardNoShot", ownGiver - ownTaker, "min", "uu")]);
       this.giveaway = {
         giver: giver.name, giverTeam: giver.team, taker: taker.name, takerTeam: taker.team,
-        pickedUpAt: t, pickupHit: hit, clean: false, shotAt: null, shooter: null, measures: r.measures,
+        pickedUpAt: t, pickupHit: hit, clean: false, shotAt: null, shooter: null, measures: r.measures, backward,
       };
     }
   }

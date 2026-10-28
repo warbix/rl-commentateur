@@ -75,3 +75,10 @@ test("the 5 lines of a situation all come out before one comes back, never twice
   for (let k = 0; k < 50; k += 5) assert.strictEqual(new Set(seen.slice(k, k + 5)).size, 5, `round ${k / 5}: ${seen.slice(k, k + 5)}`);
   for (let k = 1; k < 50; k++) assert.notStrictEqual(seen[k], seen[k - 1], `repeat at ${k}`);
 });
+
+test("a situation can borrow the lines of another one", () => {
+  const phrases = new Phrases(path.join(ROOT, "phrases.json"));
+  const text = phrases.pick("giveaway.backward", { giver: "MonPseudo", opponent: "Adversaire1" });
+  assert.match(text, /Adversaire1/);
+  assert.doesNotMatch(text, /\{\w+\}/);
+});
