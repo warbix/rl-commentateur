@@ -1,7 +1,7 @@
 // Bot Discord : rejoint le salon vocal, lit les fichiers audio à la suite,
 // et répond aux commandes /… déclarées avec addCommand().
 
-const { Client, GatewayIntentBits, Events, MessageFlags, PermissionFlagsBits } = require("discord.js");
+const { Client, GatewayIntentBits, Events, MessageFlags, PermissionFlagsBits, Partials } = require("discord.js");
 const {
   joinVoiceChannel, createAudioPlayer, createAudioResource, entersState,
   AudioPlayerStatus, VoiceConnectionStatus, NoSubscriberBehavior,
@@ -23,7 +23,11 @@ class DiscordVoice {
   }
 
   async start() {
-    this.client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+    this.client = new Client({
+      intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessageReactions],
+      // Pour recevoir les votes sur des messages postés avant une relance du bot
+      partials: [Partials.Message, Partials.Reaction, Partials.User],
+    });
     const ready = new Promise((resolve) => this.client.once(Events.ClientReady, resolve));
     await this.client.login(this.token);
     await ready;
@@ -31,8 +35,8 @@ class DiscordVoice {
 
     const home = await this.client.channels.fetch(this.voiceChannelId).catch(() => null);
     if (!home || !home.isVoiceBased()) throw new Error(`Salon vocal introuvable (salonVocalId = ${this.voiceChannelId}). Le bot est bien invité sur le serveur ?`);
-    if (this.textChannelId) this.textChannel = await this.client.channels.fetch(this.textChannelId).catch(() => null);
     this.me = await home.guild.members.fetchMe();
+    if (this.textChannelId) await this.setupTextChannel();
 
     // En priorité le salon où se trouve un membre suivi, sinon le salon de config.json
     const followed = this.followedChannel(home.guild);
@@ -61,6 +65,38 @@ class DiscordVoice {
     });
 
     await this.registerCommands(channel.guild);
+  }
+
+  // Salon texte des déclenchements : on y poste et on écoute les votes (réactions)
+  async setupTextChannel() {
+    const channel = await this.client.channels.fetch(this.textChannelId).catch(() => null);
+    if (!channel || !channel.isTextBased()) return console.log(`Discord : salon texte introuvable (salonTexteId = ${this.textChannelId}), pas de votes`);
+    const perms = channel.permissionsFor(this.me);
+    const missing = [["ViewChannel", "Voir le salon"], ["SendMessages", "Envoyer des messages"], ["AddReactions", "Ajouter des réactions"], ["ReadMessageHistory", "Voir les anciens messages"]]
+      .filter(([flag]) => !perms || !perms.has(PermissionFlagsBits[flag])).map(([, label]) => label);
+    if (missing.length) return console.log(`Discord : il manque les droits ${missing.join(", ")} sur « ${channel.name} », pas de votes`);
+    this.textChannel = channel;
+    console.log(`Discord : déclenchements et votes dans « #${channel.name} »`);
+
+    const onReaction = (added) => async (reaction, user) => {
+      if (user.bot || reaction.message.channelId !== channel.id || !this.onVote) return;
+      this.onVote(reaction.message.id, reaction.emoji.name, user.id, added);
+    };
+    this.client.on(Events.MessageReactionAdd, onReaction(true));
+    this.client.on(Events.MessageReactionRemove, onReaction(false));
+  }
+
+  // Poste un message dans le salon texte avec ses boutons de vote ; renvoie l'identifiant du message
+  async post(content, reactions = []) {
+    if (!this.textChannel) return null;
+    try {
+      const message = await this.textChannel.send({ content, allowedMentions: { parse: [] } });
+      for (const r of reactions) await message.react(r);
+      return message.id;
+    } catch (e) {
+      console.error("Discord : message non posté :", e.message);
+      return null;
+    }
   }
 
   // Sans ces droits, la connexion vocale reste bloquée sans message clair
@@ -150,9 +186,8 @@ class DiscordVoice {
     });
   }
 
-  enqueue(file, text) {
+  enqueue(file) {
     this.queue.push(file);
-    if (this.textChannel && text) this.textChannel.send(text).catch(() => {});
     if (this.player.state.status === AudioPlayerStatus.Idle) this.playNext();
   }
 

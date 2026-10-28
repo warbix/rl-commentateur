@@ -19,6 +19,7 @@ const { Recorder } = require("./recorder");
 const { PhrasePool } = require("./pool");
 const { Bilan } = require("./bilan");
 const { jingleFile } = require("./jingle");
+const { Retours, format } = require("./retours");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -48,11 +49,14 @@ async function main() {
     output = new (require("./discordVoice").DiscordVoice)(config.discord, config.voix);
   }
   // Bruitage (si activé) puis la phrase
-  const play = (file, text) => {
+  const play = (file) => {
     const jingle = jingleFile();
     if (jingle) output.enqueue(jingle);
-    output.enqueue(file, text);
+    output.enqueue(file);
   };
+
+  // Déclenchements numérotés et votes (pas pour un rejeu : il ne doit pas se mélanger aux vrais votes)
+  const retours = option("--rejouer") ? null : new Retours(path.join(ROOT, "retours"));
 
   // Le bilan d'un rejeu reste à part : il ne doit pas se mélanger à celui de la soirée
   const bilan = new Bilan(option("--rejouer") ? null : path.join(ROOT, "cache", "bilan.json"));
@@ -61,7 +65,7 @@ async function main() {
   // Commandes Discord (avant start() : elles sont enregistrées à la connexion)
   let muted = false;
   if (output && output.addCommand) {
-    const { SlashCommandBuilder } = require("discord.js");
+    const { SlashCommandBuilder, MessageFlags } = require("discord.js");
     output.addCommand(new SlashCommandBuilder().setName("chut").setDescription("Coupe les commentaires"), () => {
       muted = true;
       return "🤐 Commentateur coupé. /parle pour le relancer.";
@@ -79,6 +83,19 @@ async function main() {
         return `🔊 Volume réglé à ${pct} %.`;
       },
     );
+    output.addCommand(
+      new SlashCommandBuilder().setName("avis").setDescription("Donne ton avis sur un déclenchement du commentateur")
+        .addIntegerOption((o) => o.setName("numero").setDescription("Le numéro du déclenchement (#12 → 12)").setMinValue(1).setRequired(true))
+        .addStringOption((o) => o.setName("texte").setDescription("Ex. : trop sévère, c'était un vol, il fallait le dire…").setRequired(true)),
+      (interaction) => {
+        const id = interaction.options.getInteger("numero");
+        const texte = interaction.options.getString("texte");
+        if (!retours || !retours.avis(id, interaction.user.displayName || interaction.user.username, texte)) {
+          return { content: `Je ne connais pas de déclenchement #${id}.`, flags: MessageFlags.Ephemeral };
+        }
+        return `📝 Noté pour #${id} : « ${texte} »`;
+      },
+    );
     output.addCommand(new SlashCommandBuilder().setName("bilan").setDescription("Bilan de la soirée, en vocal et par écrit"), async (interaction) => {
       const text = bilanTexte();
       await interaction.deferReply();
@@ -87,6 +104,7 @@ async function main() {
       await interaction.editReply(`📋 ${text}`);
     });
   }
+  if (output && retours) output.onVote = (messageId, emoji, userId, added) => retours.react(messageId, emoji, userId, added);
   if (output) await output.start();
 
   const pool = output && config.pregenerer !== false
@@ -104,17 +122,35 @@ async function main() {
   detector.on("resultat", (r) => bilan.addResultat(r));
   // Ctrl+C ou fermeture : on affiche le bilan avant de partir
   process.on("SIGINT", () => { console.log(`\n${bilanTexte()}`); process.exit(0); });
-  detector.on("comment", ({ key, vars, live, t }) => {
+  // Numérote le déclenchement, le poste dans le salon texte (tout de suite, pour voter pendant le replay)
+  const publish = (type, c, phrase) => {
+    if (!retours) return "";
+    const e = retours.add({ type, ...c, phrase });
+    if (output && output.post) {
+      output.post(format(e), type === "presque" ? ["👍", "👎"] : ["✅", "❌"])
+        .then((messageId) => messageId && retours.setMessage(e.id, messageId));
+    }
+    return `#${e.id} `;
+  };
+
+  detector.on("presque", (c) => {
+    const num = publish("presque", c);
+    console.log(`${new Date(c.t).toLocaleTimeString()} ${num}[presque ${c.key}] ${c.cible}`);
+  });
+
+  detector.on("comment", (c) => {
+    const { key, vars, live, t } = c;
     // Phrase déjà prête (voix comprise) si elle ne cite que la bande, sinon on la génère maintenant
     const ready = pool && pool.take(key, vars);
     let text;
     try { text = ready ? ready.text : phrases.pick(key, vars); } catch (e) { return console.error(e.message); }
-    console.log(`${new Date(t).toLocaleTimeString()} [${key}${live ? ", direct" : ""}] ${text}`);
+    const num = publish("commentaire", c, text);
+    console.log(`${new Date(t).toLocaleTimeString()} ${num}[${key}${live ? ", direct" : ""}] ${text}`);
     if (recorder) recorder.comment(t, key, text);
     if (!output || muted) return;
     chain = chain
       .then(() => (ready ? ready.file : tts.synth(text)))
-      .then((file) => play(file, text))
+      .then((file) => play(file))
       .catch((e) => console.error("Voix :", e.message));
   });
 

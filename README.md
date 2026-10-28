@@ -29,7 +29,7 @@ Tout tourne **sur ton PC** : pas de serveur à louer.
 2. Menu **Bot** → **Reset Token** → copie le token. ⚠️ C'est le mot de passe du bot : ne le partage jamais.
 3. Menu **OAuth2** → **URL Generator** :
    - Scopes : coche **bot** et **applications.commands** (pour les commandes /chut, /parle…)
-   - Bot Permissions : coche **View Channels**, **Connect**, **Speak** (et **Send Messages** si tu veux aussi les phrases écrites)
+   - Bot Permissions : coche **View Channels**, **Connect**, **Speak**, et pour les votes **Send Messages**, **Add Reactions**, **Read Message History**
 4. Copie l'URL générée en bas, ouvre-la dans ton navigateur et ajoute le bot sur votre serveur.
 
 ### 2. Récupérer l'identifiant du salon vocal
@@ -102,6 +102,23 @@ Dans n'importe quel salon du serveur :
 Le bilan compte tout ce qui s'est passé dans la soirée, même ce qui n'a pas été commenté, et survit aux relances du bot (il repart à zéro après 6 h sans match). Il s'affiche aussi dans la console quand on arrête le bot (Ctrl+C).
 
 Si les commandes n'apparaissent pas, le bot a été invité sans le scope `applications.commands` : régénère l'URL d'invitation (étape 1.3) et réinvite-le, sans le retirer du serveur.
+
+### Voter sur les déclenchements (pour régler le bot)
+
+Mets l'identifiant d'un salon texte dans `config.json` → `discord.salonTexteId` (le bot doit pouvoir y voir le salon,
+envoyer des messages, ajouter des réactions et voir les anciens messages). Pendant le match, chaque déclenchement y est
+posté **tout de suite**, numéroté, avec le chrono du match et les mesures qui l'ont déclenché :
+
+> **#12** · ⏱ 2:34 · match de 21:04 · **Tap-in** → MonPseudo
+> dernière touche à la ligne 6,2 m (max 9,0 m) ✓ · vitesse après la touche 31 km/h (max 50 km/h) ✓ · …
+> > *la phrase dite*
+
+- ✅ / ❌ : le commentaire était-il mérité ? Vous pouvez voter pendant le replay du but.
+- **Presque** : quand une situation rate ses seuils de peu, le bot ne dit rien mais poste un `#13 ?`. 👍 = il fallait le dire, 👎 = non.
+- `/avis 12 trop sévère` : pour nuancer (« c'était un vol, pas un tap-in », « il fallait le dire »…).
+- Avec le chrono, vous pouvez retrouver l'action dans le replay Rocket League.
+
+Tout est gardé dans `retours/` (ignoré par git). `npm run calibrer` lit les votes et propose des seuils (voir plus bas).
 
 ### Tester sans jouer
 
