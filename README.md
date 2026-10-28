@@ -134,7 +134,7 @@ Pour désactiver : `"enregistrerMatchs": false` dans `config.json`. `node captur
 | Surnoms (`surnoms`) et prononciation (`prononciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
 | Voix et rotation (`voix`) | `config.json` | Tout de suite (sauf le volume) |
 | Bruitage avant chaque phrase (`voix.jingle` : `true` pour le ding, `false`, ou le chemin d'un son à toi) | `config.json` | Tout de suite |
-| Seuils de détection (distances, durées…) | `src/detector.js`, en haut du fichier | Au prochain lancement |
+| Seuils de détection (distances, durées…) | `config.json` → `seuils` | Tout de suite |
 | Token, salon, volume, vérification de l'API (`rocketLeague`) | `config.json` | Au prochain lancement |
 
 Les phrases déjà générées sont gardées dans `cache/` : elles ne repassent pas par internet et sont lues sans attente.
