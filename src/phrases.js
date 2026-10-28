@@ -19,8 +19,9 @@ class Phrases {
   spokenName(name, nicknames) {
     const key = findKey(Object.keys(nicknames), name);
     if (key && nicknames[key].length) return randomItem(nicknames[key]);
-    // Unknown name: drop the dots, dashes and underscores the voice would read badly ("XX-_Name_-XX" → "XX Name XX")
-    return String(name).replace(/[._\-]+/g, " ").replace(/\s+/g, " ").trim() || String(name);
+    // Unknown name: keep only letters and digits, the voice reads the rest badly ("XX-_Name_-XX" → "XX Name XX";
+    // the game also shows characters it cannot display, like emojis, as "?")
+    return String(name).replace(/[^\p{L}\p{N}]+/gu, " ").trim() || String(name);
   }
 
   pick(key, vars) {

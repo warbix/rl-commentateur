@@ -440,7 +440,9 @@ class Detector extends EventEmitter {
       const measures = [...na.measures, { name: "tir adverse après la récupération", value: na.shotAt - na.pickedUpAt, unit: "ms" }, { name: "arrêt", value: f.type === "EpicSave" ? "miraculeux" : "simple" }];
       if (this.giveaway && this.giveaway.giver === na.giver) this.giveaway = null;
       else this.countGiveaway(na.giver);
-      this.live("giveaway.saved", { giver: na.giver, opponent: na.shooter, saver: f.name }, t, measures);
+      // Saved by the giver himself: lines of their own ("savedSelf")
+      const key = f.name === na.giver ? "giveaway.savedSelf" : "giveaway.saved";
+      this.live(key, { giver: na.giver, opponent: na.shooter, saver: f.name }, t, measures);
     }
 
     if (f.type === "MVP") this.checkMvp(f.name);
