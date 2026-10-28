@@ -8,6 +8,7 @@ const EVENING_MS = 6 * 60 * 60 * 1000;
 const TITLES = [
   { type: "tapIn", title: "Roi du tap-in", unit: ["tap-in", "tap-ins"] },
   { type: "steal", title: "Pickpocket de la soirée", unit: ["but volé", "buts volés"] },
+  { type: "teamBlock", title: "Gardien de l'équipe adverse", unit: ["but sauvé pour l'adversaire", "buts sauvés pour l'adversaire"] },
   { type: "missedSave", title: "Passoire d'or", unit: ["arrêt manqué", "arrêts manqués"] },
   { type: "giveaway", title: "Bénévole de la soirée", unit: ["ballon rendu", "ballons rendus"] },
   { type: "adminAssist", title: "Fonctionnaire de la passe", unit: ["passe administrative", "passes administratives"] },

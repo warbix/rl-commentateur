@@ -13,6 +13,7 @@ const { normalize, findKey } = require("./names");
 const SITUATIONS = {
   tapIn: ["scorer", "passer"],
   steal: ["thief", "victim"],
+  teamBlock: ["blocker", "shooter"],
   "finish.topCorner": ["scorer"],
   "mvp.light": ["mvp", "realMvp"],
   "mvp.mocking": ["mvp", "realMvp"],

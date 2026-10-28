@@ -185,6 +185,20 @@ Si l'adversaire marque à la place : « bénévole de l'année ».
 
 ---
 
+## 12. Arrêt pour l'adversaire 🧱
+**Idée** : un tir de l'équipe allait rentrer, et un coéquipier le sort juste devant la cage adverse.
+
+**Règle** :
+- Un joueur A fait un **tir cadré** (`Shot` du jeu)
+- La **première touche** après le tir (≤ 2,5 s, `teamBlockMaxMs`) est celle d'un **coéquipier B** (pas A, pas un adversaire)
+- B touche la balle à **≤ 12 m de la ligne adverse** (`teamBlockMaxDistance`), et ce n'est pas lui-même un tir cadré
+- **Pas de but** dans les 3 s qui suivent (`teamBlockNoGoalMs`)
+
+**Cible** : B, en citant A. **Quand** : en direct, 3 s après la touche. Compte comme une casserole pour le MVP illégitime.
+Rare : 1 cas sur les 13 premiers matchs enregistrés.
+
+---
+
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un pseudo de la liste des surnoms.

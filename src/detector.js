@@ -34,6 +34,8 @@ const DEFAULTS = {
   // (not a 50/50), who shoots, and the shot is saved by the giver's team
   nearAssistMaxOwnGoalDistance: 5120, nearAssistMaxForward: 500, nearAssistMinMs: 1000,
   nearAssistShotWindowMs: 4000, nearAssistSaveWindowMs: 2500,
+  // Save for the opponent: a teammate is the first to touch a shot on target, close to the opponent goal, and no goal follows
+  teamBlockMaxDistance: 1200, teamBlockMaxMs: 2500, teamBlockNoGoalMs: 3000,
   liveCooldownMs: 15000,
   topCornerWaitMs: 20000,
   // Near miss: every failed measure misses its threshold by less than 30 %
@@ -48,7 +50,7 @@ const NEAR_MISS_PRIORITY = ["missedSave", "tapIn", "adminAssist"];
 // The player each situation targets (the one being mocked)
 const TARGET = {
   tapIn: "scorer", steal: "thief", missedSave: "defender", choke: "defender", finish: "scorer",
-  adminAssist: "passer", mvp: "mvp", beggar: "player", ghost: "player", giveaway: "giver",
+  adminAssist: "passer", mvp: "mvp", beggar: "player", ghost: "player", giveaway: "giver", teamBlock: "blocker",
 };
 
 const distToOpponentGoal = (team, y) => (team === 0 ? GOAL_LINE - y : GOAL_LINE + y);
@@ -88,6 +90,8 @@ class Detector extends EventEmitter {
     this.giveaways = new Map();
     this.giveaway = null;
     this.nearAssist = null;
+    this.lastShot = null; // last shot on target, until the next touch
+    this.teamBlock = null;
     this.pendingGoal = null;
     this.lastLiveT = -Infinity;
     this.lastGhostT = -Infinity; // two ghosts (of different players) at least a minute apart
@@ -304,6 +308,17 @@ class Detector extends EventEmitter {
       this.announceGiveaway(t);
     }
 
+    // Save for the opponent: still no goal a moment after the teammate's touch → said (or offered as a near miss)
+    const tb = this.teamBlock;
+    if (tb && t - tb.t >= S.teamBlockNoGoalMs) {
+      this.teamBlock = null;
+      const r = this.evaluate([condition("touche du coéquipier à la ligne adverse", "teamBlockMaxDistance", tb.distance, "max", "uu")]);
+      const measures = [...r.measures, { name: "délai après le tir", value: tb.t - tb.shotAt, unit: "ms" }];
+      const vars = { blocker: tb.blocker, shooter: tb.shooter };
+      if (r.ok) { this.addBlunder(tb.blocker); this.live("teamBlock", vars, t, measures); }
+      else if (r.nearMiss) this.emitNearMiss("teamBlock", vars, measures);
+    }
+
     // Near assist: no shot, or no save after the shot, in time → forgotten
     const na = this.nearAssist;
     if (na && ((!na.shotAt && t - na.pickedUpAt > S.nearAssistShotWindowMs) || (na.shotAt && t - na.shotAt > S.nearAssistSaveWindowMs))) this.nearAssist = null;
@@ -383,6 +398,15 @@ class Detector extends EventEmitter {
       }
     }
 
+    // Save for the opponent: the first touch after a shot on target is a teammate's (not the shooter's, no opponent)
+    const ls = this.lastShot;
+    if (ls) {
+      this.lastShot = null;
+      if (t - ls.t <= S.teamBlockMaxMs && onlyTeam(hit, ls.team) && !has(hit, ls.shooter)) {
+        this.teamBlock = { blocker: hit.players[0].name, shooter: ls.shooter, shotAt: ls.t, t, distance: distToOpponentGoal(ls.team, hit.loc.Y) };
+      }
+    }
+
     // Near assist to the opponent: a ball played in one's own half, not forward, picked up by an opponent
     if (prev.players.length === 1 && hit.players.length === 1 && prev.players[0].team !== hit.players[0].team) {
       const giver = prev.players[0], taker = hit.players[0];
@@ -435,6 +459,11 @@ class Detector extends EventEmitter {
       g.shooter = f.name;
     }
 
+    if (f.type === "Shot") {
+      if (this.teamBlock && f.name === this.teamBlock.blocker && t - this.teamBlock.t <= S.shotDelayMs) this.teamBlock = null;
+      else this.lastShot = { shooter: f.name, team: f.team, t };
+    }
+
     // Near assist: the opponent shoots in time, then the giver's team saves it → said (instead of a plain giveaway)
     const na = this.nearAssist;
     if (na && f.type === "Shot" && f.team === na.takerTeam && !na.shotAt && t - na.pickedUpAt <= S.nearAssistShotWindowMs) {
@@ -458,6 +487,8 @@ class Detector extends EventEmitter {
     const S = this.S;
     const scorer = d.Scorer.Name, TS = d.Scorer.TeamNum, TD = 1 - TS;
     const hits = this.hits.filter((h) => h.t >= this.roundStart && h.t <= t);
+    this.teamBlock = null;
+    this.lastShot = null;
     const found = {}; // key → { vars, measures }
     const nearMisses = {}; // family → { key, vars, measures }
 

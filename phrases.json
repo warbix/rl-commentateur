@@ -20,6 +20,16 @@
       "Statistique du jour : {victim} tire, {thief} encaisse les points. On appelle ça du travail en équipe, version {thief}."
     ]
   },
+  "teamBlock": {
+    "_variables": "{blocker} = the player who stopped his teammate's shot, {shooter} = the teammate whose shot was going in",
+    "phrases": [
+      "Le tir de {shooter} rentrait. {blocker} a fait l'arrêt. Pour l'équipe adverse.",
+      "Superbe parade de {blocker}, sur le tir de son propre coéquipier. Le gardien adverse dit merci.",
+      "{shooter} allait marquer, mais {blocker} veillait. Dommage, il est dans la même équipe.",
+      "But de {shooter} annulé sur décision de {blocker}. Personne n'a compris, surtout pas {shooter}.",
+      "Meilleur défenseur adverse du match : {blocker}. Il vient de sortir le tir de {shooter}."
+    ]
+  },
   "missedSave": {
     "escorted": {
       "_variables": "{defender} = the defender who touched the ball without saving it, {scorer} = the scorer",

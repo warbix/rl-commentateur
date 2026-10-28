@@ -89,6 +89,9 @@
     "nearAssistMinMs": 1000,
     "nearAssistShotWindowMs": 4000,
     "nearAssistSaveWindowMs": 2500,
+    "teamBlockMaxDistance": 1200,
+    "teamBlockMaxMs": 2500,
+    "teamBlockNoGoalMs": 3000,
     "liveCooldownMs": 15000,
     "topCornerWaitMs": 20000,
     "nearMissMargin": 0.3
