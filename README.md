@@ -99,7 +99,7 @@ Dans n'importe quel salon du serveur :
 | `/volume 80` | Règle le volume du commentateur (0 à 200 %) |
 | `/bilan` | Bilan de la soirée en vocal et par écrit : victoires, roi du tap-in, passoire d'or, bénévole, fantôme… |
 
-Le bilan compte tout depuis le lancement du bot, même ce qui n'a pas été commenté. Il s'affiche aussi dans la console quand on arrête le bot (Ctrl+C).
+Le bilan compte tout ce qui s'est passé dans la soirée, même ce qui n'a pas été commenté, et survit aux relances du bot (il repart à zéro après 6 h sans match). Il s'affiche aussi dans la console quand on arrête le bot (Ctrl+C).
 
 Si les commandes n'apparaissent pas, le bot a été invité sans le scope `applications.commands` : régénère l'URL d'invitation (étape 1.3) et réinvite-le, sans le retirer du serveur.
 

@@ -54,7 +54,8 @@ async function main() {
     output.enqueue(file, text);
   };
 
-  const bilan = new Bilan();
+  // Le bilan d'un rejeu reste à part : il ne doit pas se mélanger à celui de la soirée
+  const bilan = new Bilan(option("--rejouer") ? null : path.join(ROOT, "cache", "bilan.json"));
   const bilanTexte = () => bilan.texte((name) => phrases.say(name));
 
   // Commandes Discord (avant start() : elles sont enregistrées à la connexion)
