@@ -50,7 +50,7 @@ test("pronunciation: MVP and unknown names", () => {
   assert.strictEqual(phrases.pronounce("Le MVP du match"), "Le aime vie pie du match");
   assert.strictEqual(phrases.say(".officer_tom"), "officer tom");
   assert.strictEqual(phrases.say("XX-_Pseudo_-XX"), "XX Pseudo XX");
-  assert.strictEqual(phrases.say("?Ferreira?"), "Ferreira");
+  assert.strictEqual(phrases.say("?Pseudo?"), "Pseudo");
 });
 
 test("names: accents, spaces and truncated names", () => {
