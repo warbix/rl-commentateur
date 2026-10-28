@@ -120,6 +120,16 @@ posté **tout de suite**, numéroté, avec le chrono du match et les mesures qui
 
 Tout est gardé dans `retours/` (ignoré par git). `npm run calibrer` lit les votes et propose des seuils (voir plus bas).
 
+### Régler les seuils d'après vos votes
+
+```
+npm run calibrer
+```
+Pour chaque règle : les votes (✅/❌, 👍/👎 sur les « presque »), chaque mesure avec les valeurs validées (✓) et rejetées (✗),
+le seuil qui respecterait le plus de votes, et vos `/avis`. Rien ne bouge tant qu'une mesure a moins de 4 votes.
+Une règle a plusieurs mesures, donc un ❌ peut venir d'une autre mesure : relis avant d'appliquer.
+`npm run calibrer -- --appliquer` écrit les seuils proposés dans `config.json` → `seuils` (pris en compte tout de suite).
+
 ### Tester sans jouer
 
 Rejoue un vrai match classé 3v3 enregistré, avec le son sur les haut-parleurs du PC.

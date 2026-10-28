@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test",
     "start": "node src/index.js",
-    "verifier-api": "node src/apiStats.js"
+    "verifier-api": "node src/apiStats.js",
+    "calibrer": "node src/calibrer.js"
   },
   "keywords": [],
   "author": "",
