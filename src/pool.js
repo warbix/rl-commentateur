@@ -1,25 +1,25 @@
-// Phrases prêtes à l'avance pour la bande (les pseudos de config.json → surnoms).
-// Pour les situations qui ne citent que des joueurs de notre équipe, on génère une phrase
-// (texte + voix) par combinaison de joueurs, en arrière-plan. Au moment du commentaire, elle sort
-// sans attendre la voix ; une nouvelle est aussitôt préparée pour la fois suivante.
-// La réserve est gardée dans cache/reserve.json et vidée si les phrases, surnoms ou voix changent.
+// Lines prepared in advance for the squad (the names in config.json → nicknames).
+// For the situations that only mention players of our team, one line (text + voice) is generated
+// per combination of players, in the background. When the comment comes, it plays without waiting
+// for the voice; a new one is prepared right away for next time.
+// The pool is kept in cache/pool.json and emptied when the lines, nicknames or voices change.
 
 const fs = require("fs");
 const crypto = require("crypto");
 const { readConfig } = require("./config");
 const { normalize, findKey } = require("./names");
 
-// Situations dont toutes les variables sont des joueurs de notre équipe
+// Situations whose variables are all players of our team
 const SITUATIONS = {
-  tapin: ["buteur", "passeur"],
-  vol: ["voleur", "victime"],
-  "lucarne.lucarne": ["buteur"],
-  "mvp.leger": ["mvp", "vraiMvp"],
-  "mvp.moqueur": ["mvp", "vraiMvp"],
-  "mvp.rembourse": ["mvp", "vraiMvp"],
+  tapIn: ["scorer", "passer"],
+  steal: ["thief", "victim"],
+  "finish.topCorner": ["scorer"],
+  "mvp.light": ["mvp", "realMvp"],
+  "mvp.mocking": ["mvp", "realMvp"],
+  "mvp.refund": ["mvp", "realMvp"],
 };
 
-// Toutes les façons de choisir n joueurs différents, dans l'ordre
+// Every way to pick n different players, in order
 function arrangements(names, n) {
   if (n === 0) return [[]];
   return names.flatMap((name) => arrangements(names.filter((x) => x !== name), n - 1).map((rest) => [name, ...rest]));
@@ -35,11 +35,11 @@ class PhrasePool {
     try { this.data = JSON.parse(fs.readFileSync(file, "utf8")); } catch { this.data = { signature: "", entries: {} }; }
   }
 
-  // Empreinte de tout ce qui change le texte ou la voix : si elle bouge, la réserve est périmée
+  // Fingerprint of everything that changes the text or the voice: if it moves, the pool is stale
   signature() {
-    const { surnoms, prononciation, voix } = readConfig();
+    const { nicknames, pronunciation, voice } = readConfig();
     const phrasesText = fs.readFileSync(this.phrases.phrasesFile, "utf8");
-    return crypto.createHash("sha1").update(JSON.stringify([phrasesText, surnoms, prononciation, voix && voix.liste, voix && voix.vitesse, voix && voix.hauteur])).digest("hex");
+    return crypto.createHash("sha1").update(JSON.stringify([phrasesText, nicknames, pronunciation, voice && voice.list, voice && voice.rate, voice && voice.pitch])).digest("hex");
   }
 
   checkSignature() {
@@ -49,8 +49,8 @@ class PhrasePool {
 
   poolKey(key, vars) {
     const names = SITUATIONS[key];
-    // Le pseudo du jeu (ex. tronqué) est ramené à la clé de surnoms correspondante
-    const keys = Object.keys(readConfig().surnoms || {});
+    // The in-game name (e.g. truncated) is mapped back to the matching nicknames key
+    const keys = Object.keys(readConfig().nicknames || {});
     return names ? `${key}|${names.map((n) => normalize(findKey(keys, vars[n]) || vars[n])).join("|")}` : null;
   }
 
@@ -58,7 +58,7 @@ class PhrasePool {
     fs.writeFile(this.file, JSON.stringify(this.data), () => {});
   }
 
-  // Une phrase prête pour ce commentaire, ou null
+  // A line ready for this comment, or null
   take(key, vars) {
     const pk = this.poolKey(key, vars);
     if (!pk) return null;
@@ -70,10 +70,10 @@ class PhrasePool {
     return entry && fs.existsSync(entry.file) ? entry : null;
   }
 
-  // Prépare toute la réserve en arrière-plan
+  // Prepares the whole pool in the background
   warm() {
     this.checkSignature();
-    const friends = Object.keys(readConfig().surnoms || {});
+    const friends = Object.keys(readConfig().nicknames || {});
     const missing = [];
     for (const [key, names] of Object.entries(SITUATIONS)) {
       for (const combo of arrangements(friends, names.length)) {
@@ -82,7 +82,7 @@ class PhrasePool {
       }
     }
     if (!missing.length) return;
-    console.log(`Préparation de ${missing.length} phrases pour la bande, en arrière-plan…`);
+    console.log(`Preparing ${missing.length} lines for the squad, in the background…`);
     this.queue.push(...missing);
     this.run();
   }
@@ -107,12 +107,12 @@ class PhrasePool {
         this.data.entries[pk] = { text, file };
         if (++done % 10 === 0) this.save();
       } catch (e) {
-        console.error("Préparation des phrases :", e.message);
+        console.error("Preparing lines:", e.message);
         break;
       }
     }
     this.save();
-    if (total > 1 && done) console.log(`${done} phrases prêtes pour la bande.`);
+    if (total > 1 && done) console.log(`${done} lines ready for the squad.`);
     this.running = false;
   }
 }

@@ -1,5 +1,5 @@
-// Choix d'une phrase au hasard, remplacement des pseudos par les surnoms, et corrections de prononciation.
-// phrases.json et config.json sont relus à chaque phrase : on peut les modifier pendant que le bot tourne.
+// Picks a random line, replaces player names with their nicknames, and fixes pronunciation.
+// phrases.json and config.json are re-read for every line: they can be edited while the bot is running.
 
 const fs = require("fs");
 const { readConfig } = require("./config");
@@ -7,7 +7,7 @@ const { findKey } = require("./names");
 
 const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const NAME = "\u0001"; // repère placé devant chaque nom inséré
+const NAME = String.fromCharCode(1); // marker placed before each inserted name
 const VOWEL = "[aeiouyhAEIOUYHàâäéèêëîïôöûùüÀÂÄÉÈÊËÎÏÔÖÛÙÜ]";
 
 class Phrases {
@@ -16,39 +16,39 @@ class Phrases {
     this.bags = new Map();
   }
 
-  spokenName(name, surnoms) {
-    const key = findKey(Object.keys(surnoms), name);
-    if (key && surnoms[key].length) return randomItem(surnoms[key]);
-    // Pseudo inconnu : on enlève les points, tirets et tirets bas que la voix lirait mal (« XX-_Pseudo_-XX » → « XX Pseudo XX »)
+  spokenName(name, nicknames) {
+    const key = findKey(Object.keys(nicknames), name);
+    if (key && nicknames[key].length) return randomItem(nicknames[key]);
+    // Unknown name: drop the dots, dashes and underscores the voice would read badly ("XX-_Name_-XX" → "XX Name XX")
     return String(name).replace(/[._\-]+/g, " ").replace(/\s+/g, " ").trim() || String(name);
   }
 
   pick(key, vars) {
     const all = JSON.parse(fs.readFileSync(this.phrasesFile, "utf8"));
     const node = key.split(".").reduce((n, k) => (n ? n[k] : undefined), all);
-    if (!node || !node.phrases || !node.phrases.length) throw new Error(`Pas de phrases pour "${key}" dans phrases.json`);
+    if (!node || !node.phrases || !node.phrases.length) throw new Error(`No lines for "${key}" in phrases.json`);
 
     const i = this.nextIndex(key, node.phrases.length);
 
-    const { surnoms = {}, prononciation = {} } = readConfig();
-    // Un seul surnom par joueur dans une même phrase. Chaque nom inséré est précédé d'un repère
-    // pour faire l'élision juste devant lui (« de Arnaud » → « d'Arnaud »).
+    const { nicknames = {}, pronunciation = {} } = readConfig();
+    // One nickname per player within a line. Each inserted name is preceded by a marker
+    // so that the French elision is done right before it ("de Arnaud" → "d'Arnaud").
     const said = new Map();
     let text = node.phrases[i].replace(/\{(\w+)\}/g, (m, v) => {
       if (!(v in vars)) return m;
       if (typeof vars[v] === "number") return String(vars[v]);
-      if (!said.has(vars[v])) said.set(vars[v], this.spokenName(vars[v], surnoms));
+      if (!said.has(vars[v])) said.set(vars[v], this.spokenName(vars[v], nicknames));
       return NAME + said.get(vars[v]);
     });
     text = text
       .replace(new RegExp(`\\b([dD])e ${NAME}(?=${VOWEL})`, "g"), "$1'")
       .replace(new RegExp(`\\b([qQ]u)e ${NAME}(?=${VOWEL})`, "g"), "$1'")
       .split(NAME).join("");
-    return this.pronounce(text, prononciation);
+    return this.pronounce(text, pronunciation);
   }
 
-  // Les phrases d'une situation sortent toutes une fois (dans le désordre) avant qu'une revienne,
-  // et jamais deux fois de suite la même, même d'un tour à l'autre
+  // All the lines of a situation come out once (in random order) before one comes back,
+  // and never the same twice in a row, even from one round to the next
   nextIndex(key, count) {
     let bag = this.bags.get(key);
     if (!bag || bag.count !== count || !bag.left.length) {
@@ -61,15 +61,15 @@ class Phrases {
     return bag.last;
   }
 
-  // Nom prononcé d'un joueur, d'après les surnoms de config.json
+  // Spoken name of a player, from the nicknames in config.json
   say(name) {
-    return this.spokenName(name, readConfig().surnoms || {});
+    return this.spokenName(name, readConfig().nicknames || {});
   }
 
-  // Corrections de prononciation de config.json (ex. MVP → aime vie pie)
-  pronounce(text, prononciation = readConfig().prononciation || {}) {
-    for (const [mot, dit] of Object.entries(prononciation)) {
-      text = text.replace(new RegExp(`\\b${escapeRegExp(mot)}\\b`, "g"), dit);
+  // Pronunciation fixes from config.json (e.g. MVP → aime vie pie)
+  pronounce(text, pronunciation = readConfig().pronunciation || {}) {
+    for (const [word, said] of Object.entries(pronunciation)) {
+      text = text.replace(new RegExp(`\\b${escapeRegExp(word)}\\b`, "g"), said);
     }
     return text;
   }

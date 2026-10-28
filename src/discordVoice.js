@@ -1,5 +1,5 @@
-// Bot Discord : rejoint le salon vocal, lit les fichiers audio à la suite,
-// et répond aux commandes /… déclarées avec addCommand().
+// Discord bot: joins the voice channel, plays the audio files one after the other,
+// posts the triggers in the text channel, and answers the /… commands declared with addCommand().
 
 const { Client, GatewayIntentBits, Events, MessageFlags, PermissionFlagsBits, Partials } = require("discord.js");
 const {
@@ -8,75 +8,75 @@ const {
 } = require("@discordjs/voice");
 
 class DiscordVoice {
-  constructor({ token, salonVocalId, salonTexteId, suivre = [] }, { volume = 1 } = {}) {
+  constructor({ token, voiceChannelId, textChannelId, follow = [] }, { volume = 1 } = {}) {
     this.token = token;
-    this.voiceChannelId = salonVocalId;
-    // Membres à suivre, par ordre de priorité : identifiant Discord, nom d'utilisateur, nom affiché ou pseudo du serveur
-    this.follow = (Array.isArray(suivre) ? suivre : [suivre]).filter(Boolean).map((x) => String(x).toLowerCase());
-    this.textChannelId = salonTexteId;
+    this.voiceChannelId = voiceChannelId;
+    this.textChannelId = textChannelId;
+    // Members to follow, by priority: Discord id, username, display name or server nickname
+    this.follow = (Array.isArray(follow) ? follow : [follow]).filter(Boolean).map((x) => String(x).toLowerCase());
     this.volume = volume;
     this.queue = [];
     this.commands = new Map();
     this.player = createAudioPlayer({ behaviors: { noSubscriber: NoSubscriberBehavior.Play } });
     this.player.on(AudioPlayerStatus.Idle, () => this.playNext());
-    this.player.on("error", (e) => { console.error("Erreur de lecture :", e.message); this.playNext(); });
+    this.player.on("error", (e) => { console.error("Playback error:", e.message); this.playNext(); });
   }
 
   async start() {
     this.client = new Client({
       intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMessageReactions],
-      // Pour recevoir les votes sur des messages postés avant une relance du bot
+      // To receive votes on messages posted before a bot restart
       partials: [Partials.Message, Partials.Reaction, Partials.User],
     });
     const ready = new Promise((resolve) => this.client.once(Events.ClientReady, resolve));
     await this.client.login(this.token);
     await ready;
-    console.log(`Discord : connecté en tant que ${this.client.user.tag}`);
+    console.log(`Discord: logged in as ${this.client.user.tag}`);
 
     const home = await this.client.channels.fetch(this.voiceChannelId).catch(() => null);
-    if (!home || !home.isVoiceBased()) throw new Error(`Salon vocal introuvable (salonVocalId = ${this.voiceChannelId}). Le bot est bien invité sur le serveur ?`);
+    if (!home || !home.isVoiceBased()) throw new Error(`Voice channel not found (voiceChannelId = ${this.voiceChannelId}). Is the bot invited on the server?`);
     this.me = await home.guild.members.fetchMe();
     if (this.textChannelId) await this.setupTextChannel();
 
-    // En priorité le salon où se trouve un membre suivi, sinon le salon de config.json
+    // First the channel of a followed member, otherwise the channel from config.json
     const followed = this.followedChannel(home.guild);
     let channel = home;
     if (followed && !this.missingPerms(followed).length) channel = followed;
-    else if (followed) console.log(`Discord : pas les droits sur « ${followed.name} » (salon suivi), on va dans « ${home.name} »`);
+    else if (followed) console.log(`Discord: no permission on "${followed.name}" (followed channel), going to "${home.name}"`);
 
     const missing = this.missingPerms(channel);
     if (missing.length) {
-      throw new Error(`le bot n'a pas les droits ${missing.join(", ")} sur le salon « ${channel.name} ». ` +
-        "Discord → clic droit sur le salon → Modifier le salon → Permissions → ajoute le rôle du bot et autorise ces droits.");
+      throw new Error(`the bot is missing the ${missing.join(", ")} permission(s) on "${channel.name}". ` +
+        "Discord → right-click the channel → Edit Channel → Permissions → add the bot's role and allow them.");
     }
 
     this.connect(channel);
     await entersState(this.connection, VoiceConnectionStatus.Ready, 20000);
-    console.log(`Discord : dans le salon vocal « ${channel.name} »${channel === followed ? " (salon suivi)" : ""}`);
+    console.log(`Discord: in voice channel "${channel.name}"${channel === followed ? " (followed)" : ""}`);
 
-    // Si un membre suivi change de salon vocal, le bot le suit
+    // If a followed member changes voice channel, the bot follows
     this.client.on(Events.VoiceStateUpdate, (before, after) => {
       if (!after.channel || !this.isFollowed(after.member)) return;
-      // Le membre suivi le plus prioritaire qui est en vocal décide du salon
+      // The highest-priority followed member in voice decides the channel
       const target = this.followedChannel(after.guild);
       if (!target || target.id === this.channel.id) return;
-      if (this.missingPerms(target).length) return console.log(`Discord : pas les droits pour suivre dans « ${target.name} »`);
+      if (this.missingPerms(target).length) return console.log(`Discord: no permission to follow into "${target.name}"`);
       this.moveTo(target);
     });
 
     await this.registerCommands(channel.guild);
   }
 
-  // Salon texte des déclenchements : on y poste et on écoute les votes (réactions)
+  // Text channel of the triggers: the bot posts there and listens to the votes (reactions)
   async setupTextChannel() {
     const channel = await this.client.channels.fetch(this.textChannelId).catch(() => null);
-    if (!channel || !channel.isTextBased()) return console.log(`Discord : salon texte introuvable (salonTexteId = ${this.textChannelId}), pas de votes`);
+    if (!channel || !channel.isTextBased()) return console.log(`Discord: text channel not found (textChannelId = ${this.textChannelId}), no votes`);
     const perms = channel.permissionsFor(this.me);
-    const missing = [["ViewChannel", "Voir le salon"], ["SendMessages", "Envoyer des messages"], ["AddReactions", "Ajouter des réactions"], ["ReadMessageHistory", "Voir les anciens messages"]]
-      .filter(([flag]) => !perms || !perms.has(PermissionFlagsBits[flag])).map(([, label]) => label);
-    if (missing.length) return console.log(`Discord : il manque les droits ${missing.join(", ")} sur « ${channel.name} », pas de votes`);
+    const missing = ["ViewChannel", "SendMessages", "AddReactions", "ReadMessageHistory"]
+      .filter((flag) => !perms || !perms.has(PermissionFlagsBits[flag]));
+    if (missing.length) return console.log(`Discord: missing ${missing.join(", ")} on "${channel.name}", no votes`);
     this.textChannel = channel;
-    console.log(`Discord : déclenchements et votes dans « #${channel.name} »`);
+    console.log(`Discord: triggers and votes in "#${channel.name}"`);
 
     const onReaction = (added) => async (reaction, user) => {
       if (user.bot || reaction.message.channelId !== channel.id || !this.onVote) return;
@@ -86,7 +86,7 @@ class DiscordVoice {
     this.client.on(Events.MessageReactionRemove, onReaction(false));
   }
 
-  // Poste un message dans le salon texte avec ses boutons de vote ; renvoie l'identifiant du message
+  // Posts a message in the text channel with its vote buttons; returns the message id
   async post(content, reactions = []) {
     if (!this.textChannel) return null;
     try {
@@ -94,19 +94,18 @@ class DiscordVoice {
       for (const r of reactions) await message.react(r);
       return message.id;
     } catch (e) {
-      console.error("Discord : message non posté :", e.message);
+      console.error("Discord: message not posted:", e.message);
       return null;
     }
   }
 
-  // Sans ces droits, la connexion vocale reste bloquée sans message clair
+  // Without these permissions, the voice connection hangs without a clear message
   missingPerms(channel) {
     const perms = channel.permissionsFor(this.me);
-    return [["ViewChannel", "Voir le salon"], ["Connect", "Se connecter"], ["Speak", "Parler"]]
-      .filter(([flag]) => !perms || !perms.has(PermissionFlagsBits[flag])).map(([, label]) => label);
+    return ["ViewChannel", "Connect", "Speak"].filter((flag) => !perms || !perms.has(PermissionFlagsBits[flag]));
   }
 
-  // Rang du membre dans la liste "suivre" (-1 s'il n'y est pas)
+  // Rank of the member in the "follow" list (-1 if absent)
   followRank(member) {
     if (!member || member.user.bot) return -1;
     const names = [member.id, member.user.username, member.user.globalName, member.displayName, member.nickname]
@@ -118,7 +117,7 @@ class DiscordVoice {
     return this.followRank(member) >= 0;
   }
 
-  // Salon vocal du membre suivi le plus prioritaire actuellement en vocal
+  // Voice channel of the highest-priority followed member currently in voice
   followedChannel(guild) {
     let best = null;
     for (const state of guild.voiceStates.cache.values()) {
@@ -131,10 +130,10 @@ class DiscordVoice {
   moveTo(channel) {
     this.channel = channel;
     this.connection.rejoin({ channelId: channel.id, selfDeaf: true, selfMute: false });
-    console.log(`Discord : suit dans le salon vocal « ${channel.name} »`);
+    console.log(`Discord: following into voice channel "${channel.name}"`);
   }
 
-  // builder : un SlashCommandBuilder ; handler(interaction) renvoie le texte de la réponse
+  // builder: a SlashCommandBuilder; handler(interaction) returns the reply
   addCommand(builder, handler) {
     this.commands.set(builder.name, { builder, handler });
   }
@@ -142,11 +141,11 @@ class DiscordVoice {
   async registerCommands(guild) {
     if (!this.commands.size) return;
     try {
-      // Commandes du serveur (et pas globales) : disponibles immédiatement
+      // Server commands (not global ones): available immediately
       await guild.commands.set([...this.commands.values()].map((c) => c.builder.toJSON()));
-      console.log(`Discord : commandes ${[...this.commands.keys()].map((n) => "/" + n).join(" ")} disponibles`);
+      console.log(`Discord: commands ${[...this.commands.keys()].map((n) => "/" + n).join(" ")} available`);
     } catch (e) {
-      console.log(`Discord : impossible d'ajouter les commandes (${e.message}). Réinvite le bot avec le scope applications.commands (voir README).`);
+      console.log(`Discord: cannot add the commands (${e.message}). Re-invite the bot with the applications.commands scope (see README).`);
     }
     this.client.on(Events.InteractionCreate, async (interaction) => {
       if (!interaction.isChatInputCommand()) return;
@@ -156,7 +155,7 @@ class DiscordVoice {
         const reply = await command.handler(interaction);
         if (reply) await interaction.reply(reply);
       } catch (e) {
-        console.error(`Commande /${interaction.commandName} :`, e.message);
+        console.error(`Command /${interaction.commandName}:`, e.message);
         if (!interaction.replied) interaction.reply({ content: "Oups, ça a planté.", flags: MessageFlags.Ephemeral }).catch(() => {});
       }
     });
@@ -171,7 +170,7 @@ class DiscordVoice {
       selfDeaf: true,
     });
     this.connection.subscribe(this.player);
-    // Si on est déconnecté (changement de région, coupure…), on tente de revenir avant d'abandonner
+    // When disconnected (region change, network cut…), try to come back before giving up
     this.connection.on(VoiceConnectionStatus.Disconnected, async () => {
       try {
         await Promise.race([
@@ -180,7 +179,7 @@ class DiscordVoice {
         ]);
       } catch {
         this.connection.destroy();
-        console.log("Discord : déconnecté du vocal, nouvelle tentative dans 5 s");
+        console.log("Discord: disconnected from voice, retrying in 5 s");
         setTimeout(() => this.connect(this.channel), 5000);
       }
     });

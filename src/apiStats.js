@@ -1,6 +1,6 @@
-// Vérifie que l'API Stats est activée dans chaque installation de Rocket League (Steam et Epic),
-// et remet PacketSendRate à la bonne valeur si une mise à jour du jeu l'a remis à 0.
-// Utilisable seul : npm run verifier-api
+// Checks that the Stats API is enabled in every Rocket League install (Steam and Epic),
+// and sets PacketSendRate back to the right value if a game update reset it to 0.
+// Can be run on its own: npm run check-api
 
 const fs = require("fs");
 const path = require("path");
@@ -15,7 +15,7 @@ function steamInstalls() {
     const m = out.match(/SteamPath\s+REG_SZ\s+(.+)/);
     if (m) roots.add(m[1].trim().replace(/\//g, "\\"));
   } catch {}
-  // Les autres bibliothèques Steam (autres disques) sont listées dans libraryfolders.vdf
+  // The other Steam libraries (other drives) are listed in libraryfolders.vdf
   const libraries = new Set();
   for (const root of roots) {
     libraries.add(root);
@@ -30,7 +30,7 @@ function steamInstalls() {
 function epicInstalls() {
   try {
     const dat = JSON.parse(fs.readFileSync("C:\\ProgramData\\Epic\\UnrealEngineLauncher\\LauncherInstalled.dat", "utf8"));
-    // "Sugar" est le nom de code de Rocket League chez Epic
+    // "Sugar" is Rocket League's code name at Epic
     return (dat.InstallationList || []).filter((i) => i.AppName === "Sugar").map((i) => i.InstallLocation);
   } catch {
     return [];
@@ -45,57 +45,56 @@ function gameRunning() {
   }
 }
 
-// Renvoie un résultat par installation trouvée : { file, avant, apres, corrige, erreur }
-// recherche: false pour ne vérifier que cheminsJeu (utilisé par les tests)
-function checkStatsApi({ packetSendRate = 30, cheminsJeu = [], recherche = true } = {}) {
-  // Windows ne tient pas compte des majuscules : on dédoublonne en minuscules, mais on garde le chemin tel quel
+// Returns one result per install found: { file, before, after, fixed, error }
+// search: false to only check gamePaths (used by the tests)
+function checkStatsApi({ packetSendRate = 30, gamePaths = [], search = true } = {}) {
+  // Windows ignores case: deduplicate in lowercase, but keep the path as is
   const unique = new Map();
-  const found = recherche ? [...steamInstalls(), ...epicInstalls()] : [];
-  for (const d of [...found, ...cheminsJeu]) {
+  const found = search ? [...steamInstalls(), ...epicInstalls()] : [];
+  for (const d of [...found, ...gamePaths]) {
     const full = path.resolve(d);
     if (!unique.has(full.toLowerCase())) unique.set(full.toLowerCase(), full);
   }
-  const dirs = [...unique.values()];
   const results = [];
-  for (const dir of dirs) {
+  for (const dir of unique.values()) {
     const file = path.join(dir, INI);
     if (!fs.existsSync(file)) continue;
-    const result = { file, avant: null, apres: null, corrige: false, erreur: null };
+    const result = { file, before: null, after: null, fixed: false, error: null };
     try {
       const text = fs.readFileSync(file, "utf8");
       const m = text.match(/^PacketSendRate=(\d+)/m);
-      result.avant = m ? Number(m[1]) : null;
-      result.apres = result.avant;
-      if (result.avant !== packetSendRate) {
-        // Copie de l'original, une seule fois
+      result.before = m ? Number(m[1]) : null;
+      result.after = result.before;
+      if (result.before !== packetSendRate) {
+        // Copy of the original, only once
         if (!fs.existsSync(`${file}.bak`)) fs.copyFileSync(file, `${file}.bak`);
         const fixed = m ? text.replace(/^PacketSendRate=\d+/m, `PacketSendRate=${packetSendRate}`) : `${text.trimEnd()}\r\nPacketSendRate=${packetSendRate}\r\n`;
         fs.writeFileSync(file, fixed);
-        result.apres = packetSendRate;
-        result.corrige = true;
+        result.after = packetSendRate;
+        result.fixed = true;
       }
     } catch (e) {
-      result.erreur = e.code === "EPERM" || e.code === "EACCES" ? "accès refusé (relance en administrateur)" : e.message;
+      result.error = e.code === "EPERM" || e.code === "EACCES" ? "access denied (run as administrator)" : e.message;
     }
     results.push(result);
   }
   return results;
 }
 
-// Vérifie, corrige et affiche le résultat. Renvoie true si une correction a été faite.
+// Checks, fixes and prints the result. Returns true if something was fixed.
 function checkAndReport(options, { verbose = true } = {}) {
   const results = checkStatsApi(options);
   if (!results.length) {
-    console.log("API Stats : aucune installation de Rocket League trouvée (ajoute le dossier du jeu dans config.json → rocketLeague.cheminsJeu).");
+    console.log("Stats API: no Rocket League install found (add the game folder to config.json → rocketLeague.gamePaths).");
     return false;
   }
   let changed = false;
   for (const r of results) {
-    if (r.erreur) console.log(`API Stats : impossible de corriger ${r.file} : ${r.erreur}`);
-    else if (r.corrige) { changed = true; console.log(`API Stats : réactivée dans ${r.file} (PacketSendRate ${r.avant} → ${r.apres})`); }
-    else if (verbose) console.log(`API Stats : OK dans ${r.file}`);
+    if (r.error) console.log(`Stats API: cannot fix ${r.file}: ${r.error}`);
+    else if (r.fixed) { changed = true; console.log(`Stats API: re-enabled in ${r.file} (PacketSendRate ${r.before} → ${r.after})`); }
+    else if (verbose) console.log(`Stats API: OK in ${r.file}`);
   }
-  if (changed && gameRunning()) console.log("API Stats : ⚠️ Rocket League est déjà lancé, relance le jeu pour que le réglage soit pris en compte.");
+  if (changed && gameRunning()) console.log("Stats API: ⚠️ Rocket League is already running, restart the game for the setting to apply.");
   return changed;
 }
 

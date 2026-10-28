@@ -1,12 +1,12 @@
-// Comparaison tolérante des pseudos : le jeu peut afficher un pseudo avec des accents,
-// des espaces ou coupé (ex. « MonSuperPséudo20 » pour « MonSuperPseudo2000 »).
+// Tolerant comparison of player names: the game may show a name with accents,
+// spaces, or cut short (e.g. "MonSuperPséudo20" for "MonSuperPseudo2000").
 
-// Minuscules, sans accents, sans espaces ni ponctuation
+// Lowercase, no accents, no spaces or punctuation
 function normalize(name) {
-  return String(name).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  return String(name).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-// Même pseudo, ou l'un est le début de l'autre (pseudo tronqué), à partir de 8 caractères
+// Same name, or one is the start of the other (truncated name), from 8 characters on
 function sameName(a, b) {
   const x = normalize(a), y = normalize(b);
   if (!x || !y) return false;
@@ -15,7 +15,7 @@ function sameName(a, b) {
   return short.length >= 8 && long.startsWith(short);
 }
 
-// La clé de surnoms qui correspond à ce pseudo, ou undefined
+// The nicknames key matching this name, or undefined
 function findKey(keys, name) {
   return keys.find((k) => sameName(k, name));
 }

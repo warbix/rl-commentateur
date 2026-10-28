@@ -1,56 +1,64 @@
-// Rejoue le match classé enregistré et vérifie que le bot dit toujours la même chose.
-// Si une modification des règles change ces résultats volontairement, mets à jour les listes attendues.
+// Replays the recorded ranked match and checks that the bot still says the same things.
+// If a rule change alters these results on purpose, update the expected lists.
 
 const test = require("node:test");
 const assert = require("node:assert");
 const fs = require("fs");
 const path = require("path");
-const { Detector } = require("../src/detector");
+const { Detector, TARGET } = require("../src/detector");
+const { migrate } = require("../src/config");
 
 const ROOT = path.join(__dirname, "..");
-const exemple = JSON.parse(fs.readFileSync(path.join(ROOT, "config.exemple.json"), "utf8"));
+const example = JSON.parse(fs.readFileSync(path.join(ROOT, "config.example.json"), "utf8"));
+migrate(example);
 const events = fs.readFileSync(path.join(ROOT, "capture.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
-
-const TARGET = { tapin: "buteur", vol: "voleur", arretManque: "defenseur", craquage: "defenseur", lucarne: "buteur", passeAdmin: "passeur", mvp: "mvp", mendiant: "joueur", fantome: "joueur", benevole: "benevole" };
 
 function replay(options) {
   const detector = new Detector({ options: () => options });
-  const comments = [], faits = [], resultats = [];
+  const comments = [], nearMisses = [], facts = [], results = [];
   detector.on("comment", ({ key, vars }) => comments.push(`${key} → ${vars[TARGET[key.split(".")[0]]]}`));
-  detector.on("fait", ({ type, joueur }) => faits.push(`${type} → ${joueur}`));
-  detector.on("resultat", ({ gagne }) => resultats.push(gagne));
+  detector.on("nearMiss", ({ key, target, measures }) => nearMisses.push({ key, target, measures }));
+  detector.on("fact", ({ type, player }) => facts.push(`${type} → ${player}`));
+  detector.on("result", ({ won }) => results.push(won));
   for (const { t, e, d } of events) detector.handle(e, d || {}, t);
-  return { comments, faits, resultats };
+  return { comments, nearMisses, facts, results };
 }
 
-test("notre équipe : les commentaires du match", () => {
-  assert.deepStrictEqual(replay(exemple).comments, [
-    "fantome → Coequipier2",
-    "fantome → Coequipier1",
-    "lucarne.lucarne → Coequipier1",
-    "benevole.but → Coequipier1",
-    "fantome → Coequipier2",
-    "tapin → MonPseudo",
+test("our team: the match comments", () => {
+  assert.deepStrictEqual(replay(example).comments, [
+    "ghost → Coequipier2",
+    "ghost → Coequipier1",
+    "finish.topCorner → Coequipier1",
+    "giveaway.goal → Coequipier1",
+    "ghost → Coequipier2",
+    "tapIn → MonPseudo",
   ]);
 });
 
-test("notre équipe : jamais de commentaire sur un adversaire", () => {
-  for (const c of replay(exemple).comments) assert.doesNotMatch(c, /Adversaire/);
+test("our team: never a comment about an opponent", () => {
+  for (const c of replay(example).comments) assert.doesNotMatch(c, /Adversaire/);
 });
 
-test("tout le monde : l'arrêt manqué adverse passe devant le tap-in", () => {
-  const { comments } = replay({ ...exemple, commenter: "tout-le-monde" });
-  assert.strictEqual(comments[comments.length - 1], "arretManque.accompagne → Adversaire3");
+test("everyone: the opponent's missed save beats the tap-in", () => {
+  const { comments } = replay({ ...example, target: "everyone" });
+  assert.strictEqual(comments[comments.length - 1], "missedSave.escorted → Adversaire3");
 });
 
-test("bilan : faits marquants et victoire", () => {
-  const { faits, resultats } = replay(exemple);
-  assert.deepStrictEqual(resultats, [true]);
-  for (const f of ["tapin → MonPseudo", "lucarne → Coequipier1", "benevole → Coequipier1", "fantome → Coequipier2"]) {
-    assert.ok(faits.includes(f), `fait manquant : ${f}`);
+test("recap: facts and win", () => {
+  const { facts, results } = replay(example);
+  assert.deepStrictEqual(results, [true]);
+  for (const f of ["tapIn → MonPseudo", "finish → Coequipier1", "giveaway → Coequipier1", "ghost → Coequipier2"]) {
+    assert.ok(facts.includes(f), `missing fact: ${f}`);
   }
 });
 
-test("aucun pseudo connu : silence", () => {
-  assert.deepStrictEqual(replay({ ...exemple, surnoms: {} }).comments, []);
+test("no known name: silence", () => {
+  assert.deepStrictEqual(replay({ ...example, nicknames: {} }).comments, []);
+});
+
+test("thresholds from config: a stricter tap-in disappears, then becomes a near miss", () => {
+  const strict = { ...example, thresholds: { tapInMaxDistance: 50 } };
+  const { comments, nearMisses } = replay(strict);
+  assert.ok(!comments.includes("tapIn → MonPseudo"));
+  assert.ok(nearMisses.some((n) => n.key === "tapIn" && n.target === "MonPseudo"));
 });

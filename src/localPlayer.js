@@ -1,5 +1,5 @@
-// Lecture sur les haut-parleurs du PC, pour tester sans Discord (Windows uniquement).
-// Le mp3 est converti en wav avec FFmpeg, puis lu par le lecteur intégré de Windows.
+// Playback on the PC speakers, to test without Discord (Windows only).
+// The mp3 is converted to wav with FFmpeg, then played by the built-in Windows player.
 
 const { execFile } = require("child_process");
 const ffmpegPath = require("ffmpeg-static");

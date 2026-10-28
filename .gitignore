@@ -1,6 +1,6 @@
 node_modules/
 cache/
-matchs/
-# Contient le token du bot : ne jamais le committer
+matches/
+# Holds the bot token: never commit it
 config.json
-retours/
+feedback/

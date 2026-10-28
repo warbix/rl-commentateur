@@ -1,13 +1,13 @@
 {
   "name": "rl-commentateur",
   "version": "1.0.0",
-  "description": "Commentateur piquant de Rocket League dans un salon vocal Discord",
+  "description": "Spicy Rocket League commentator in a Discord voice channel",
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test",
     "start": "node src/index.js",
-    "verifier-api": "node src/apiStats.js",
-    "calibrer": "node src/calibrer.js"
+    "test": "node --test",
+    "check-api": "node src/apiStats.js",
+    "calibrate": "node src/calibrate.js"
   },
   "keywords": [],
   "author": "",

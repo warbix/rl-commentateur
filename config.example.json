@@ -1,0 +1,99 @@
+{
+  "discord": {
+    "token": "COLLE_ICI_LE_TOKEN_DU_BOT",
+    "voiceChannelId": "ID_DU_SALON_VOCAL",
+    "textChannelId": "",
+    "_follow": "Discord members to follow, by priority (id, username or display name): the bot joins their voice channel and follows them when they move. Nobody in voice: voiceChannelId.",
+    "follow": []
+  },
+  "_target": "'our-team': only players of the team with at least one name from nicknames. 'everyone': both teams. Can be changed while the bot is running.",
+  "target": "our-team",
+  "_nicknames": "In-game name -> spoken nicknames, one drawn at random for each line. Case, accents, spaces and punctuation don't matter, and a name cut short by the game (8 characters or more) is recognized: MonSuperPseudo2000 = MonSuperPséudo20. These names also define our team. Unknown names are read as is. Can be changed while the bot is running.",
+  "nicknames": {
+    "MonPseudo": [
+      "Mon surnom",
+      "Jojo"
+    ],
+    "Coequipier1": [
+      "Coéquipier un",
+      "Bébert"
+    ],
+    "Coequipier2": [
+      "Coéquipier deux"
+    ]
+  },
+  "_pronunciation": "Words replaced right before the voice, so that it says them correctly. Can be changed while the bot is running.",
+  "pronunciation": {
+    "MVP": "aime vie pie"
+  },
+  "_voice": "rotation: 'random' (never the same twice in a row), 'alternate' (each in turn) or 'fixed' (always the first). jingle: true (ding before each line), false, or the path of your own sound (e.g. sounds/whistle.mp3). Can be changed while the bot is running, except the volume.",
+  "voice": {
+    "jingle": true,
+    "rotation": "random",
+    "list": [
+      "fr-FR-HenriNeural",
+      "fr-FR-RemyMultilingualNeural",
+      "fr-FR-DeniseNeural",
+      "fr-FR-VivienneMultilingualNeural",
+      "fr-CA-AntoineNeural",
+      "fr-BE-GerardNeural"
+    ],
+    "rate": "+0%",
+    "pitch": "+0Hz",
+    "volume": 1
+  },
+  "_pregenerate": "Prepares in advance (in the background) the lines that only mention the squad, so they play without waiting for the voice.",
+  "pregenerate": true,
+  "_recordMatches": "Records every match in matches/ (replayable with --replay), with the bot's comments in it.",
+  "recordMatches": true,
+  "_thresholds": "Detection thresholds (see REGLES.md). Distances in game units (100 = 1 m), speeds in km/h, durations in ms. Can be changed while the bot is running; npm run calibrate suggests values from your votes.",
+  "thresholds": {
+    "tapInMaxDistance": 900,
+    "tapInMaxSideOffset": 1200,
+    "tapInMaxSpeed": 50,
+    "tapInMaxGapMs": 2000,
+    "tapInMaxTouches": 2,
+    "shotDelayMs": 300,
+    "stealMaxDistance": 1500,
+    "missedSaveMaxMs": 1000,
+    "missedSaveMaxDistance": 1500,
+    "missedSaveOnLineDistance": 1000,
+    "missedSaveShotWindowMs": 3000,
+    "topCornerMinHeight": 450,
+    "topCornerMinSideOffset": 550,
+    "groundRollerMaxHeight": 110,
+    "groundRollerMaxSpeed": 60,
+    "adminAssistMinMs": 4000,
+    "adminAssistMinTouches": 3,
+    "mvpMinHighlightRatio": 0.7,
+    "beggarMs": 8000,
+    "beggarUnderPressureMs": 5000,
+    "beggarAfterTouchMs": 3000,
+    "beggarAfterKickoffMs": 10000,
+    "beggarCooldownMs": 90000,
+    "ghost3v3Ms": 45000,
+    "ghost2v2Ms": 40000,
+    "ghostMinAdvance": 1500,
+    "ghostCooldownMs": 120000,
+    "ghostSpacingMs": 60000,
+    "chokeMaxSecondsLeft": 10,
+    "giveawayMinMs": 1000,
+    "giveawayMinDistance": 1500,
+    "giveawayMinOwnGoalDistance": 2500,
+    "giveawayMinBackward": 800,
+    "giveawayWindowMs": 6000,
+    "giveawayOfTheMatchMin": 3,
+    "liveCooldownMs": 15000,
+    "topCornerWaitMs": 20000,
+    "nearMissMargin": 0.3
+  },
+  "_rocketLeague": "checkApi: at launch then every 10 min, sets PacketSendRate back to the right value in DefaultStatsAPI.ini (Steam and Epic found automatically; gamePaths to add an install folder by hand).",
+  "rocketLeague": {
+    "host": "127.0.0.1",
+    "port": 49123,
+    "checkApi": true,
+    "packetSendRate": 30,
+    "gamePaths": []
+  },
+  "python": "python"
+}

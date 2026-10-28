@@ -1,11 +1,11 @@
-// Connexion à l'API Stats de Rocket League (socket TCP locale).
-// Émet "event" (nom, données) pour chaque message, et se reconnecte tout seul.
+// Connection to the Rocket League Stats API (local TCP socket).
+// Emits "event" (name, data) for each message, and reconnects on its own.
 
 const net = require("net");
 const EventEmitter = require("events");
 
-// Le jeu envoie des objets JSON collés les uns aux autres : on les découpe
-// en suivant la profondeur des accolades (en ignorant celles dans les chaînes).
+// The game sends JSON objects glued to each other: they are split by following
+// the depth of the braces (ignoring those inside strings).
 function createJsonSplitter(onObject) {
   let buf = "";
   return (chunk) => {
@@ -31,9 +31,9 @@ function createJsonSplitter(onObject) {
 }
 
 class RLClient extends EventEmitter {
-  constructor({ hote = "127.0.0.1", port = 49123 } = {}) {
+  constructor({ host = "127.0.0.1", port = 49123 } = {}) {
     super();
-    this.host = hote;
+    this.host = host;
     this.port = port;
     this.connected = false;
   }
@@ -58,4 +58,4 @@ class RLClient extends EventEmitter {
   }
 }
 
-module.exports = { RLClient };
+module.exports = { RLClient, createJsonSplitter };

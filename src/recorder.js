@@ -1,6 +1,6 @@
-// Enregistre chaque match dans matchs/, un fichier par partie, rejouable avec --rejouer.
-// Les commentaires du bot y sont notés aussi (événement "Commentaire", ignoré au rejeu),
-// pour retrouver facilement les moments où il s'est trompé.
+// Records every match in matches/, one file per game, replayable with --replay.
+// The bot's comments are written in it too ("Comment" event, ignored on replay),
+// to easily find the moments where it got things wrong.
 
 const fs = require("fs");
 const path = require("path");
@@ -22,7 +22,7 @@ class Recorder {
     const stamp = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
     this.file = path.join(this.dir, `${stamp}_${guid.slice(0, 8)}.jsonl`);
     this.guid = guid;
-    console.log(`Enregistrement du match dans ${path.relative(process.cwd(), this.file)}`);
+    console.log(`Recording the match in ${path.relative(process.cwd(), this.file)}`);
   }
 
   write(t, e, d) {
@@ -34,7 +34,7 @@ class Recorder {
     const guid = data && data.MatchGuid;
     if (guid && guid !== this.guid && event !== "PlayerLeft") this.open(guid, t);
     if (event === "UpdateState") {
-      // Une fois par seconde suffit pour rejouer, et sans les objets cosmétiques qui pèsent lourd
+      // Once per second is enough to replay, and without the cosmetic items that weigh a lot
       if (t - this.lastStateT < STATE_EVERY_MS) return;
       this.lastStateT = t;
       data = { ...data, Players: (data.Players || []).map(({ Loadout, ...p }) => p) };
@@ -44,7 +44,7 @@ class Recorder {
   }
 
   comment(t, key, text) {
-    this.write(t, "Commentaire", { key, text });
+    this.write(t, "Comment", { key, text });
   }
 }
 

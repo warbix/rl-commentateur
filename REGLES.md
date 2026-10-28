@@ -169,7 +169,7 @@ adverse : normal, pas un cadeau. On ne garde que les balles rendues **vers l'arr
 
 ## Qui est commenté
 
-Par défaut (`commenter: "notre-equipe"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un pseudo de la liste des surnoms.
+Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un pseudo de la liste des surnoms.
 Le joueur visé (buteur du tap-in, voleur, défenseur de l'arrêt manqué, passeur, MVP, mendiant, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible.
 
