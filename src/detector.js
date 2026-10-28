@@ -36,6 +36,9 @@ const DEFAULTS = {
   nearAssistShotWindowMs: 4000, nearAssistSaveWindowMs: 2500,
   // Save for the opponent: a teammate is the first to touch a shot on target, close to the opponent goal, and no goal follows
   teamBlockMaxDistance: 1200, teamBlockMaxMs: 2500, teamBlockNoGoalMs: 3000,
+  // Near goal: a shot hits the frame (crossbar, post, top corner) and does not go in. The shot must be recent and
+  // real (not a ball rolling onto the post); the frame zone is told by the impact point (crossbar above, posts on the side).
+  nearGoalShotMaxMs: 2500, nearGoalMinSpeed: 30, nearGoalNoGoalMs: 2000, nearGoalCrossbarMinHeight: 550, nearGoalPostMinSideOffset: 750,
   liveCooldownMs: 15000,
   topCornerWaitMs: 20000,
   // Near miss: every failed measure misses its threshold by less than 30 %
@@ -50,7 +53,7 @@ const NEAR_MISS_PRIORITY = ["missedSave", "tapIn", "adminAssist"];
 // The player each situation targets (the one being mocked)
 const TARGET = {
   tapIn: "scorer", steal: "thief", missedSave: "defender", choke: "defender", finish: "scorer",
-  adminAssist: "passer", mvp: "mvp", beggar: "player", ghost: "player", giveaway: "giver", teamBlock: "blocker",
+  adminAssist: "passer", mvp: "mvp", beggar: "player", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
 };
 
 const distToOpponentGoal = (team, y) => (team === 0 ? GOAL_LINE - y : GOAL_LINE + y);
@@ -92,6 +95,8 @@ class Detector extends EventEmitter {
     this.nearAssist = null;
     this.lastShot = null; // last shot on target, until the next touch
     this.teamBlock = null;
+    this.nearGoal = null;
+    this.lastFrameT = -Infinity;
     this.pendingGoal = null;
     this.lastLiveT = -Infinity;
     this.lastGhostT = -Infinity; // two ghosts (of different players) at least a minute apart
@@ -259,6 +264,9 @@ class Detector extends EventEmitter {
       case "StatfeedEvent":
         this.onFeed(d, t);
         break;
+      case "CrossbarHit":
+        this.onFrame(d, t);
+        break;
       case "GoalScored":
         if (d.Scorer && d.Scorer.Name) {
           this.onGoal(d, t);
@@ -306,6 +314,14 @@ class Detector extends EventEmitter {
     const g = this.giveaway;
     if (g && ((g.shotAt && t - g.shotAt >= 4000) || (!g.shotAt && t - g.pickedUpAt > S.giveawayWindowMs))) {
       this.announceGiveaway(t);
+    }
+
+    // Near goal: still no goal a moment after hitting the frame → said
+    const ng = this.nearGoal;
+    if (ng && t - ng.t >= S.nearGoalNoGoalMs) {
+      this.nearGoal = null;
+      this.addBlunder(ng.shooter);
+      this.live(ng.key, { shooter: ng.shooter }, t, ng.measures);
     }
 
     // Save for the opponent: still no goal a moment after the teammate's touch → said (or offered as a near miss)
@@ -488,6 +504,7 @@ class Detector extends EventEmitter {
     const scorer = d.Scorer.Name, TS = d.Scorer.TeamNum, TD = 1 - TS;
     const hits = this.hits.filter((h) => h.t >= this.roundStart && h.t <= t);
     this.teamBlock = null;
+    this.nearGoal = null;
     this.lastShot = null;
     const found = {}; // key → { vars, measures }
     const nearMisses = {}; // family → { key, vars, measures }
@@ -649,6 +666,28 @@ class Detector extends EventEmitter {
     } else if (topCorner.nearMiss) {
       this.emitNearMiss("finish.topCorner", vars, topCorner.measures);
     }
+  }
+
+  // A shot on the frame (the game sends CrossbarHit for the crossbar, the posts and the top corners)
+  onFrame(d, t) {
+    const S = this.S;
+    // The game sends it twice, and again during the goal replay
+    if (!this.inPlay || t - this.lastFrameT < 300) return;
+    this.lastFrameT = t;
+    const shooter = d.BallLastTouch && d.BallLastTouch.Player && d.BallLastTouch.Player.Name;
+    const loc = d.BallLocation || {};
+    if (!shooter) return;
+    const lastHit = this.hits[this.hits.length - 1];
+    if (!lastHit || !has(lastHit, shooter)) return;
+    const r = this.evaluate([
+      condition("délai depuis le tir", "nearGoalShotMaxMs", t - lastHit.t, "max", "ms"),
+      condition("vitesse de la balle", "nearGoalMinSpeed", d.BallSpeed || 0, "min", "kmh"),
+    ]);
+    if (!r.ok) return;
+    const high = loc.Z >= S.nearGoalCrossbarMinHeight, side = Math.abs(loc.X) >= S.nearGoalPostMinSideOffset;
+    const key = high && side ? "nearGoal.topCorner" : high ? "nearGoal.crossbar" : "nearGoal.post";
+    const measures = [...r.measures, { name: "hauteur de l'impact", value: loc.Z, unit: "uu" }, { name: "écart au centre", value: Math.abs(loc.X), unit: "uu" }];
+    this.nearGoal = { key, shooter, t, measures };
   }
 
   checkMvp(name) {

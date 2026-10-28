@@ -199,6 +199,20 @@ Rare : 1 cas sur les 13 premiers matchs enregistrés.
 
 ---
 
+## 13. Quasi-but : barre, poteau, équerre 🔔
+**Idée** : un tir tape le cadre et ne rentre pas. On se moque du tireur.
+
+**Règle** — événement `CrossbarHit` du jeu (il couvre la barre, les poteaux et les équerres) :
+- Pendant le jeu (pas le renvoi du même événement pendant un replay), un seul par impact
+- La dernière touche avant l'impact est celle du tireur, il y a **≤ 2,5 s** (`nearGoalShotMaxMs`), et la balle va à **≥ 30 km/h** (`nearGoalMinSpeed`) : pas une balle morte qui roule sur le poteau
+- **Pas de but** dans les 2 s (`nearGoalNoGoalMs`) : les poteaux rentrants ne comptent pas
+- Zone : **barre** si l'impact est à ≥ 5,5 m de haut (`nearGoalCrossbarMinHeight`), **poteau** sinon ; **équerre** si en plus il est à ≥ 7,5 m du centre (`nearGoalPostMinSideOffset`)
+
+**Cible** : le tireur. **Quand** : en direct, 2 s après l'impact. Compte comme une casserole pour le MVP illégitime, et dans le bilan (« Ferrailleur de la soirée »).
+Fréquence mesurée : 12 sur les 14 premiers matchs enregistrés.
+
+---
+
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un pseudo de la liste des surnoms.

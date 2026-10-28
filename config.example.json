@@ -92,6 +92,11 @@
     "teamBlockMaxDistance": 1200,
     "teamBlockMaxMs": 2500,
     "teamBlockNoGoalMs": 3000,
+    "nearGoalShotMaxMs": 2500,
+    "nearGoalMinSpeed": 30,
+    "nearGoalNoGoalMs": 2000,
+    "nearGoalCrossbarMinHeight": 550,
+    "nearGoalPostMinSideOffset": 750,
     "liveCooldownMs": 15000,
     "topCornerWaitMs": 20000,
     "nearMissMargin": 0.3

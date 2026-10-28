@@ -74,6 +74,38 @@
       ]
     }
   },
+  "nearGoal": {
+    "crossbar": {
+      "_variables": "{shooter} = the player whose shot hit the frame",
+      "phrases": [
+        "Sur la barre ! {shooter} visait la lucarne, il a trouvé la ferraille.",
+        "{shooter} a tiré sur la barre. Elle est solide, merci pour le test.",
+        "La barre transversale remercie {shooter} pour sa visite. Le filet, lui, attend toujours.",
+        "{shooter} trouve la barre. Quelques centimètres trop haut, comme son ego.",
+        "Ding ! {shooter} fait sonner la barre. C'est joli, mais ça ne compte pas."
+      ]
+    },
+    "post": {
+      "_variables": "{shooter} = the player whose shot hit the frame",
+      "phrases": [
+        "Poteau ! {shooter} avait tout le cadre, il a choisi le seul endroit qui ne marque pas.",
+        "{shooter} tape le poteau. Le poteau, lui, n'a pas bougé.",
+        "Encore un poteau pour {shooter}. À ce rythme, il va falloir le repeindre.",
+        "{shooter} trouve le montant. Il paraît que c'est plus dur à viser que la cage.",
+        "Le poteau sauve l'équipe adverse. Meilleur défenseur du match, devant tout le monde, et surtout devant {shooter}."
+      ]
+    },
+    "topCorner": {
+      "_variables": "{shooter} = the player whose shot hit the frame",
+      "phrases": [
+        "Dans l'équerre ! Enfin, sur l'équerre. {shooter} était à deux doigts du but de sa vie.",
+        "{shooter} touche l'équerre. Le but de l'année, à un centimètre près. C'est-à-dire pas de but.",
+        "L'équerre a dit non à {shooter}. Elle a bon goût.",
+        "{shooter} visait la lucarne, il a eu le cadre. Presque un chef-d'œuvre, donc raté.",
+        "Équerre pour {shooter}. Sur le replay on dira que c'était voulu. Personne n'y croira."
+      ]
+    }
+  },
   "adminAssist": {
     "_variables": "{passer} = the teammate who passed, {seconds} = duration in seconds, {scorer} = the scorer",
     "phrases": [
