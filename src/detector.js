@@ -469,7 +469,13 @@ class Detector extends EventEmitter {
         const vars = { passer: assister, scorer, seconds: Math.round(ms / 1000) };
         const r = this.evaluate([condition("délai entre la passe et le but", "adminAssistMinMs", ms, "min", "ms")]);
         const touches = this.evaluate([condition("touches du buteur après la passe", "adminAssistMinTouches", touchesAfter, "min", "n")]);
-        const measures = [...r.measures, ...touches.measures, { name: "adversaire touche entre les deux", value: opponentBetween ? "oui" : "non", ok: opponentBetween }];
+        // For information (being studied to cap the delay): delay up to the scorer's first touch, and how far the pass moved the ball forward
+        const scorerHit = iFirstS >= 0 ? after[iFirstS] : null;
+        const info = scorerHit ? [
+          { name: "délai jusqu'à la touche du buteur", value: scorerHit.t - hits[iA].t, unit: "ms" },
+          { name: "la passe avance la balle de", value: distToOpponentGoal(TS, hits[iA].loc.Y) - distToOpponentGoal(TS, scorerHit.loc.Y), unit: "uu" },
+        ] : [];
+        const measures = [...r.measures, ...touches.measures, { name: "adversaire touche entre les deux", value: opponentBetween ? "oui" : "non", ok: opponentBetween }, ...info];
         if (r.ok || touches.ok || opponentBetween) found.adminAssist = { vars, measures };
         else if (r.nearMiss) nearMisses.adminAssist = { key: "adminAssist", vars, measures };
       }
