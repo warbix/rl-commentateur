@@ -70,7 +70,6 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 ## 4. Lucarne 🎯
 **Règle** — sur le `GoalScored` du replay (le 2e, pour un `ImpactLocation` fiable) :
 - **Z ≥ 450** et **|X| ≥ 550** ⚙️
-- Variante « au ras du sol » : **Z ≤ 110** (balle qui roule) et **≤ 60 km/h** ⚙️
 - Uniquement si aucune autre règle n'a commenté le but (on attend le replay pour avoir le bon point d'impact)
 
 **Cible** : le buteur (compliment ironique ou vrai compliment). **Quand** : fin du replay.

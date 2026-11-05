@@ -62,16 +62,6 @@
         "Frappe dans la lucarne de {scorer}. Quelqu'un vérifie qu'il n'a pas changé de joueur ?",
         "{scorer} sort le but de l'année. Enfin, de sa carrière. On va le voir sur toutes ses vidéos."
       ]
-    },
-    "groundRoller": {
-      "_variables": "{scorer} = the scorer, {speed} = ball speed in km/h",
-      "phrases": [
-        "But de {scorer} à {speed} kilomètres heure. La balle a eu le temps de lire le règlement avant d'entrer.",
-        "{scorer} marque une balle qui roule. Le gardien adverse s'est sûrement endormi.",
-        "{speed} kilomètres heure. {scorer}, même une trottinette tire plus fort.",
-        "La balle de {scorer} a rampé jusqu'au but. Lentement. Très lentement. Mais elle est arrivée.",
-        "But au ras du sol de {scorer}. Pas beau, pas puissant, mais ça compte. Malheureusement."
-      ]
     }
   },
   "nearGoal": {

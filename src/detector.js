@@ -18,7 +18,7 @@ const DEFAULTS = {
   shotDelayMs: 300,
   stealMaxDistance: 1500,
   missedSaveMaxMs: 1000, missedSaveMaxDistance: 1500, missedSaveOnLineDistance: 1000, missedSaveShotWindowMs: 3000,
-  topCornerMinHeight: 450, topCornerMinSideOffset: 550, groundRollerMaxHeight: 110, groundRollerMaxSpeed: 60,
+  topCornerMinHeight: 450, topCornerMinSideOffset: 550,
   adminAssistMinMs: 4000, adminAssistMinTouches: 3,
   mvpMinHighlightRatio: 0.7,
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
@@ -637,15 +637,9 @@ class Detector extends EventEmitter {
       condition("hauteur dans la cage", "topCornerMinHeight", Z, "min", "uu"),
       condition("écart au centre de la cage", "topCornerMinSideOffset", Math.abs(X), "min", "uu"),
     ]);
-    const ground = this.evaluate([
-      condition("hauteur dans la cage", "groundRollerMaxHeight", Z, "max", "uu"),
-      condition("vitesse du but", "groundRollerMaxSpeed", g.speed, "max", "kmh"),
-    ]);
     if (topCorner.ok) {
       this.fact("finish", g.scorer);
       this.report("finish.topCorner", vars, topCorner.measures);
-    } else if (ground.ok) {
-      this.report("finish.groundRoller", { ...vars, speed: Math.round(g.speed) }, ground.measures);
     } else if (topCorner.nearMiss) {
       this.emitNearMiss("finish.topCorner", vars, topCorner.measures);
     }

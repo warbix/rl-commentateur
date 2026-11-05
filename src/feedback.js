@@ -14,7 +14,7 @@ const AGAINST = ["❌", "👎"];
 const LABELS = {
   tapIn: "Tap-in", steal: "Vol de but", teamBlock: "Arrêt pour l'adversaire", choke: "Craquage",
   "missedSave.escorted": "Arrêt manqué", "missedSave.ownGoal": "Contre son camp",
-  "finish.topCorner": "Lucarne", "finish.groundRoller": "But au ras du sol",
+  "finish.topCorner": "Lucarne",
   "nearGoal.crossbar": "Barre", "nearGoal.post": "Poteau", "nearGoal.topCorner": "Équerre",
   adminAssist: "Passe administrative", ghost: "Fantôme",
   "mvp.light": "MVP illégitime (léger)", "mvp.mocking": "MVP illégitime", "mvp.refund": "MVP illégitime (remboursez)",
