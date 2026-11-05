@@ -11,7 +11,6 @@ const EventEmitter = require("events");
 const { findKey } = require("./names");
 
 const GOAL_LINE = 5120;
-const THIRD = (2 * GOAL_LINE) / 3;
 
 // Default thresholds ⚙️ (see REGLES.md). Distances in game units (1 = 1 cm), speeds in km/h, durations in ms.
 const DEFAULTS = {
@@ -22,10 +21,9 @@ const DEFAULTS = {
   topCornerMinHeight: 450, topCornerMinSideOffset: 550, groundRollerMaxHeight: 110, groundRollerMaxSpeed: 60,
   adminAssistMinMs: 4000, adminAssistMinTouches: 3,
   mvpMinHighlightRatio: 0.7,
-  beggarMs: 8000, beggarUnderPressureMs: 5000, beggarAfterTouchMs: 3000, beggarAfterKickoffMs: 10000, beggarCooldownMs: 90000,
-  // Useful action for the ghost: a touch kept by the team, a demo, or anything the game rewards with ≥ 10 points
-  // (center 10, clear 20, shot 20, save 50, goal 100… — a plain touch is only worth 2)
-  ghost3v3Ms: 45000, ghost2v2Ms: 40000, ghostMinScoreGain: 10, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
+  // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
+  // about one ghost every match and a half per team (one touches the ball less at three than at two)
+  ghost3v3Ms: 40000, ghost2v2Ms: 30000, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
   chokeMaxSecondsLeft: 10,
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
   // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
@@ -53,7 +51,7 @@ const NEAR_MISS_PRIORITY = ["missedSave", "tapIn", "adminAssist"];
 // The player each situation targets (the one being mocked)
 const TARGET = {
   tapIn: "scorer", steal: "thief", missedSave: "defender", choke: "defender", finish: "scorer",
-  adminAssist: "passer", mvp: "mvp", beggar: "player", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
+  adminAssist: "passer", mvp: "mvp", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
 };
 
 const distToOpponentGoal = (team, y) => (team === 0 ? GOAL_LINE - y : GOAL_LINE + y);
@@ -217,7 +215,7 @@ class Detector extends EventEmitter {
   player(name, team) {
     let p = this.players.get(name);
     if (!p) {
-      p = { name, team, stats: {}, idleMs: 0, zeroBoostMs: 0, lastTouchT: -Infinity, lastGhostT: -Infinity, lastBeggarT: -Infinity };
+      p = { name, team, stats: {}, idleMs: 0, lastTouchT: -Infinity, lastGhostT: -Infinity };
       this.players.set(name, p);
     }
     if (team !== undefined) p.team = team;
@@ -243,8 +241,8 @@ class Detector extends EventEmitter {
         this.inPlay = true;
         this.roundStart = t;
         this.kickoffScores = [...this.scores];
-        // New round: ghost and beggar start again from zero
-        for (const p of this.players.values()) { p.zeroBoostMs = 0; p.idleMs = 0; }
+        // New round: the ghost starts again from zero
+        for (const p of this.players.values()) p.idleMs = 0;
         break;
       case "CountdownBegin":
       case "GoalReplayStart":
@@ -270,7 +268,7 @@ class Detector extends EventEmitter {
       case "GoalScored":
         if (d.Scorer && d.Scorer.Name) {
           this.onGoal(d, t);
-          // Nobody plays until the next kickoff (ghost and beggar stop counting)
+          // Nobody plays until the next kickoff (the ghost stops counting)
           this.inPlay = false;
         } else {
           this.onReplayGoal(d);
@@ -294,8 +292,6 @@ class Detector extends EventEmitter {
     const perTeam = [0, 0];
     for (const s of d.Players || []) {
       const p = this.player(s.Name, s.TeamNum);
-      // Ghost: the game rewarded an action (center, clear, shot, save…) → it was useful
-      if (p.stats.Score !== undefined && (s.Score || 0) - (p.stats.Score || 0) >= S.ghostMinScoreGain) p.idleMs = 0;
       p.stats = s;
       perTeam[s.TeamNum]++;
     }
@@ -342,34 +338,20 @@ class Detector extends EventEmitter {
     if (this.pendingGoal && t - this.pendingGoal.t > S.topCornerWaitMs) this.pendingGoal = null;
   }
 
+  // Ghost: play time without touching the ball (reset by each touch and each kickoff, paused between a goal and the kickoff)
   tickPlayer(p, s, dt, t) {
     const S = this.S;
-    if (!s.bHasCar) { p.zeroBoostMs = 0; return; }
-
-    // Ghost
+    if (!s.bHasCar) return;
     p.idleMs += dt;
     const ghostKey = this.teamSize >= 3 ? "ghost3v3Ms" : this.teamSize === 2 ? "ghost2v2Ms" : null;
     // The minute between two ghosts only applies to the ones said out loud
     const vars = { player: p.name, seconds: Math.round(p.idleMs / 1000) };
     if (ghostKey && p.idleMs >= S[ghostKey] && t - p.lastGhostT >= S.ghostCooldownMs &&
         (t - this.lastGhostT >= S.ghostSpacingMs || !this.isTarget("ghost", vars))) {
-      const measures = [{ ...condition("sans action utile", ghostKey, p.idleMs, "min", "ms"), threshold: S[ghostKey], ok: true }];
+      const measures = [{ ...condition("sans toucher la balle", ghostKey, p.idleMs, "min", "ms"), threshold: S[ghostKey], ok: true }];
       const r = this.live("ghost", vars, t, measures);
       if (r) p.lastGhostT = t;
       if (r === "spoken") this.lastGhostT = t;
-    }
-
-    // Beggar
-    const boost = s.Boost || 0;
-    if (boost > 0 || s.bOnWall) { p.zeroBoostMs = 0; return; }
-    if (t - this.roundStart < S.beggarAfterKickoffMs) return;
-    p.zeroBoostMs += dt;
-    const lastHit = this.hits[this.hits.length - 1];
-    const underPressure = lastHit && distToOwnGoal(p.team, lastHit.loc.Y) <= THIRD;
-    const key = underPressure ? "beggarUnderPressureMs" : "beggarMs";
-    if (p.zeroBoostMs >= S[key] && t - p.lastTouchT >= S.beggarAfterTouchMs && t - p.lastBeggarT >= S.beggarCooldownMs) {
-      const measures = [{ ...condition(underPressure ? "sans boost (balle dans son camp)" : "sans boost", key, p.zeroBoostMs, "min", "ms"), threshold: S[key], ok: true }];
-      if (this.live("beggar", { player: p.name, seconds: Math.round(p.zeroBoostMs / 1000) }, t, measures)) p.lastBeggarT = t;
     }
   }
 
@@ -386,15 +368,10 @@ class Detector extends EventEmitter {
     const prev = this.hits[this.hits.length - 1];
     this.hits.push(hit);
     this.hits = this.hits.filter((h) => t - h.t <= 60000);
-    for (const p of hit.players) this.player(p.name, p.team).lastTouchT = t;
+    // Ghost: any touch of the ball counts
+    for (const p of hit.players) { const pl = this.player(p.name, p.team); pl.lastTouchT = t; pl.idleMs = 0; }
 
     if (!prev) return;
-
-    // Ghost: the previous touch was kept by the team (pass, possession) → it was useful.
-    // A ball pushed forward and lost counts only if the game rewarded it (see onState).
-    for (const pp of prev.players) {
-      if (hit.players.some((p) => p.team === pp.team)) this.player(pp.name).idleMs = 0;
-    }
 
     // Giveaway: after the opponent's shot (or a clean pick-up of a ball sent far back), the giver's team
     // got the ball back → the action is over, it can be said
@@ -466,8 +443,6 @@ class Detector extends EventEmitter {
     const f = { t, type: d.EventName, name: target.Name, team: target.TeamNum };
     this.feed.push(f);
     this.feed = this.feed.filter((x) => t - x.t <= 60000);
-
-    if (["Shot", "Save", "EpicSave", "Savior", "Goal", "Assist", "Demolish"].includes(f.type) && f.name) this.player(f.name).idleMs = 0;
 
     const g = this.giveaway;
     if (f.type === "Shot" && g && f.team === g.takerTeam && !g.shotAt && t - g.pickedUpAt <= S.giveawayWindowMs) {

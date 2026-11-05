@@ -71,12 +71,12 @@ test("ideas are kept with their match and clock", () => {
   assert.deepStrictEqual(idea.clock, { seconds: 130, overtime: false });
 });
 
-test("votes are asked on what can be seen, ghost and beggar only for the squad", () => {
+test("votes are asked on what can be seen, the ghost only for the squad", () => {
   const { isVotable } = require("../src/feedback");
   const nicknames = { MonPseudo: ["Moi"] };
   assert.ok(isVotable({ key: "missedSave.ownGoal", target: "Adversaire1" }, nicknames));
   assert.ok(isVotable({ key: "giveaway.saved", target: "Adversaire1" }, nicknames));
   assert.ok(isVotable({ key: "ghost", target: "MonPseudo" }, nicknames));
   assert.ok(!isVotable({ key: "ghost", target: "CoequipierAleatoire" }, nicknames));
-  assert.ok(!isVotable({ key: "beggar", target: "Adversaire1" }, nicknames));
+  assert.ok(!isVotable({ key: "ghost", target: "Adversaire1" }, nicknames));
 });

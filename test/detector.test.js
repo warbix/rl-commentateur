@@ -26,7 +26,6 @@ function replay(options) {
 
 test("our team: the match comments", () => {
   assert.deepStrictEqual(replay(example).comments, [
-    "ghost → Coequipier2",
     "ghost → Coequipier1",
     "finish.topCorner → Coequipier1",
     "giveaway.goal → Coequipier1",

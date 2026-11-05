@@ -148,20 +148,10 @@
       ]
     }
   },
-  "beggar": {
-    "_variables": "{player} = the player, {seconds} = duration in seconds",
-    "phrases": [
-      "{player} est à zéro boost depuis {seconds} secondes. Quelqu'un peut lui faire un virement ?",
-      "{player} roule à sec. Les pastilles sont par terre, il suffit de passer dessus.",
-      "Alerte mendicité : {player} n'a plus une goutte de boost. On organise une quête ?",
-      "{player}, ça fait {seconds} secondes que tu roules au pédalier. Va prendre du boost, sérieux.",
-      "Zéro boost pour {player}. Il est en mode économie d'énergie. Ou il a oublié comment ça marche."
-    ]
-  },
   "ghost": {
-    "_variables": "{player} = the player, {seconds} = duration in seconds",
+    "_variables": "{player} = the player who has not touched the ball for a while, {seconds} = for how long",
     "phrases": [
-      "Avis de recherche : {player}. Aucune action utile depuis {seconds} secondes. Si vous le voyez, prévenez son équipe.",
+      "Avis de recherche : {player}. Pas une touche de balle depuis {seconds} secondes. Si vous le voyez, prévenez son équipe.",
       "{player} est toujours dans le match ? Son équipe joue à un de moins depuis un moment.",
       "{seconds} secondes sans rien faire. {player}, ta voiture est en mode pilote automatique ?",
       "Minute de silence pour {player}, porté disparu sur le terrain.",

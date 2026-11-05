@@ -16,16 +16,16 @@ const LABELS = {
   "missedSave.escorted": "Arrêt manqué", "missedSave.ownGoal": "Contre son camp",
   "finish.topCorner": "Lucarne", "finish.groundRoller": "But au ras du sol",
   "nearGoal.crossbar": "Barre", "nearGoal.post": "Poteau", "nearGoal.topCorner": "Équerre",
-  adminAssist: "Passe administrative", beggar: "Mendiant", ghost: "Fantôme",
+  adminAssist: "Passe administrative", ghost: "Fantôme",
   "mvp.light": "MVP illégitime (léger)", "mvp.mocking": "MVP illégitime", "mvp.refund": "MVP illégitime (remboursez)",
   "giveaway.shot": "Bénévole", "giveaway.backward": "Balle rendue", "giveaway.saved": "Presque passe décisive à l'adversaire", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
 };
 
-// Only the player concerned can judge these (a teammate's or an opponent's boost or idleness is not visible)
-const PERSONAL = ["ghost", "beggar"];
+// Only the player concerned can judge these (a teammate's or an opponent's idleness is not visible)
+const PERSONAL = ["ghost"];
 
 // Should the squad be asked to vote on this trigger? Everything that can be seen on the pitch or in the replay
-// (goals, saves, giveaways, MVP…) for both teams; ghost and beggar only for a player listed in nicknames.
+// (goals, saves, giveaways, MVP…) for both teams; the ghost only for a player listed in nicknames.
 function isVotable(e, nicknames = {}) {
   if (!PERSONAL.includes(e.key.split(".")[0])) return true;
   return findKey(Object.keys(nicknames), e.target) !== undefined;

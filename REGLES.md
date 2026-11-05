@@ -101,37 +101,20 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 **Cible** : le MVP, en citant le coéquipier qui a le plus de touches (« le vrai MVP »). **Quand** : `PodiumStart`.
 
 ## 7. Le mendiant 🪙
-**Idée** : sans boost trop longtemps quand ça n'a pas de sens.
-
-**Limite** : on ne connaît **pas** la position des voitures. On utilise ce qu'on a :
-`bOnWall` (mur ou backboard), la vitesse, et la position de la balle à la dernière touche.
-
-**Règle** — sur `UpdateState`, pendant le jeu (pas en replay, pas au compte à rebours) :
-- `Boost` à 0 (ou absent) **en continu pendant ≥ 8 s** ⚙️
-- **Exclusions** (le boost à 0 est normal ou excusable) :
-  - le joueur est sur un mur / le backboard (`bOnWall`) pendant la période
-  - il vient de **faire une touche** (il est en train de jouer l'action)
-  - les 10 s qui suivent un engagement
-- **Aggravant** (déclenche plus vite, ⚙️ 5 s) : la dernière touche de balle est dans **son propre tiers**
-  (son équipe est sous pression et il est à sec)
-
-**Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 90 s.
+**Retiré** : le boost d'un joueur ne disait pas assez s'il jouait mal.
 
 ## 8. Le fantôme 👻
-**Idée** : pas de contribution utile depuis trop longtemps (toucher la balle ne suffit pas).
-
-**Action utile** = au moins une des conditions :
-- la touche suivante est faite par **son équipe** (il a gardé ou donné la balle)
-- le jeu lui donne **≥ 10 points** d'un coup : centre (+10), dégagement ou tir cadré (+20), arrêt (+50), arrêt miraculeux (+75), but (+100)… Une simple touche ne rapporte que +2 et ne compte pas ⚙️
-- le jeu lui attribue un `Shot`, `Save`, `EpicSave`, `Savior`, `Goal`, `Assist` ou une **démo** (`Demolish`)
-
-Une balle poussée vers l'avant puis perdue, sans points du jeu, ne compte pas : c'est souvent une balle rendue.
+**Idée** : un joueur qui ne touche plus la balle depuis trop longtemps.
 
 **Règle** — en direct :
-- Aucune touche utile depuis **≥ 45 s en 3v3**, **≥ 40 s en 2v2** ⚙️ (pas de fantôme en 1v1)
-- On ne compte que le temps de jeu effectif (pas les replays ni les comptes à rebours)
+- **Aucune touche de balle** depuis **≥ 40 s en 3v3**, **≥ 30 s en 2v2** ⚙️ (pas de fantôme en 1v1). N'importe quelle touche remet le compteur à zéro.
+- On ne compte que le temps de jeu effectif : le chrono s'arrête au but et repart de zéro à chaque coup d'envoi.
 
-**Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 2 min, et au moins 1 min entre deux fantômes. Le chrono s'arrête au but et repart de zéro à chaque coup d'envoi.
+**Pourquoi ces seuils** : mesurés sur les matchs enregistrés (10 en 2v2, 8 en 3v3). À trois, on touche moins la balle :
+le 95ᵉ centile des durées sans toucher est de 23 s en 2v2 contre 29 s en 3v3. Ces seuils donnent environ
+**un fantôme par match et demi pour une équipe** (0,7 par match en 2v2, 0,8 en 3v3).
+
+**Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 2 min, et au moins 1 min entre deux fantômes.
 
 ## 9. Craquage 💥
 **Idée** : le but qui fait mal, au pire moment, avec une erreur défensive.
@@ -216,19 +199,19 @@ Fréquence mesurée : 12 sur les 14 premiers matchs enregistrés.
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un pseudo de la liste des surnoms.
-Le joueur visé (buteur du tap-in, voleur, défenseur de l'arrêt manqué, passeur, MVP, mendiant, fantôme, bénévole) doit en faire partie.
+Le joueur visé (buteur du tap-in, voleur, défenseur de l'arrêt manqué, passeur, MVP, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible.
 
 **Détection pour tout le monde, voix pour notre équipe** : le bot détecte les situations des deux équipes. Seules celles de notre équipe sont dites ;
 les autres sont postées « non dit » pour voter. Les votes ne sont demandés que sur ce qui se voit (buts, arrêts, ballons rendus, MVP…) :
-fantôme et mendiant seulement pour un joueur listé dans les surnoms, qui est seul à pouvoir en juger.
+le fantôme seulement pour un joueur listé dans les surnoms, qui est seul à pouvoir en juger.
 
 ## Priorités (1 seul commentaire par but)
 
 Si plusieurs règles se déclenchent sur le même but, on garde la plus piquante parmi celles qui visent un joueur de notre équipe :
 **Craquage > Vol de but > Bénévole de l'année > Arrêt manqué > Tap-in > Passe administrative > Lucarne**
 
-Les règles en direct (mendiant, fantôme, bénévole) ne parlent jamais pendant un replay, et laissent
+Les règles en direct (fantôme, bénévole, quasi-buts) ne parlent jamais pendant un replay, et laissent
 **≥ 15 s** entre deux commentaires.
 
 ## Non retenu

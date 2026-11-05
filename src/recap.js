@@ -14,7 +14,6 @@ const TITLES = [
   { type: "adminAssist", title: "Fonctionnaire de la passe", unit: ["passe administrative", "passes administratives"] },
   { type: "mvp", title: "Braqueur de MVP", unit: ["MVP volé", "MVP volés"] },
   { type: "ghost", title: "Fantôme de la soirée", unit: ["disparition", "disparitions"] },
-  { type: "beggar", title: "Mendiant de la soirée", unit: ["panne sèche", "pannes sèches"] },
   { type: "nearGoal", title: "Ferrailleur de la soirée", unit: ["tir sur le cadre", "tirs sur le cadre"] },
   { type: "finish", title: "Sniper de la soirée", unit: ["lucarne", "lucarnes"] },
 ];
