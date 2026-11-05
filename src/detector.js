@@ -167,8 +167,14 @@ class Detector extends EventEmitter {
   context(key, vars, measures) {
     const target = vars[TARGET[key.split(".")[0]]];
     const p = this.players.get(target);
+    const ourTeams = this.ourTeams();
+    // The players mentioned who are not on our team: the voice says "l'adversaire" instead of their name
+    const opponents = Object.values(vars).filter((v) => {
+      const pl = typeof v === "string" && this.players.get(v);
+      return pl && ourTeams.size && !ourTeams.has(pl.team);
+    });
     return {
-      key, vars, measures: measures || [], target, team: p ? p.team : null, ours: !!p && this.ourTeams().has(p.team),
+      key, vars, opponents, measures: measures || [], target, team: p ? p.team : null, ours: !!p && ourTeams.has(p.team),
       clock: { seconds: this.time, overtime: this.overtime }, match: { guid: this.guid, start: this.matchStart }, t: this.now,
     };
   }

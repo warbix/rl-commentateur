@@ -9,6 +9,8 @@ const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const randomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const NAME = String.fromCharCode(1); // marker placed before each inserted name
 const VOWEL = "[aeiouyhAEIOUYHàâäéèêëîïôöûùüÀÂÄÉÈÊËÎÏÔÖÛÙÜ]";
+// What the voice says instead of an opponent's name (config.json → opponentNames overrides it)
+const OPPONENT_NAMES = ["l'adversaire", "un joueur d'en face", "un joueur de l'équipe adverse", "un adversaire"];
 
 class Phrases {
   constructor(phrasesFile) {
@@ -24,7 +26,8 @@ class Phrases {
     return String(name).replace(/[^\p{L}\p{N}]+/gu, " ").trim() || String(name);
   }
 
-  pick(key, vars) {
+  // opponents: the names in vars that belong to the other team, said as "l'adversaire" and synonyms
+  pick(key, vars, { opponents = [] } = {}) {
     const all = JSON.parse(fs.readFileSync(this.phrasesFile, "utf8"));
     const find = (k) => k.split(".").reduce((n, part) => (n ? n[part] : undefined), all);
     let node = find(key);
@@ -34,20 +37,22 @@ class Phrases {
 
     const i = this.nextIndex(key, node.phrases.length);
 
-    const { nicknames = {}, pronunciation = {} } = readConfig();
+    const { nicknames = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES } = readConfig();
     // One nickname per player within a line. Each inserted name is preceded by a marker
     // so that the French elision is done right before it ("de Arnaud" → "d'Arnaud").
     const said = new Map();
     let text = node.phrases[i].replace(/\{(\w+)\}/g, (m, v) => {
       if (!(v in vars)) return m;
       if (typeof vars[v] === "number") return String(vars[v]);
-      if (!said.has(vars[v])) said.set(vars[v], this.spokenName(vars[v], nicknames));
+      if (!said.has(vars[v])) said.set(vars[v], opponents.includes(vars[v]) ? randomItem(opponentNames) : this.spokenName(vars[v], nicknames));
       return NAME + said.get(vars[v]);
     });
     text = text
       .replace(new RegExp(`\\b([dD])e ${NAME}(?=${VOWEL})`, "g"), "$1'")
       .replace(new RegExp(`\\b([qQ]u)e ${NAME}(?=${VOWEL})`, "g"), "$1'")
-      .split(NAME).join("");
+      .split(NAME).join("")
+      // "l'adversaire marque" at the start of a sentence → "L'adversaire marque"
+      .replace(/(^|[.!?…]\s+)(\p{Ll})/gu, (m, before, letter) => before + letter.toUpperCase());
     return this.pronounce(text, pronunciation);
   }
 

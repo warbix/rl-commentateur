@@ -22,6 +22,9 @@
       "Coéquipier deux"
     ]
   },
+  "_opponentNames": "What the voice says instead of an opponent's name (one drawn at random). The Discord posts keep the real names.",
+  "opponentNames": ["l'adversaire", "un joueur d'en face", "un joueur de l'équipe adverse", "un adversaire"],
+
   "_pronunciation": "Words replaced right before the voice, so that it says them correctly. Can be changed while the bot is running.",
   "pronunciation": {
     "MVP": "aime vie pie"

@@ -172,7 +172,7 @@ async function main() {
     // Line already prepared (voice included) if it only mentions the squad, otherwise generated now
     const ready = pool && pool.take(key, vars);
     let text;
-    try { text = ready ? ready.text : phrases.pick(key, vars); } catch (e) { return console.error(e.message); }
+    try { text = ready ? ready.text : phrases.pick(key, vars, { opponents: c.opponents }); } catch (e) { return console.error(e.message); }
     const num = publish("comment", c, text);
     console.log(`${new Date(t).toLocaleTimeString()} ${num}[${key}${live ? ", live" : ""}] ${text}`);
     if (recorder) recorder.comment(t, key, text);

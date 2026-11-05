@@ -83,3 +83,12 @@ test("a situation can borrow the lines of another one", () => {
   assert.match(text, /Adversaire1/);
   assert.doesNotMatch(text, /\{\w+\}/);
 });
+
+test("opponents are said as \"l'adversaire\" and synonyms, with elision and a capital at the start", () => {
+  const phrases = new Phrases(path.join(ROOT, "phrases.json"));
+  for (let i = 0; i < 30; i++) {
+    const text = phrases.pick("missedSave.escorted", { defender: "MonPseudo", scorer: "Adversaire1" }, { opponents: ["Adversaire1"] });
+    assert.doesNotMatch(text, /Adversaire1/, text);
+    assert.doesNotMatch(text, /\bde un\b|^[a-zà-ÿ]/, text);
+  }
+});
