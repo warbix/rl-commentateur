@@ -81,6 +81,7 @@
     "giveawayWindowMs": 6000,
     "giveawayOfTheMatchMin": 3,
     "giveawayBackwardNoShot": 1500,
+    "giveawayKickoffMs": 5000,
     "nearAssistMaxOwnGoalDistance": 5120,
     "nearAssistMaxForward": 500,
     "nearAssistMinMs": 1000,

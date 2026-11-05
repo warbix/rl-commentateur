@@ -28,6 +28,8 @@ const DEFAULTS = {
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
   // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
   giveawayBackwardNoShot: 1500,
+  // Kickoff: a ball lost in the first seconds after the kickoff is not a giveaway (nor a near assist)
+  giveawayKickoffMs: 5000,
   // Near assist to the opponent: a touch in one's own half that does not go forward, picked up by an opponent
   // (not a 50/50), who shoots, and the shot is saved by the giver's team
   nearAssistMaxOwnGoalDistance: 5120, nearAssistMaxForward: 500, nearAssistMinMs: 1000,
@@ -410,7 +412,7 @@ class Detector extends EventEmitter {
     if (prev.players.length === 1 && hit.players.length === 1 && prev.players[0].team !== hit.players[0].team) {
       const giver = prev.players[0], taker = hit.players[0];
       const ownGiver = distToOwnGoal(giver.team, prev.loc.Y);
-      const wasShot = this.wasShotOrSave(giver.name, prev.t);
+      const wasShot = this.wasShotOrSave(giver.name, prev.t) || prev.t - this.roundStart < S.giveawayKickoffMs;
       const r = this.evaluate([
         condition("touche à sa propre ligne", "nearAssistMaxOwnGoalDistance", ownGiver, "max", "uu"),
         condition("balle envoyée vers l'avant", "nearAssistMaxForward", distToOwnGoal(giver.team, hit.loc.Y) - ownGiver, "max", "uu"),
@@ -427,7 +429,7 @@ class Detector extends EventEmitter {
     if (giver.team === taker.team) return;
     const dist = Math.hypot(prev.loc.X - hit.loc.X, prev.loc.Y - hit.loc.Y);
     const ownGiver = distToOwnGoal(giver.team, prev.loc.Y), ownTaker = distToOwnGoal(giver.team, hit.loc.Y);
-    const wasShot = this.wasShotOrSave(giver.name, prev.t);
+    const wasShot = this.wasShotOrSave(giver.name, prev.t) || prev.t - this.roundStart < S.giveawayKickoffMs;
     if (wasShot || !(ownGiver - ownTaker >= S.giveawayMinBackward || ownTaker < GOAL_LINE)) return;
     const r = this.evaluate([
       condition("délai avant la récupération", "giveawayMinMs", t - prev.t, "min", "ms"),
@@ -660,6 +662,9 @@ class Detector extends EventEmitter {
     if (!shooter) return;
     const lastHit = this.hits[this.hits.length - 1];
     if (!lastHit || !has(lastHit, shooter)) return;
+    // Only the opponent's frame: a ball sent onto one's own post is not a near goal
+    const team = lastHit.players.find((p) => p.name === shooter).team;
+    if (distToOpponentGoal(team, loc.Y || 0) > GOAL_LINE) return;
     const r = this.evaluate([
       condition("délai depuis le tir", "nearGoalShotMaxMs", t - lastHit.t, "max", "ms"),
       condition("vitesse de la balle", "nearGoalMinSpeed", d.BallSpeed || 0, "min", "kmh"),
