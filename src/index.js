@@ -16,7 +16,7 @@ const { TTS } = require("./tts");
 const { readConfig, CONFIG_FILE } = require("./config");
 const { checkAndReport, gameRunning } = require("./apiStats");
 const { Recorder } = require("./recorder");
-const { PhrasePool } = require("./pool");
+const library = require("./library");
 const { Recap } = require("./recap");
 const { jingleFile } = require("./jingle");
 const { Feedback, format, isVotable, clockText } = require("./feedback");
@@ -130,10 +130,19 @@ async function main() {
   if (output && feedback) output.onVote = (messageId, emoji, userId, added) => feedback.react(messageId, emoji, userId, added);
   if (output) await output.start();
 
-  const pool = output && config.pregenerate !== false
-    ? new PhrasePool({ phrases, tts, file: path.join(ROOT, "cache", "pool.json") })
-    : null;
-  if (pool) pool.warm();
+  // Voice library: the lines about the squad generated in advance play without waiting.
+  // With the free voices the missing ones are made in the background; with paid ones, only with npm run pregenerate.
+  if (output && config.pregenerate !== false) {
+    const st = library.status(phrases, tts);
+    if (st.missing.length && st.settings.provider === "edge") {
+      console.log(`Voice library: generating ${st.missing.length} missing lines in the background…`);
+      library.generate(tts, st.missing, { parallel: 2 }).then((errors) => {
+        console.log(`Voice library: done${errors.length ? `, ${errors.length} failed (${errors[0]})` : ""}.`);
+      });
+    } else if (st.missing.length) {
+      console.log(`Voice library: ${st.missing.length} lines not generated (about ${st.cost.toFixed(2)} dollars). Run: npm run pregenerate`);
+    }
+  }
 
   // Lines are generated one at a time, in order, so that comments don't get mixed up
   let chain = Promise.resolve();
@@ -169,16 +178,15 @@ async function main() {
 
   detector.on("comment", (c) => {
     const { key, vars, live, t } = c;
-    // Line already prepared (voice included) if it only mentions the squad, otherwise generated now
-    const ready = pool && pool.take(key, vars);
+    // A line about the squad is already in the voice library; otherwise its voice is generated now
     let text;
-    try { text = ready ? ready.text : phrases.pick(key, vars, { opponents: c.opponents }); } catch (e) { return console.error(e.message); }
+    try { text = phrases.pick(key, vars, { opponents: c.opponents }); } catch (e) { return console.error(e.message); }
     const num = publish("comment", c, text);
     console.log(`${new Date(t).toLocaleTimeString()} ${num}[${key}${live ? ", live" : ""}] ${text}`);
     if (recorder) recorder.comment(t, key, text);
     if (!output || muted) return;
     chain = chain
-      .then(() => (ready ? ready.file : tts.synth(text)))
+      .then(() => tts.synth(text))
       .then((file) => play(file))
       .catch((e) => console.error("Voice:", e.message));
   });

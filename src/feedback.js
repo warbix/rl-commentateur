@@ -150,4 +150,4 @@ class Feedback {
   }
 }
 
-module.exports = { Feedback, format, isVotable, clockText, valueText, FOR, AGAINST };
+module.exports = { Feedback, format, isVotable, clockText, valueText, FOR, AGAINST, LABELS };

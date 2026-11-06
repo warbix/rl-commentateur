@@ -7,7 +7,8 @@
     "start": "node src/index.js",
     "test": "node --test",
     "check-api": "node src/apiStats.js",
-    "calibrate": "node src/calibrate.js"
+    "calibrate": "node src/calibrate.js",
+    "pregenerate": "node src/pregenerate.js"
   },
   "keywords": [],
   "author": "",

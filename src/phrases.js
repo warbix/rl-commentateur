@@ -26,26 +26,43 @@ class Phrases {
     return String(name).replace(/[^\p{L}\p{N}]+/gu, " ").trim() || String(name);
   }
 
-  // opponents: the names in vars that belong to the other team, said as "l'adversaire" and synonyms
-  pick(key, vars, { opponents = [] } = {}) {
-    const all = JSON.parse(fs.readFileSync(this.phrasesFile, "utf8"));
+  // The whole phrases.json (re-read: it can be edited while the bot is running)
+  all() {
+    return JSON.parse(fs.readFileSync(this.phrasesFile, "utf8"));
+  }
+
+  // The lines of a situation. A situation can borrow the lines of another one: "backward": "giveaway.shot"
+  node(key, all = this.all()) {
     const find = (k) => k.split(".").reduce((n, part) => (n ? n[part] : undefined), all);
     let node = find(key);
-    // A situation can borrow the lines of another one: "backward": "giveaway.shot"
     if (typeof node === "string") node = find(node);
     if (!node || !node.phrases || !node.phrases.length) throw new Error(`No lines for "${key}" in phrases.json`);
+    return node;
+  }
 
+  // opponents: the names in vars that belong to the other team, said as "l'adversaire" and synonyms
+  pick(key, vars, { opponents = [] } = {}) {
+    const node = this.node(key);
     const i = this.nextIndex(key, node.phrases.length);
-
     const { nicknames = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES } = readConfig();
-    // One nickname per player within a line. Each inserted name is preceded by a marker
-    // so that the French elision is done right before it ("de Arnaud" → "d'Arnaud").
+    // One nickname per player within a line
     const said = new Map();
-    let text = node.phrases[i].replace(/\{(\w+)\}/g, (m, v) => {
-      if (!(v in vars)) return m;
-      if (typeof vars[v] === "number") return String(vars[v]);
+    return this.render(node.phrases[i], (v) => {
+      if (!(v in vars)) return undefined;
+      if (typeof vars[v] === "number") return vars[v];
       if (!said.has(vars[v])) said.set(vars[v], opponents.includes(vars[v]) ? randomItem(opponentNames) : this.spokenName(vars[v], nicknames));
-      return NAME + said.get(vars[v]);
+      return said.get(vars[v]);
+    }, pronunciation);
+  }
+
+  // Fills a line: valueOf(variable) gives the spoken name (string) or a number, undefined leaves {variable}.
+  // The same text always comes out for the same values: the voice library relies on it.
+  render(line, valueOf, pronunciation = readConfig().pronunciation || {}) {
+    // Each inserted name is preceded by a marker so that the French elision is done right before it ("de Arnaud" → "d'Arnaud")
+    let text = line.replace(/\{(\w+)\}/g, (m, v) => {
+      const value = valueOf(v);
+      if (value === undefined) return m;
+      return typeof value === "number" ? String(value) : NAME + value;
     });
     text = text
       .replace(new RegExp(`\\b([dD])e ${NAME}(?=${VOWEL})`, "g"), "$1'")

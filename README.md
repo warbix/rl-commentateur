@@ -48,7 +48,7 @@ Tout tourne **sur ton PC** : pas de serveur à louer.
     "textChannelId": ""
   },
   "nicknames": { "TonPseudoEnJeu": ["Ton surnom", "Un autre surnom"], ... },
-  "voice": { "rotation": "random", "list": ["fr-FR-HenriNeural", ...], ... },
+  "voice": { "provider": "edge", "rotation": "line", "list": ["fr-FR-HenriNeural", ...], ... },
   ...
 }
 ```
@@ -61,8 +61,9 @@ Si aucun n'est en vocal, il va dans `voiceChannelId`. Il lui faut les droits Voi
 
 ### 4. Choisir les voix
 
-Le bot change de voix à chaque phrase parmi `voice.list` dans `config.json`. `voice.rotation` vaut :
-- `random` : au hasard, jamais deux fois de suite la même (par défaut)
+Le bot change de voix d'une phrase à l'autre parmi `voice.list` dans `config.json`. `voice.rotation` vaut :
+- `line` : chaque phrase a toujours la même voix, et les voix changent d'une phrase à l'autre (par défaut, nécessaire pour la bibliothèque de voix)
+- `random` : au hasard, jamais deux fois de suite la même
 - `alternate` : chacune son tour
 - `fixed` : toujours la première de la liste
 
@@ -167,10 +168,30 @@ Pour désactiver : `"recordMatches": false` dans `config.json`. `node capture.js
 | Token, salon, volume, vérification de l'API (`rocketLeague`) | `config.json` | Au prochain lancement |
 
 Les phrases déjà générées sont gardées dans `cache/` : elles ne repassent pas par internet et sont lues sans attente.
-Au lancement, le bot prépare aussi en arrière-plan les phrases qui ne citent que la bande (tap-in, vol, lucarne, MVP) pour toutes les
-combinaisons de pseudos de `nicknames` : elles sortent instantanément. La réserve se refait toute seule si tu changes les phrases,
-les surnoms ou les voix (`"pregenerate": false` pour désactiver).
 Tu peux vider ce dossier sans risque.
+
+### Bibliothèque de voix
+
+Toutes les phrases que le bot peut dire sur la bande sont générées à l'avance : chaque phrase de `phrases.json`, avec chaque joueur
+et chaque surnom de `nicknames`, chaque formule pour l'adversaire (`opponentNames`) et chaque nombre de ballons rendus.
+En match, la voix est déjà prête. Seul un joueur inconnu (un coéquipier de passage) est encore généré en direct.
+
+```
+npm run pregenerate                 compte les phrases et génère celles qui manquent
+npm run pregenerate -- --dry-run    compte seulement
+npm run pregenerate -- --prune      supprime aussi les voix qui ne servent plus
+```
+
+La page `cache/library.html` permet de tout écouter, situation par situation.
+Avec les voix gratuites, le bot complète aussi la bibliothèque tout seul au lancement (`"pregenerate": false` pour désactiver).
+Après un changement de phrase ou de surnom, seules les nouvelles phrases sont générées.
+
+### Voix OpenAI (payantes)
+
+Dans `config.json` : `voice.provider` → `"openai"`, et ta clé dans `voice.openai.apiKey` (ou la variable d'environnement `OPENAI_API_KEY`).
+`voice.openai.voices` liste les voix (`ash`, `onyx`, `coral`…), `voice.openai.instructions` le ton demandé.
+Lance ensuite `npm run pregenerate` : il annonce le coût avant de commencer, et ne génère qu'avec `-- --yes`.
+Ordre de grandeur avec gpt-4o-mini-tts : environ 0,015 dollar par minute de voix, soit environ 2 dollars pour 1 500 phrases.
 
 ---
 

@@ -33,10 +33,11 @@
   "pronunciation": {
     "MVP": "aime vie pie"
   },
-  "_voice": "rotation: 'random' (never the same twice in a row), 'alternate' (each in turn) or 'fixed' (always the first). jingle: true (ding before each line), false, or the path of your own sound (e.g. sounds/whistle.mp3). Can be changed while the bot is running, except the volume.",
+  "_voice": "provider: \"edge\" (free Microsoft voices, list) or \"openai\" (paid, openai.voices, key in openai.apiKey or the OPENAI_API_KEY variable). rotation: \"line\" (each line always has the same voice, the voices still change from one line to the next: needed for the voice library), \"random\", \"alternate\" or \"fixed\" (always the first). jingle: true (ding before each line), false, or the path of your own sound. Can be changed while the bot is running, except the volume.",
   "voice": {
+    "provider": "edge",
     "jingle": true,
-    "rotation": "random",
+    "rotation": "line",
     "list": [
       "fr-FR-HenriNeural",
       "fr-FR-RemyMultilingualNeural",
@@ -47,9 +48,22 @@
     ],
     "rate": "+0%",
     "pitch": "+0Hz",
-    "volume": 1
+    "volume": 1,
+    "openai": {
+      "apiKey": "",
+      "model": "gpt-4o-mini-tts",
+      "voices": [
+        "ash",
+        "onyx",
+        "coral",
+        "sage",
+        "ballad",
+        "verse"
+      ],
+      "instructions": "Tu es un commentateur sportif français, moqueur et piquant. Parle en français de France, avec un ton ironique et vivant."
+    }
   },
-  "_pregenerate": "Prepares in advance (in the background) the lines that only mention the squad, so they play without waiting for the voice.",
+  "_pregenerate": "Voice library: every line about the squad (nicknames) is generated in advance, so it plays without waiting. With the free voices the missing ones are made in the background at launch; with paid voices, only with npm run pregenerate (which shows the cost first).",
   "pregenerate": true,
   "_recordMatches": "Records every match in matches/ (replayable with --replay), with the bot's comments in it.",
   "recordMatches": true,
