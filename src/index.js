@@ -136,7 +136,7 @@ async function main() {
     const st = library.status(phrases, tts);
     if (st.missing.length && st.settings.provider === "edge") {
       console.log(`Voice library: generating ${st.missing.length} missing lines in the background…`);
-      library.generate(tts, st.missing, { parallel: 2 }).then((errors) => {
+      library.generate(tts, st.missing, { parallel: 3 }).then((errors) => {
         console.log(`Voice library: done${errors.length ? `, ${errors.length} failed (${errors[0]})` : ""}.`);
       });
     } else if (st.missing.length) {
