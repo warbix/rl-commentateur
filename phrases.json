@@ -142,14 +142,14 @@
     }
   },
   "adminAssist": {
-    "_variables": "{passer} = the teammate who passed, {seconds} = duration in seconds, {scorer} = the scorer",
+    "_variables": "{passer} = the teammate who passed, {scorer} = the scorer",
     "phrases": [
-      "Passe décisive pour {passer}. Il a touché la balle il y a {seconds} secondes, ça compte apparemment.",
+      "Passe décisive pour {passer}. Il a touché la balle à une autre époque, mais ça compte apparemment.",
       "{passer} récupère une passe décisive purement administrative. Il peut la ranger avec ses autres papiers.",
       "{scorer} a tout fait tout seul, mais {passer} touche quand même sa commission.",
       "Assistance de {passer}. Assistance à quoi, on ne sait pas, mais le jeu dit que c'est lui.",
       "{passer}, cette passe décisive, tu l'as eue comme une attestation de présence. Tu étais là, c'est tout.",
-      "Passe décisive de {passer}, touchée il y a {seconds} secondes. À ce compte-là, l'engagement aussi, c'est une passe.",
+      "Passe décisive de {passer}, touchée il y a une éternité. À ce compte-là, l'engagement aussi, c'est une passe.",
       "{passer} gagne une passe décisive sans rien faire. Le rêve de tout fonctionnaire.",
       "{scorer} dribble, tire, marque. Et {passer} lève la main pour réclamer la passe. Culotté.",
       "Passe décisive pour {passer}, qui regardait l'action depuis les tribunes.",
@@ -204,17 +204,17 @@
     }
   },
   "ghost": {
-    "_variables": "{player} = the player who has not touched the ball for a while, {seconds} = for how long",
+    "_variables": "{player} = the player who has not touched the ball for a while",
     "phrases": [
-      "Avis de recherche : {player}. Pas une touche de balle depuis {seconds} secondes. Si vous le voyez, prévenez son équipe.",
+      "Avis de recherche : {player}. Plus une seule touche de balle depuis une éternité. Si vous le voyez, prévenez son équipe.",
       "{player} est toujours dans le match ? Son équipe joue à un de moins depuis un moment.",
-      "{seconds} secondes sans toucher la balle. {player}, ta voiture est en pilote automatique ?",
+      "{player}, ta voiture est en pilote automatique ? La balle est passée dix fois devant toi.",
       "Minute de silence pour {player}, porté disparu sur le terrain.",
       "{player} fait du tourisme. Il visite le stade, mais il ne joue pas avec la balle.",
-      "{player}, {seconds} secondes sans toucher la balle. Tu attends une invitation écrite ?",
-      "On signale la disparition de {player}. Dernière apparition près de la balle : il y a {seconds} secondes.",
+      "{player}, ça fait un bail que tu n'as pas touché la balle. Tu attends une invitation écrite ?",
+      "On signale la disparition de {player}. Dernière apparition près de la balle : plus personne ne s'en souvient.",
       "{player} joue en mode spectateur. Il a juste oublié de prévenir le reste de l'équipe.",
-      "{seconds} secondes que {player} n'a pas touché la balle. Un plot gonflable ferait plus de touches.",
+      "La balle demande des nouvelles de {player}. Ils ne se sont pas vus depuis longtemps.",
       "{player} fait le tour du terrain comme un touriste. La balle ? Connais pas."
     ]
   },
