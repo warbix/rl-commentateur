@@ -78,7 +78,15 @@ class TTS {
     try {
       await this.generate(text, voice, file, s);
     } catch {
-      await this.generate(text, voice, file, s);
+      try {
+        await this.generate(text, voice, file, s);
+      } catch (e) {
+        // Some voices refuse some texts for good (Edge's multilingual ones): the next voice says it,
+        // kept under the same file so that the line is still found
+        const other = s.list[(s.list.indexOf(voice) + 1) % s.list.length];
+        if (other === voice) throw e;
+        await this.generate(text, other, file, s);
+      }
     }
     return file;
   }
