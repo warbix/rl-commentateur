@@ -75,7 +75,7 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 **Cible** : le buteur (compliment ironique ou vrai compliment). **Quand** : fin du replay.
 ⚠️ À valider sur plus de buts (le bon `ImpactLocation` est celui du replay).
 
-## 5. Passe décisive administrative 📎
+## 5. Passe décisive par procuration 📎
 **Idée** : la passe a été comptée mais n'y est pour rien.
 
 **Règle** — sur `GoalScored` avec `Assister` :
@@ -91,7 +91,7 @@ _Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en
 **Règle** — sur `StatfeedEvent` `MVP`, avec les stats finales de `UpdateState` + l'historique du match :
 - **Part des points venant des faits marquants** : `(100 × Goals + 50 × Assists) / Score` **≥ 70 %** ⚙️
 - **Peu de travail** : `Touches` **≤ moyenne de son équipe** et `Saves = 0` ⚙️
-- **Au moins 1 casserole** dans le match : un de ses buts est un **tap-in** ou un **vol**, ou une de ses passes est **administrative**, ou il a un **arrêt manqué**
+- **Au moins 1 casserole** dans le match : un de ses buts est un **tap-in** ou un **vol**, ou une de ses passes décisives est **par procuration**, ou il a un **arrêt manqué**
 - Plus il cumule de casseroles, plus le commentaire est appuyé (le curseur) :
   - 1 casserole → pique légère
   - 2 → franchement moqueur
@@ -208,7 +208,7 @@ le fantôme seulement pour un joueur listé dans les surnoms, qui est seul à po
 ## Priorités (1 seul commentaire par but)
 
 Si plusieurs règles se déclenchent sur le même but, on garde la plus piquante parmi celles qui visent un joueur de notre équipe :
-**Craquage > Vol de but > Bénévole de l'année > Arrêt manqué > Tap-in > Passe administrative > Lucarne**
+**Craquage > Vol de but > Bénévole de l'année > Arrêt manqué > Tap-in > Passe décisive par procuration > Lucarne**
 
 Les règles en direct (fantôme, bénévole, quasi-buts) ne parlent jamais pendant un replay, et laissent
 **≥ 15 s** entre deux commentaires.
