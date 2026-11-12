@@ -200,7 +200,6 @@ Fréquence mesurée : 12 sur les 14 premiers matchs enregistrés.
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un joueur de la bande (`players`). Les comptes d'un même joueur comptent comme un seul.
 Le joueur visé (buteur du tap-in, voleur, défenseur de l'arrêt manqué, passeur, MVP, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible : la voix dit « l'adversaire » ou un synonyme.
-Un coéquipier hors de la bande est dit avec une formule (« notre random », « notre coéquipier du jour »…), jamais par son pseudo.
 Le bilan de la soirée ne parle que de la bande.
 
 **Détection pour tout le monde, voix pour notre équipe** : le bot détecte les situations des deux équipes. Seules celles de notre équipe sont dites ;

@@ -12,10 +12,10 @@ const library = require("../src/library");
 
 const phrases = new Phrases(path.join(ROOT, "phrases.json"));
 const OPPONENT = { "missedSave.escorted": "scorer", choke: "scorer", "giveaway.shot": "opponent", "giveaway.backward": "opponent", "giveaway.saved": "opponent", "giveaway.goal": "opponent" };
-// The squad of config.example.json, and a teammate outside it
-const SQUAD = ["MonPseudo", "Coequipier1", "Coequipier2", "XX-Random-XX"];
+// The squad of config.example.json
+const SQUAD = ["MonPseudo", "Coequipier1", "Coequipier2"];
 
-test("every line said during a match is in the voice library, with a random teammate too", () => {
+test("every line said during a match is in the voice library", () => {
   const texts = new Set(library.lines(phrases).map((l) => l.text));
   const all = phrases.all();
   const keys = Object.keys(OPPONENT).concat(["tapIn", "steal", "teamBlock", "missedSave.ownGoal", "finish.topCorner", "nearGoal.crossbar",

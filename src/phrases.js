@@ -11,8 +11,6 @@ const NAME = String.fromCharCode(1); // marker placed before each inserted name
 const VOWEL = "[aeiouyhAEIOUYHàâäéèêëîïôöûùüÀÂÄÉÈÊËÎÏÔÖÛÙÜ]";
 // What the voice says instead of an opponent's name (config.json → opponentNames overrides it)
 const OPPONENT_NAMES = ["l'adversaire", "un joueur d'en face", "un joueur de l'équipe adverse", "un adversaire"];
-// What the voice says instead of the name of a teammate who is not in the squad (config.json → unknownNames overrides it)
-const UNKNOWN_NAMES = ["notre coéquipier du jour", "notre random", "notre coéquipier de passage"];
 
 // The in-game name as the voice can read it: letters and digits only ("XX-_Name_-XX" → "XX Name XX";
 // the game also shows characters it cannot display, like emojis, as "?")
@@ -24,11 +22,9 @@ class Phrases {
     this.bags = new Map();
   }
 
-  // A player of the squad → their spoken name; anyone else → one of unknownNames (or the in-game name if the list is empty)
-  spokenName(name, players, unknownNames = UNKNOWN_NAMES) {
-    const key = squadName(players, name);
-    if (key) return key;
-    return unknownNames.length ? randomItem(unknownNames) : readable(name);
+  // A player of the squad → their spoken name; anyone else → the readable in-game name
+  spokenName(name, players) {
+    return squadName(players, name) || readable(name);
   }
 
   // The whole phrases.json (re-read: it can be edited while the bot is running)
@@ -49,13 +45,13 @@ class Phrases {
   pick(key, vars, { opponents = [] } = {}) {
     const node = this.node(key);
     const i = this.nextIndex(key, node.phrases.length);
-    const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES, unknownNames = UNKNOWN_NAMES } = readConfig();
+    const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES } = readConfig();
     // One name per player within a line
     const said = new Map();
     return this.render(node.phrases[i], (v) => {
       if (!(v in vars)) return undefined;
       if (typeof vars[v] === "number") return vars[v];
-      if (!said.has(vars[v])) said.set(vars[v], opponents.includes(vars[v]) ? randomItem(opponentNames) : this.spokenName(vars[v], players, unknownNames));
+      if (!said.has(vars[v])) said.set(vars[v], opponents.includes(vars[v]) ? randomItem(opponentNames) : this.spokenName(vars[v], players));
       return said.get(vars[v]);
     }, pronunciation);
   }
@@ -108,4 +104,4 @@ class Phrases {
   }
 }
 
-module.exports = { Phrases, OPPONENT_NAMES, UNKNOWN_NAMES };
+module.exports = { Phrases, OPPONENT_NAMES };

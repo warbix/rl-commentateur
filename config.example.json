@@ -27,12 +27,6 @@
     "un joueur de l'équipe adverse",
     "un adversaire"
   ],
-  "_unknownNames": "What the voice says instead of the name of a teammate who is not in players (one drawn at random), so that every line can be prepared in advance. Empty list: the in-game name is read.",
-  "unknownNames": [
-    "notre coéquipier du jour",
-    "notre random",
-    "notre coéquipier de passage"
-  ],
   "_pronunciation": "Words replaced right before the voice, so that it says them correctly. Can be changed while the bot is running.",
   "pronunciation": {
     "MVP": "aime vie pie"
@@ -67,7 +61,7 @@
       "instructions": "Tu es un commentateur sportif français, moqueur et piquant. Parle en français de France, avec un ton ironique et vivant."
     }
   },
-  "_pregenerate": "Voice library: every line (players, unknownNames, opponentNames) is generated in advance, so it plays without waiting. With the free voices the missing ones are made in the background at launch; with paid voices, only with npm run pregenerate (which shows the cost first).",
+  "_pregenerate": "Voice library: every line (players, opponentNames) is generated in advance, so it plays without waiting. With the free voices the missing ones are made in the background at launch; with paid voices, only with npm run pregenerate (which shows the cost first).",
   "pregenerate": true,
   "_recordMatches": "Records every match in matches/ (replayable with --replay), with the bot's comments in it.",
   "recordMatches": true,

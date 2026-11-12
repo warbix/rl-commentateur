@@ -1,18 +1,16 @@
 // Voice library: every line the bot can say about the squad, generated in advance.
 // For each situation of phrases.json, each of its lines is filled with every possible cast:
-//   - our players: the spoken names of config.json → players, and a teammate outside the squad
-//     with each formula of unknownNames ("notre random"…)
+//   - our players: the spoken names of config.json → players (we only play within the squad)
 //   - the opponent: each formula of opponentNames ("l'adversaire"…)
 //   - numbers: every plausible value (balls given away in a match)
 // The text comes out exactly as during a match (same code), so the voice found in the cache is the right one.
-// Only a line with two teammates outside the squad is still generated live.
 
 const fs = require("fs");
 const path = require("path");
 const { readConfig } = require("./config");
 const { estimateCost } = require("./tts");
 const { LABELS } = require("./feedback");
-const { OPPONENT_NAMES, UNKNOWN_NAMES } = require("./phrases");
+const { OPPONENT_NAMES } = require("./phrases");
 
 // Variables that name an opponent (all the others name one of our players)
 const OPPONENT_VARS = {
@@ -32,15 +30,12 @@ function situations(node, prefix = "") {
     .flatMap(([k, v]) => situations(v, prefix ? `${prefix}.${k}` : k));
 }
 
-// Every way to give each variable a value. ours: a different player for each (the squad, and at most one teammate
-// outside it, said with each formula of unknownNames).
-function casts(ours, opponents, numbers, { players, opponentNames, unknownNames }) {
-  const people = Object.keys(players).map((name) => ({ id: name, names: [name] }));
-  if (unknownNames.length) people.push({ id: "?", names: unknownNames });
+// Every way to give each variable a value. ours: a different player of the squad for each.
+function casts(ours, opponents, numbers, { players, opponentNames }) {
   let result = [{ values: {}, used: [] }];
   for (const v of ours) {
-    result = result.flatMap((c) => people.filter((p) => !c.used.includes(p.id))
-      .flatMap((p) => p.names.map((name) => ({ values: { ...c.values, [v]: name }, used: [...c.used, p.id] }))));
+    result = result.flatMap((c) => Object.keys(players).filter((p) => !c.used.includes(p))
+      .map((p) => ({ values: { ...c.values, [v]: p }, used: [...c.used, p] })));
   }
   for (const v of opponents) result = result.flatMap((c) => each(v, c, opponentNames));
   for (const v of numbers) result = result.flatMap((c) => each(v, c, NUMBERS[v]));
@@ -51,8 +46,8 @@ const each = (v, c, list) => list.map((x) => ({ ...c, values: { ...c.values, [v]
 // All the lines of the library: [{ key, text }], without duplicates
 function lines(phrases) {
   const all = phrases.all();
-  const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES, unknownNames = UNKNOWN_NAMES } = readConfig();
-  const people = { players, opponentNames, unknownNames };
+  const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES } = readConfig();
+  const people = { players, opponentNames };
   const seen = new Set();
   const out = [];
   for (const key of situations(all)) {

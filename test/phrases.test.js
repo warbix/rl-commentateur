@@ -5,7 +5,7 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 process.argv.push("--config", path.join(ROOT, "config.example.json"));
-const { Phrases, UNKNOWN_NAMES } = require("../src/phrases");
+const { Phrases } = require("../src/phrases");
 const { sameName, squadName } = require("../src/names");
 
 const all = JSON.parse(fs.readFileSync(path.join(ROOT, "phrases.json"), "utf8"));
@@ -44,7 +44,7 @@ test("every variable is replaced, and a player of the squad is said by their spo
   }
 });
 
-test("pronunciation, the squad's spoken names, and unknown teammates", () => {
+test("pronunciation, the squad's spoken names, and unknown names", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
   assert.strictEqual(phrases.pronounce("Le MVP du match"), "Le aime vie pie du match");
   // Recap: in-game name or spoken name → spoken name; anyone else → the readable in-game name
@@ -52,9 +52,7 @@ test("pronunciation, the squad's spoken names, and unknown teammates", () => {
   assert.strictEqual(phrases.say("Jojo"), "Jojo");
   assert.strictEqual(phrases.say("XX-_Pseudo_-XX"), "XX Pseudo XX");
   assert.strictEqual(phrases.say("?Pseudo?"), "Pseudo");
-  // In a line: a teammate outside the squad is said with a formula, or by the readable name if there is none
-  assert.ok(UNKNOWN_NAMES.includes(phrases.spokenName(".officer_tom", { Jojo: ["MonPseudo"] })));
-  assert.strictEqual(phrases.spokenName(".officer_tom", {}, []), "officer tom");
+  assert.strictEqual(phrases.spokenName(".officer_tom", { Jojo: ["MonPseudo"] }), "officer tom");
 });
 
 test("two accounts of one player count as one", () => {

@@ -161,7 +161,7 @@ Pour désactiver : `"recordMatches": false` dans `config.json`. `node capture.js
 |---|---|---|
 | Les phrases | `phrases.json` | Tout de suite, même pendant une partie |
 | Qui est commenté (`target` : `our-team` ou `everyone`) | `config.json` | Tout de suite |
-| Joueurs de la bande (`players` : le nom dit → ses pseudos en jeu), formules pour un coéquipier inconnu (`unknownNames`) et pour l'adversaire (`opponentNames`), prononciation (`pronunciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
+| Joueurs de la bande (`players` : le nom dit → ses pseudos en jeu), formules pour l'adversaire (`opponentNames`), prononciation (`pronunciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
 | Voix et rotation (`voice`) | `config.json` | Tout de suite (sauf le volume) |
 | Bruitage avant chaque phrase (`voice.jingle` : `true` pour le ding, `false`, ou le chemin d'un son à toi) | `config.json` | Tout de suite |
 | Seuils de détection (distances, durées…) | `config.json` → `thresholds` | Tout de suite |
@@ -173,8 +173,8 @@ Tu peux vider ce dossier sans risque.
 ### Bibliothèque de voix
 
 Toutes les phrases que le bot peut dire sont générées à l'avance : chaque phrase de `phrases.json`, avec chaque joueur de `players`,
-chaque formule pour un coéquipier hors de la bande (`unknownNames`, ex. « notre random ») et pour l'adversaire (`opponentNames`),
-et chaque nombre de ballons rendus. En match, la voix est déjà prête : aucun pseudo n'est lu, tout est dans la bibliothèque.
+chaque formule pour l'adversaire (`opponentNames`) et chaque nombre de ballons rendus. En match, la voix est déjà prête.
+On part du principe que la bande joue toujours entre elle : un coéquipier hors de `players` serait lu par son pseudo, généré en direct.
 Moins il y a de formules, moins il y a de phrases à générer.
 
 ```
