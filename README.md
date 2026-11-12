@@ -164,6 +164,7 @@ Pour désactiver : `"recordMatches": false` dans `config.json`. `node capture.js
 | Joueurs de la bande (`players` : le nom dit → ses pseudos en jeu), formules pour l'adversaire (`opponentNames`), prononciation (`pronunciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
 | Voix et rotation (`voice`) | `config.json` | Tout de suite (sauf le volume) |
 | Bruitage avant chaque phrase (`voice.jingle` : `true` pour le ding, `false`, ou le chemin d'un son à toi) | `config.json` | Tout de suite |
+| Règles actives ou coupées (`rules`, voir REGLES.md) | `config.json` | Tout de suite |
 | Seuils de détection (distances, durées…) | `config.json` → `thresholds` | Tout de suite |
 | Token, salon, volume, vérification de l'API (`rocketLeague`) | `config.json` | Au prochain lancement |
 

@@ -11,6 +11,7 @@ const { readConfig } = require("./config");
 const { estimateCost } = require("./tts");
 const { LABELS } = require("./feedback");
 const { OPPONENT_NAMES } = require("./phrases");
+const { ruleEnabled } = require("./rules");
 
 // Variables that name an opponent (all the others name one of our players)
 const OPPONENT_VARS = {
@@ -46,11 +47,12 @@ const each = (v, c, list) => list.map((x) => ({ ...c, values: { ...c.values, [v]
 // All the lines of the library: [{ key, text }], without duplicates
 function lines(phrases) {
   const all = phrases.all();
-  const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES } = readConfig();
+  const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES, rules } = readConfig();
   const people = { players, opponentNames };
   const seen = new Set();
   const out = [];
   for (const key of situations(all)) {
+    if (!ruleEnabled(rules, key)) continue;
     const node = phrases.node(key, all);
     const declared = [...(node._variables || "").matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
     const opponents = declared.filter((v) => (OPPONENT_VARS[key] || []).includes(v));

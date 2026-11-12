@@ -61,3 +61,10 @@ test("thresholds from config: a stricter tap-in disappears, then becomes a near 
   assert.ok(!comments.includes("tapIn → MonPseudo"));
   assert.ok(nearMisses.some((n) => n.key === "tapIn" && n.target === "MonPseudo"));
 });
+
+test("a rule switched off is not detected at all", () => {
+  const { comments, facts } = replay({ ...example, rules: { tapIn: false, "finish.topCorner": false } });
+  assert.ok(!comments.some((c) => c.startsWith("tapIn") || c.startsWith("finish")));
+  assert.ok(!facts.some((f) => f.startsWith("tapIn") || f.startsWith("finish")));
+  assert.ok(comments.includes("ghost → Coequipier1"), "the other rules still work");
+});

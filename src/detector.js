@@ -9,6 +9,7 @@
 
 const EventEmitter = require("events");
 const { squadName } = require("./names");
+const { ruleEnabled } = require("./rules");
 
 const GOAL_LINE = 5120;
 
@@ -67,7 +68,7 @@ const findLastIndex = (arr, fn) => { for (let i = arr.length - 1; i >= 0; i--) i
 const condition = (name, key, value, direction, unit) => ({ name, key, value, direction, unit });
 
 class Detector extends EventEmitter {
-  // options() returns { target, players, thresholds } (re-read from config.json every time)
+  // options() returns { target, players, rules, thresholds } (re-read from config.json every time)
   constructor({ options = () => ({}) } = {}) {
     super();
     this.options = options;
@@ -129,10 +130,16 @@ class Detector extends EventEmitter {
     return this.feed.some((f) => ["Shot", "Save", "EpicSave"].includes(f.type) && f.name === name && f.t >= t - 100 && f.t <= t + this.S.shotDelayMs);
   }
 
-  // Fact for the evening recap (always counted, even when not commented)
-  fact(type, name) {
+  // Switched off in config.json → rules: not detected at all
+  enabled(key) {
+    return ruleEnabled((this.options() || {}).rules, key);
+  }
+
+  // Fact for the evening recap (always counted, even when not commented). key: the situation, the recap counts its family.
+  fact(key, name) {
+    if (!this.enabled(key)) return;
     const p = this.players.get(name);
-    if (p && this.ourTeams().has(p.team)) this.emit("fact", { type, player: name });
+    if (p && this.ourTeams().has(p.team)) this.emit("fact", { type: key.split(".")[0], player: name });
   }
 
   // With an opponent shot: "giveaway.shot". Without one, only for a ball sent far back: "giveaway.backward".
@@ -182,13 +189,14 @@ class Detector extends EventEmitter {
 
   // Said out loud: only for a player of our team (see isTarget)
   emitComment(key, vars, live = false, measures) {
-    if (!this.isTarget(key, vars)) return false;
+    if (!this.enabled(key) || !this.isTarget(key, vars)) return false;
     this.emit("comment", { ...this.context(key, vars, measures), live });
     return true;
   }
 
   // Detected but not said (other team, or not the priority on this goal): kept for the votes
   emitDetection(key, vars, live = false, measures) {
+    if (!this.enabled(key)) return;
     this.emit("detection", { ...this.context(key, vars, measures), live });
   }
 
@@ -198,6 +206,7 @@ class Detector extends EventEmitter {
   }
 
   emitNearMiss(key, vars, measures) {
+    if (!this.enabled(key)) return false;
     this.emit("nearMiss", this.context(key, vars, measures));
     return true;
   }
@@ -205,7 +214,7 @@ class Detector extends EventEmitter {
   // Live comment: never during a replay, and spaced out from the others. Returns "spoken",
   // "detected" (other team: kept for the votes, without using up the spacing) or false.
   live(key, vars, t, measures) {
-    if (!this.inPlay) return false;
+    if (!this.inPlay || !this.enabled(key)) return false;
     if (!this.isTarget(key, vars)) {
       this.emitDetection(key, vars, true, measures);
       return "detected";
@@ -214,7 +223,7 @@ class Detector extends EventEmitter {
     this.lastLiveT = t;
     const type = key.split(".")[0];
     // Giveaways are counted when the ball is picked up, not here
-    if (type !== "giveaway") this.fact(type, vars[TARGET[type]]);
+    if (type !== "giveaway") this.fact(key, vars[TARGET[type]]);
     this.emitComment(key, vars, true, measures);
     return "spoken";
   }
@@ -602,11 +611,11 @@ class Detector extends EventEmitter {
     // Everything counts for the recap (a choke is already a missed save, giveaways are counted separately)
     for (const [k, { vars }] of Object.entries(found)) {
       const type = k.split(".")[0];
-      if (type !== "choke" && type !== "giveaway") this.fact(type, vars[TARGET[type]]);
+      if (type !== "choke" && type !== "giveaway" && this.enabled(k)) this.fact(k, vars[TARGET[type]]);
     }
 
     // The spiciest situation among those targeting a player of our team is said; all the others are detections
-    const key = GOAL_PRIORITY.find((k) => found[k] && this.isTarget(k, found[k].vars));
+    const key = GOAL_PRIORITY.find((k) => found[k] && this.enabled(k) && this.isTarget(k, found[k].vars));
     if (key) this.emitComment(key, found[key].vars, false, found[key].measures);
     for (const k of GOAL_PRIORITY) {
       if (found[k] && k !== key) this.emitDetection(k, found[k].vars, false, found[k].measures);
@@ -637,7 +646,7 @@ class Detector extends EventEmitter {
       condition("écart au centre de la cage", "topCornerMinSideOffset", Math.abs(X), "min", "uu"),
     ]);
     if (topCorner.ok) {
-      this.fact("finish", g.scorer);
+      this.fact("finish.topCorner", g.scorer);
       this.report("finish.topCorner", vars, topCorner.measures);
     } else if (topCorner.nearMiss) {
       this.emitNearMiss("finish.topCorner", vars, topCorner.measures);

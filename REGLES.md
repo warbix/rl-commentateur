@@ -195,6 +195,26 @@ Fréquence mesurée : 12 sur les 14 premiers matchs enregistrés.
 
 ---
 
+## Activer ou désactiver une règle
+
+Dans `config.json` → `rules`, chaque règle vaut `true` (active) ou `false` (coupée), même pendant que le bot tourne.
+On peut couper une famille entière (`"giveaway": false`) ou une seule variante (`"giveaway.ofTheMatch": false`, `"nearGoal.post": false`).
+Une règle coupée n'est plus détectée du tout : pas de voix, pas de message à voter, rien dans le bilan, et ses phrases sortent de la bibliothèque de voix.
+
+| Clé | Règle |
+|---|---|
+| `tapIn` | Tap-in |
+| `steal` | Vol de but |
+| `missedSave` | Arrêt manqué |
+| `finish` | Lucarne |
+| `adminAssist` | Passe décisive par procuration |
+| `mvp` | MVP illégitime |
+| `ghost` | Fantôme |
+| `choke` | Craquage |
+| `giveaway` | Bénévole, presque passe décisive à l'adversaire, bénévole du match |
+| `teamBlock` | Arrêt pour l'adversaire |
+| `nearGoal` | Barre, poteau, équerre |
+
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un joueur de la bande (`players`). Les comptes d'un même joueur comptent comme un seul.

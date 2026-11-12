@@ -65,6 +65,20 @@
   "pregenerate": true,
   "_recordMatches": "Records every match in matches/ (replayable with --replay), with the bot's comments in it.",
   "recordMatches": true,
+  "_rules": "Rules switched on (true) or off (false), by family or one by one (e.g. \"giveaway.ofTheMatch\": false). A rule that is off is not detected at all: no voice, no post, nothing in the recap. See REGLES.md. Can be changed while the bot is running.",
+  "rules": {
+    "tapIn": true,
+    "steal": true,
+    "teamBlock": true,
+    "missedSave": true,
+    "choke": true,
+    "finish": true,
+    "nearGoal": true,
+    "adminAssist": true,
+    "mvp": true,
+    "ghost": true,
+    "giveaway": true
+  },
   "_thresholds": "Detection thresholds (see REGLES.md). Distances in game units (100 = 1 m), speeds in km/h, durations in ms. Can be changed while the bot is running; npm run calibrate suggests values from your votes.",
   "thresholds": {
     "tapInMaxDistance": 900,
