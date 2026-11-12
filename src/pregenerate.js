@@ -7,6 +7,7 @@
 //
 // The page is cache/library.html: open it in a browser to listen to everything.
 
+const fs = require("fs");
 const path = require("path");
 const { Phrases } = require("./phrases");
 const { TTS } = require("./tts");
@@ -50,7 +51,8 @@ async function main() {
 
   if (flag("--prune")) console.log(`${library.prune(CACHE, st.entries)} unused voice files removed.`);
   const page = path.join(CACHE, "library.html");
-  library.writePage(page, st.entries);
+  // Only the lines already generated (a dry run must not list voices that do not exist)
+  library.writePage(page, st.entries.filter((e) => fs.existsSync(e.file)));
   console.log(`To listen to everything: ${page}`);
 }
 
