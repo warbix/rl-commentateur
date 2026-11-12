@@ -18,7 +18,9 @@ const DEFAULTS = {
   // Tap-in: a ball pushed in from close, touched low, slow, and not placed high in the goal (no pass needed)
   tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxSpeed: 50, tapInMaxTouchHeight: 250, tapInMaxImpactHeight: 300,
   shotDelayMs: 300,
-  stealMaxDistance: 1500,
+  // Steal: a teammate's shot on target, touched close to the goal by the scorer. The game reports "Shot" up to
+  // a few seconds after the touch (half the time after 0.5 s, sometimes after the next touch): stealShotWindowMs.
+  stealMaxDistance: 1500, stealShotWindowMs: 2000,
   // Own goal: the last touch before the goal is the conceding team's, and the ball was not already going in
   ownGoalMaxMs: 3000, ownGoalOnLineDistance: 1000, ownGoalShotWindowMs: 3000,
   topCornerMinHeight: 450, topCornerMinSideOffset: 550,
@@ -524,12 +526,15 @@ class Detector extends EventEmitter {
 
       if (mate) {
 
-        const mateShot = this.feed.some((f) => f.type === "Shot" && f.name === mate.name && f.t >= prev.t && f.t <= prev.t + S.shotDelayMs);
+        // The teammate's touch was on target: "Shot" for him, from just before his touch (sometimes sent first) to the goal
+        const mateShot = this.feed.find((f) => f.type === "Shot" && f.name === mate.name && f.t >= prev.t - 200 && f.t <= Math.min(t, prev.t + S.stealShotWindowMs));
         const onlyScorerAfter = hits.slice(iFirst).every((h) => h.players.every((p) => p.name === scorer));
         if (mateShot && onlyScorerAfter) {
           const farthest = Math.max(...hits.slice(iFirst, iS + 1).map((h) => distToOpponentGoal(TS, h.loc.Y)));
           const v = this.evaluate([condition("touches du voleur à la ligne", "stealMaxDistance", farthest, "max", "uu")]);
-          if (v.ok) found.steal = { vars: { thief: scorer, victim: mate.name }, measures: v.measures };
+          const measures = [...v.measures, { name: "tir cadré annoncé après la touche du coéquipier", value: mateShot.t - prev.t, unit: "ms" },
+            { name: "touche du voleur après celle du coéquipier", value: hits[iFirst].t - prev.t, unit: "ms" }];
+          if (v.ok) found.steal = { vars: { thief: scorer, victim: mate.name }, measures };
         }
       }
     }

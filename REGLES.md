@@ -44,15 +44,17 @@ Fréquence mesurée : 3 sur 39 matchs enregistrés (le seuil de vitesse est le p
 **Idée** : la balle rentrait toute seule, un coéquipier l'a touchée pour se l'attribuer.
 
 **Réponse à la question** : oui, on peut le savoir de façon fiable grâce au `Shot` du jeu. Quand une touche
-part cadrée, le jeu envoie `Shot` dans la foulée ; on n'a pas à refaire la physique nous-mêmes.
+part cadrée, le jeu envoie `Shot` ; on n'a pas à refaire la physique nous-mêmes.
 
 **Règle** — sur `GoalScored` (buteur S) :
-- Un coéquipier A a touché la balle et un `Shot` de A a suivi **≤ 0,3 s** après cette touche
+- Un coéquipier A a touché la balle et le jeu a annoncé un **tir cadré** (`Shot`) de A : la balle allait au but.
+  Le jeu l'annonce souvent tard (la moitié du temps plus de 0,5 s après la touche, parfois après la touche suivante) :
+  on accepte un `Shot` jusqu'à **2 s** après la touche de A (`stealShotWindowMs`), et avant le but ⚙️
 - Entre cette touche de A et le but : **aucune touche adverse**, seulement des touches de S
-- Les touches de S sont à **≤ 1500** de la ligne ⚙️ (on ne parle pas d'un relais au milieu du terrain)
-- Bonus « vol à l'arraché » : S a **ralenti** la balle (`PostHitSpeed < PreHitSpeed`)
+- Les touches de S sont à **≤ 15 m** de la ligne (`stealMaxDistance`) ⚙️ : il la touche au dernier moment, devant la cage
 
 **Cible** : S (le voleur), en citant A. **Quand** : pendant le replay.
+Fréquence mesurée : 8 sur 39 matchs enregistrés (3 avec l'ancienne fenêtre de 0,3 s).
 _Exemple réel_ : un but en prolongation n'est **pas** un vol — le dernier tir cadré du coéquipier date de 2,4 s,
 et sa dernière touche (0,7 s avant) n'était pas cadrée.
 

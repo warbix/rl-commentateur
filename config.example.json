@@ -87,6 +87,7 @@
     "tapInMaxImpactHeight": 300,
     "shotDelayMs": 300,
     "stealMaxDistance": 1500,
+    "stealShotWindowMs": 2000,
     "ownGoalMaxMs": 3000,
     "ownGoalOnLineDistance": 1000,
     "ownGoalShotWindowMs": 3000,
