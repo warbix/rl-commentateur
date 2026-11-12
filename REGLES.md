@@ -28,15 +28,17 @@ le 2e (pendant le replay, `Scorer.Name` vide) contient le **bon** `ImpactLocatio
 ---
 
 ## 1. Tap-in 🥱
-**Idée** : le buteur n'a fait que pousser une balle servie sur un plateau.
+**Idée** : le buteur n'a eu qu'à pousser la balle, tout près du but. Pas besoin de passe.
 
-**Règle** — sur `GoalScored` :
-- Dernière touche du buteur à **≤ 900** de la ligne adverse et **|X| ≤ 1200** ⚙️
-- Balle après sa touche **≤ 50 km/h** ⚙️
-- Un **coéquipier** a touché la balle **≤ 2 s** avant ⚙️, sans touche adverse entre-temps qui ait relancé l'action
-- Le buteur a fait **≤ 2 touches** dans l'action
+**Règle** — sur `GoalScored`, décidé pendant le replay (le 2e `GoalScored` donne le point d'impact dans la cage) :
+- Dernière touche du buteur à **≤ 9 m** de la ligne adverse (`tapInMaxDistance`) et à **≤ 12 m** du centre sur le côté (`tapInMaxSideOffset`) ⚙️
+- Touchée **pas haut** : balle à **≤ 2,5 m** du sol au moment de la touche (`tapInMaxTouchHeight`) ⚙️
+- Balle **poussée** : **≤ 50 km/h** après la touche (`tapInMaxSpeed`) ⚙️
+- **Pas placée** : elle entre à **≤ 3 m** de haut dans la cage (`tapInMaxImpactHeight`), donc ni sous la barre ni en lucarne ⚙️
+- Un défenseur qui la touche après sans l'arrêter ne change rien
 
 **Cible** : le buteur. **Quand** : pendant le replay.
+Fréquence mesurée : 3 sur 39 matchs enregistrés (le seuil de vitesse est le plus strict, à ajuster avec les votes).
 
 ## 2. Vol de but 🦹
 **Idée** : la balle rentrait toute seule, un coéquipier l'a touchée pour se l'attribuer.

@@ -15,7 +15,8 @@ const GOAL_LINE = 5120;
 
 // Default thresholds ⚙️ (see REGLES.md). Distances in game units (1 = 1 cm), speeds in km/h, durations in ms.
 const DEFAULTS = {
-  tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxSpeed: 50, tapInMaxGapMs: 2000, tapInMaxTouches: 2,
+  // Tap-in: a ball pushed in from close, touched low, slow, and not placed high in the goal (no pass needed)
+  tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxSpeed: 50, tapInMaxTouchHeight: 250, tapInMaxImpactHeight: 300,
   shotDelayMs: 300,
   stealMaxDistance: 1500,
   // Own goal: the last touch before the goal is the conceding team's, and the ball was not already going in
@@ -47,7 +48,8 @@ const DEFAULTS = {
 };
 
 // Priority when several rules fire on the same goal
-const GOAL_PRIORITY = ["steal", "giveaway.goal", "ownGoal", "tapIn", "adminAssist"];
+// (the tap-in is decided during the replay, once the impact point in the goal is known: it comes after these)
+const GOAL_PRIORITY = ["steal", "giveaway.goal", "ownGoal", "adminAssist"];
 // Near misses that can be offered on a goal, by priority
 const NEAR_MISS_PRIORITY = ["ownGoal", "tapIn", "adminAssist"];
 
@@ -496,27 +498,31 @@ class Detector extends EventEmitter {
     const found = {}; // key → { vars, measures }
     const nearMisses = {}; // family → { key, vars, measures }
 
-    // Tap-in and goal steal: the scorer's sequence of touches and what comes before it
+    // Tap-in: the scorer's last touch is close to the line, low and slow (a defender touching it after
+    // without stopping it changes nothing). The impact point in the goal is only known during the replay:
+    // decided then (see onReplayGoal).
+    let tapIn = null;
     const iS = findLastIndex(hits, (h) => has(h, scorer));
     if (iS >= 0) {
       const lastS = hits[iS];
+      const r = this.evaluate([
+        condition("dernière touche à la ligne", "tapInMaxDistance", distToOpponentGoal(TS, lastS.loc.Y), "max", "uu"),
+        condition("décalage sur le côté", "tapInMaxSideOffset", Math.abs(lastS.loc.X), "max", "uu"),
+        condition("hauteur de la touche", "tapInMaxTouchHeight", lastS.loc.Z, "max", "uu"),
+        condition("vitesse après la touche", "tapInMaxSpeed", lastS.post, "max", "kmh"),
+      ]);
+      if (r.ok) tapIn = { vars: { scorer }, measures: r.measures };
+      else if (r.nearMiss) nearMisses.tapIn = { key: "tapIn", vars: { scorer }, measures: r.measures };
+    }
+
+    // Goal steal: the scorer's sequence of touches and what comes before it
+    if (iS >= 0) {
       let iFirst = iS;
       while (iFirst > 0 && hits[iFirst - 1].players.length === 1 && hits[iFirst - 1].players[0].name === scorer) iFirst--;
-      const scorerTouches = iS - iFirst + 1;
       const prev = hits[iFirst - 1];
       const mate = prev && onlyTeam(prev, TS) ? prev.players.find((p) => p.name !== scorer) : null;
 
       if (mate) {
-        const vars = { scorer, passer: mate.name };
-        const r = this.evaluate([
-          condition("dernière touche à la ligne", "tapInMaxDistance", distToOpponentGoal(TS, lastS.loc.Y), "max", "uu"),
-          condition("décalage sur le côté", "tapInMaxSideOffset", Math.abs(lastS.loc.X), "max", "uu"),
-          condition("vitesse après la touche", "tapInMaxSpeed", lastS.post, "max", "kmh"),
-          condition("délai depuis la passe", "tapInMaxGapMs", hits[iFirst].t - prev.t, "max", "ms"),
-          condition("touches du buteur", "tapInMaxTouches", scorerTouches, "max", "n"),
-        ]);
-        if (r.ok) found.tapIn = { vars, measures: r.measures };
-        else if (r.nearMiss) nearMisses.tapIn = { key: "tapIn", vars, measures: r.measures };
 
         const mateShot = this.feed.some((f) => f.type === "Shot" && f.name === mate.name && f.t >= prev.t && f.t <= prev.t + S.shotDelayMs);
         const onlyScorerAfter = hits.slice(iFirst).every((h) => h.players.every((p) => p.name === scorer));
@@ -588,7 +594,6 @@ class Detector extends EventEmitter {
     }
 
     // Blunders for the undeserved MVP
-    if (found.tapIn) this.addBlunder(scorer);
     if (found.steal) this.addBlunder(scorer);
     if (found.adminAssist) this.addBlunder(assister);
     if (found.ownGoal) this.addBlunder(found.ownGoal.vars.defender);
@@ -605,12 +610,8 @@ class Detector extends EventEmitter {
     for (const k of GOAL_PRIORITY) {
       if (found[k] && k !== key) this.emitDetection(k, found[k].vars, false, found[k].measures);
     }
-    if (key) {
-      this.pendingGoal = null;
-    } else {
-      // Nothing spicy: wait for the 2nd GoalScored (replay) for the top corner
-      this.pendingGoal = { t, scorer, speed: d.GoalSpeed || 0 };
-    }
+    // Wait for the 2nd GoalScored (replay) and its impact point: tap-in, or top corner if nothing was said
+    this.pendingGoal = { t, scorer, speed: d.GoalSpeed || 0, tapIn, said: !!key };
 
     // One near miss per goal at most (any team), from another family than the comment made
     const done = key ? key.split(".")[0] : null;
@@ -626,6 +627,22 @@ class Detector extends EventEmitter {
     this.pendingGoal = null;
     const { X, Z } = d.ImpactLocation;
     const vars = { scorer: g.scorer };
+
+    // Tap-in: not placed high in the goal (under the crossbar or in the top corner, it is a real finish)
+    if (g.tapIn) {
+      const low = this.evaluate([condition("hauteur dans la cage", "tapInMaxImpactHeight", Z, "max", "uu")]);
+      const measures = [...g.tapIn.measures, ...low.measures];
+      if (low.ok) {
+        this.addBlunder(g.scorer);
+        this.fact("tapIn", g.scorer);
+        if (g.said) this.emitDetection("tapIn", vars, false, measures);
+        else this.report("tapIn", vars, measures);
+        return;
+      }
+      if (!g.said && low.nearMiss) this.emitNearMiss("tapIn", vars, measures);
+    }
+    if (g.said) return;
+
     const topCorner = this.evaluate([
       condition("hauteur dans la cage", "topCornerMinHeight", Z, "min", "uu"),
       condition("écart au centre de la cage", "topCornerMinSideOffset", Math.abs(X), "min", "uu"),

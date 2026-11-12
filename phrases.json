@@ -1,18 +1,18 @@
 {
   "_readme": "One line is drawn at random from the list of the situation (all lines go round before one comes back). {variables} are replaced by the spoken nicknames. Written to be read by a text-to-speech voice: no emoji, no abbreviations. A situation given as a string (\"backward\": \"giveaway.shot\") uses the lines of that other situation.",
   "tapIn": {
-    "_variables": "{scorer} = the scorer, {passer} = the teammate who passed",
+    "_variables": "{scorer} = the scorer, who only had to push the ball in",
     "phrases": [
-      "{scorer} pousse la balle depuis la ligne. Applaudissez bien fort {passer}, c'est lui qui a marqué.",
-      "Incroyable effort de {scorer}, il a dû parcourir au moins deux mètres. Merci {passer} pour le service à domicile.",
-      "But de {scorer}. Enfin, but de {passer}, mais c'est {scorer} qui signe le formulaire.",
+      "{scorer} pousse la balle depuis la ligne. Le plus dur, c'était de ne pas la rater.",
+      "Incroyable effort de {scorer}, il a dû parcourir au moins deux mètres. Qu'on lui apporte une serviette.",
+      "But de {scorer}. Il avait le choix entre marquer et marquer. Choix difficile, bien géré.",
       "{scorer}, même ma grand-mère le met celui-là. Les yeux fermés. Avec une manette débranchée.",
-      "{passer} a fait quatre-vingt-dix-neuf pour cent du travail, {scorer} prend cent pour cent des points. Classique.",
+      "{scorer} pousse une balle qui ne demandait qu'à rentrer. Un geste de pure fainéantise.",
       "{scorer} vient de marquer le but le plus facile de sa vie, et il va quand même s'en vanter toute la soirée.",
       "Tap-in de {scorer}. Un vrai renard des surfaces. Enfin, un renard qui attend qu'on lui ouvre la porte du poulailler.",
-      "{passer} prépare le plat, le découpe et le met dans la bouche de {scorer}. {scorer} mâche. Bravo.",
+      "{scorer} n'avait rien d'autre à faire que d'être là. Mission accomplie, c'est déjà ça.",
       "{scorer} marque à un mètre de la ligne. Si tu rates celui-là, tu désinstalles le jeu.",
-      "Le but de {scorer} est offert par {passer}. {scorer}, tu lui dois au minimum un kebab."
+      "But de {scorer}, à la vitesse d'un caddie sur un parking. Mais ça compte."
     ]
   },
   "steal": {
