@@ -5,8 +5,8 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 process.argv.push("--config", path.join(ROOT, "config.example.json"));
-const { Phrases } = require("../src/phrases");
-const { sameName } = require("../src/names");
+const { Phrases, UNKNOWN_NAMES } = require("../src/phrases");
+const { sameName, squadName } = require("../src/names");
 
 const all = JSON.parse(fs.readFileSync(path.join(ROOT, "phrases.json"), "utf8"));
 
@@ -31,7 +31,7 @@ test("every situation has 10 lines that only use its declared variables", () => 
   }
 });
 
-test("every variable is replaced, one nickname per player", () => {
+test("every variable is replaced, and a player of the squad is said by their spoken name", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
   for (const [key, node] of situations()) {
     const declared = [...node._variables.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
@@ -39,18 +39,29 @@ test("every variable is replaced, one nickname per player", () => {
     for (let i = 0; i < 10; i++) {
       const text = phrases.pick(key, vars);
       assert.doesNotMatch(text, /\{\w+\}/, `${key}: ${text}`);
-      const said = ["Mon surnom", "Jojo"].filter((s) => text.includes(s));
-      assert.ok(said.length <= 1, `${key}: two different nicknames: ${text}`);
+      assert.doesNotMatch(text, /MonPseudo/, `${key}: in-game name said: ${text}`);
     }
   }
 });
 
-test("pronunciation: MVP and unknown names", () => {
+test("pronunciation, the squad's spoken names, and unknown teammates", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
   assert.strictEqual(phrases.pronounce("Le MVP du match"), "Le aime vie pie du match");
-  assert.strictEqual(phrases.say(".officer_tom"), "officer tom");
+  // Recap: in-game name or spoken name → spoken name; anyone else → the readable in-game name
+  assert.strictEqual(phrases.say("MonPséudo"), "Jojo");
+  assert.strictEqual(phrases.say("Jojo"), "Jojo");
   assert.strictEqual(phrases.say("XX-_Pseudo_-XX"), "XX Pseudo XX");
   assert.strictEqual(phrases.say("?Pseudo?"), "Pseudo");
+  // In a line: a teammate outside the squad is said with a formula, or by the readable name if there is none
+  assert.ok(UNKNOWN_NAMES.includes(phrases.spokenName(".officer_tom", { Jojo: ["MonPseudo"] })));
+  assert.strictEqual(phrases.spokenName(".officer_tom", {}, []), "officer tom");
+});
+
+test("two accounts of one player count as one", () => {
+  const players = { Arnaud: ["MonCompteSteam", "MonCompteEpic"] };
+  assert.strictEqual(squadName(players, "MonCompteEpic"), "Arnaud");
+  assert.strictEqual(squadName(players, "moncomptesteam"), "Arnaud");
+  assert.strictEqual(squadName(players, "Adversaire1"), undefined);
 });
 
 test("names: accents, spaces and truncated names", () => {
@@ -64,8 +75,8 @@ test("names: accents, spaces and truncated names", () => {
 test("elision before a name starting with a vowel", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
   for (let i = 0; i < 20; i++) {
-    const text = phrases.pick("missedSave.escorted", { defender: "Arnaud", scorer: "Adversaire1" });
-    assert.doesNotMatch(text, /\b[dD]e Arnaud|\b[qQ]ue Arnaud|\bde Adversaire1/, text);
+    const text = phrases.pick("missedSave.escorted", { defender: "Coequipier2", scorer: "Adversaire1" }, { opponents: ["Adversaire1"] });
+    assert.doesNotMatch(text, /\b[dD]e Albert|\b[qQ]ue Albert|\bde un\b/, text);
   }
 });
 
@@ -79,8 +90,8 @@ test("the 5 lines of a situation all come out before one comes back, never twice
 
 test("a situation can borrow the lines of another one", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
-  const text = phrases.pick("giveaway.backward", { giver: "MonPseudo", opponent: "Adversaire1" });
-  assert.match(text, /Adversaire1/);
+  const text = phrases.pick("giveaway.backward", { giver: "MonPseudo", opponent: "Adversaire1" }, { opponents: ["Adversaire1"] });
+  assert.match(text, /Jojo/);
   assert.doesNotMatch(text, /\{\w+\}/);
 });
 

@@ -1,16 +1,18 @@
 // Voice library: every line the bot can say about the squad, generated in advance.
 // For each situation of phrases.json, each of its lines is filled with every possible cast:
-//   - our players: the names in config.json → nicknames, with each of their nicknames
+//   - our players: the spoken names of config.json → players, and a teammate outside the squad
+//     with each formula of unknownNames ("notre random"…)
 //   - the opponent: each formula of opponentNames ("l'adversaire"…)
 //   - numbers: every plausible value (balls given away in a match)
 // The text comes out exactly as during a match (same code), so the voice found in the cache is the right one.
-// Only an unknown player (a random teammate) is still generated live.
+// Only a line with two teammates outside the squad is still generated live.
 
 const fs = require("fs");
 const path = require("path");
 const { readConfig } = require("./config");
 const { estimateCost } = require("./tts");
 const { LABELS } = require("./feedback");
+const { OPPONENT_NAMES, UNKNOWN_NAMES } = require("./phrases");
 
 // Variables that name an opponent (all the others name one of our players)
 const OPPONENT_VARS = {
@@ -22,7 +24,6 @@ const OPPONENT_VARS = {
 };
 // Values a number can take in a spoken line
 const NUMBERS = { count: [3, 4, 5, 6, 7, 8, 9, 10] };
-const OPPONENT_NAMES = ["l'adversaire", "un joueur d'en face", "un joueur de l'équipe adverse", "un adversaire"];
 
 // Every situation with its own lines (aliases like "backward": "giveaway.shot" are skipped: same lines)
 function situations(node, prefix = "") {
@@ -31,25 +32,27 @@ function situations(node, prefix = "") {
     .flatMap(([k, v]) => situations(v, prefix ? `${prefix}.${k}` : k));
 }
 
-// Every way to give each variable a value. ours: one different player for each, then one nickname per player.
-function casts(ours, opponents, numbers, nicknames) {
-  const players = Object.keys(nicknames).filter((p) => nicknames[p].length);
+// Every way to give each variable a value. ours: a different player for each (the squad, and at most one teammate
+// outside it, said with each formula of unknownNames).
+function casts(ours, opponents, numbers, { players, opponentNames, unknownNames }) {
+  const people = Object.keys(players).map((name) => ({ id: name, names: [name] }));
+  if (unknownNames.length) people.push({ id: "?", names: unknownNames });
   let result = [{ values: {}, used: [] }];
   for (const v of ours) {
-    result = result.flatMap((c) => players.filter((p) => !c.used.includes(p))
-      .flatMap((p) => nicknames[p].map((nick) => ({ values: { ...c.values, [v]: nick }, used: [...c.used, p] }))));
+    result = result.flatMap((c) => people.filter((p) => !c.used.includes(p.id))
+      .flatMap((p) => p.names.map((name) => ({ values: { ...c.values, [v]: name }, used: [...c.used, p.id] }))));
   }
-  for (const v of opponents) result = result.flatMap((c) => numbersOr(v, c, opponentNamesList()));
-  for (const v of numbers) result = result.flatMap((c) => numbersOr(v, c, NUMBERS[v]));
+  for (const v of opponents) result = result.flatMap((c) => each(v, c, opponentNames));
+  for (const v of numbers) result = result.flatMap((c) => each(v, c, NUMBERS[v]));
   return result.map((c) => c.values);
 }
-const numbersOr = (v, c, list) => list.map((x) => ({ ...c, values: { ...c.values, [v]: x } }));
-const opponentNamesList = () => readConfig().opponentNames || OPPONENT_NAMES;
+const each = (v, c, list) => list.map((x) => ({ ...c, values: { ...c.values, [v]: x } }));
 
 // All the lines of the library: [{ key, text }], without duplicates
 function lines(phrases) {
   const all = phrases.all();
-  const { nicknames = {}, pronunciation = {} } = readConfig();
+  const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES, unknownNames = UNKNOWN_NAMES } = readConfig();
+  const people = { players, opponentNames, unknownNames };
   const seen = new Set();
   const out = [];
   for (const key of situations(all)) {
@@ -61,7 +64,7 @@ function lines(phrases) {
     for (const line of node.phrases) {
       const used = new Set([...line.matchAll(/\{(\w+)\}/g)].map((m) => m[1]));
       // Only the variables of this line: a line without {count} is not repeated for every count
-      const cast = casts(ours.filter((v) => used.has(v)), opponents.filter((v) => used.has(v)), numbers.filter((v) => used.has(v)), nicknames);
+      const cast = casts(ours.filter((v) => used.has(v)), opponents.filter((v) => used.has(v)), numbers.filter((v) => used.has(v)), people);
       for (const values of cast) {
         const text = phrases.render(line, (v) => values[v], pronunciation);
         if (seen.has(text)) continue;

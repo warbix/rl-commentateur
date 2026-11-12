@@ -5,7 +5,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { findKey } = require("./names");
+const { squadName } = require("./names");
 
 // ✅ and 👍 = "well spotted" / "it should have been said"; ❌ and 👎 = the opposite
 const FOR = ["✅", "👍"];
@@ -25,10 +25,10 @@ const LABELS = {
 const PERSONAL = ["ghost"];
 
 // Should the squad be asked to vote on this trigger? Everything that can be seen on the pitch or in the replay
-// (goals, saves, giveaways, MVP…) for both teams; the ghost only for a player listed in nicknames.
-function isVotable(e, nicknames = {}) {
+// (goals, saves, giveaways, MVP…) for both teams; the ghost only for a player of the squad (config.json → players).
+function isVotable(e, players = {}) {
   if (!PERSONAL.includes(e.key.split(".")[0])) return true;
-  return findKey(Object.keys(nicknames), e.target) !== undefined;
+  return squadName(players, e.target) !== undefined;
 }
 
 const pad = (n) => String(n).padStart(2, "0");

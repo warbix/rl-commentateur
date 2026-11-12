@@ -52,7 +52,7 @@ test("recap: facts and win", () => {
 });
 
 test("no known name: silence", () => {
-  assert.deepStrictEqual(replay({ ...example, nicknames: {} }).comments, []);
+  assert.deepStrictEqual(replay({ ...example, players: {} }).comments, []);
 });
 
 test("thresholds from config: a stricter tap-in disappears, then becomes a near miss", () => {

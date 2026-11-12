@@ -8,7 +8,7 @@
 // Thresholds come from config.json → thresholds (re-read on every event), otherwise from the defaults below.
 
 const EventEmitter = require("events");
-const { findKey } = require("./names");
+const { squadName } = require("./names");
 
 const GOAL_LINE = 5120;
 
@@ -67,7 +67,7 @@ const findLastIndex = (arr, fn) => { for (let i = arr.length - 1; i >= 0; i--) i
 const condition = (name, key, value, direction, unit) => ({ name, key, value, direction, unit });
 
 class Detector extends EventEmitter {
-  // options() returns { target, nicknames, thresholds } (re-read from config.json every time)
+  // options() returns { target, players, thresholds } (re-read from config.json every time)
   constructor({ options = () => ({}) } = {}) {
     super();
     this.options = options;
@@ -118,11 +118,10 @@ class Detector extends EventEmitter {
     return { ok, nearMiss: !ok && measures.every((m) => m.close), measures };
   }
 
-  // The teams with at least one name listed in nicknames
+  // The teams with at least one player of the squad (config.json → players)
   ourTeams() {
-    const { nicknames = {} } = this.options() || {};
-    const known = Object.keys(nicknames);
-    return new Set([...this.players.values()].filter((p) => findKey(known, p.name) !== undefined).map((p) => p.team));
+    const { players = {} } = this.options() || {};
+    return new Set([...this.players.values()].filter((p) => squadName(players, p.name) !== undefined).map((p) => p.team));
   }
 
   // Did the game report a shot on target or a save for this touch? Then it is not a ball handed back or a mere pass.
@@ -149,7 +148,7 @@ class Detector extends EventEmitter {
     this.fact("giveaway", name);
   }
 
-  // "our-team": only the teams with at least one name listed in nicknames are commented on
+  // "our-team": only the teams with at least one player of the squad are commented on
   isTarget(key, vars) {
     const { target = "our-team" } = this.options() || {};
     if (target === "everyone") return true;
@@ -157,7 +156,7 @@ class Detector extends EventEmitter {
     if (!ourTeams.size) {
       if (!this.warnedNoTeam && this.players.size) {
         this.warnedNoTeam = true;
-        this.emit("warning", "None of the nicknames is in this match: nobody will be commented on (add your in-game name to config.json → nicknames).");
+        this.emit("warning", "Nobody from the squad is in this match: nobody will be commented on (add your in-game name to config.json → players).");
       }
       return false;
     }

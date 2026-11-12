@@ -15,9 +15,14 @@ function sameName(a, b) {
   return short.length >= 8 && long.startsWith(short);
 }
 
-// The nicknames key matching this name, or undefined
+// The key matching this name, or undefined
 function findKey(keys, name) {
   return keys.find((k) => sameName(k, name));
 }
 
-module.exports = { normalize, sameName, findKey };
+// players (config.json): { spoken name: [in-game names] }. The spoken name of this in-game name, or undefined if not in the squad.
+function squadName(players, name) {
+  return Object.keys(players || {}).find((k) => (players[k] || []).some((account) => sameName(account, name)));
+}
+
+module.exports = { normalize, sameName, findKey, squadName };

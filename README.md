@@ -47,7 +47,7 @@ Tout tourne **sur ton PC** : pas de serveur à louer.
     "voiceChannelId": "l'identifiant copié à l'étape 2",
     "textChannelId": ""
   },
-  "nicknames": { "TonPseudoEnJeu": ["Ton surnom", "Un autre surnom"], ... },
+  "players": { "Ton surnom": ["TonPseudoSteam", "TonPseudoEpic"], "Un pote": ["SonPseudo"] },
   "voice": { "provider": "edge", "rotation": "line", "list": ["fr-FR-HenriNeural", ...], ... },
   ...
 }
@@ -161,7 +161,7 @@ Pour désactiver : `"recordMatches": false` dans `config.json`. `node capture.js
 |---|---|---|
 | Les phrases | `phrases.json` | Tout de suite, même pendant une partie |
 | Qui est commenté (`target` : `our-team` ou `everyone`) | `config.json` | Tout de suite |
-| Surnoms (`nicknames`) et prononciation (`pronunciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
+| Joueurs de la bande (`players` : le nom dit → ses pseudos en jeu), formules pour un coéquipier inconnu (`unknownNames`) et pour l'adversaire (`opponentNames`), prononciation (`pronunciation`, ex. « aime vie pie ») | `config.json` | Tout de suite |
 | Voix et rotation (`voice`) | `config.json` | Tout de suite (sauf le volume) |
 | Bruitage avant chaque phrase (`voice.jingle` : `true` pour le ding, `false`, ou le chemin d'un son à toi) | `config.json` | Tout de suite |
 | Seuils de détection (distances, durées…) | `config.json` → `thresholds` | Tout de suite |
@@ -172,9 +172,10 @@ Tu peux vider ce dossier sans risque.
 
 ### Bibliothèque de voix
 
-Toutes les phrases que le bot peut dire sur la bande sont générées à l'avance : chaque phrase de `phrases.json`, avec chaque joueur
-et chaque surnom de `nicknames`, chaque formule pour l'adversaire (`opponentNames`) et chaque nombre de ballons rendus.
-En match, la voix est déjà prête. Seul un joueur inconnu (un coéquipier de passage) est encore généré en direct.
+Toutes les phrases que le bot peut dire sont générées à l'avance : chaque phrase de `phrases.json`, avec chaque joueur de `players`,
+chaque formule pour un coéquipier hors de la bande (`unknownNames`, ex. « notre random ») et pour l'adversaire (`opponentNames`),
+et chaque nombre de ballons rendus. En match, la voix est déjà prête : aucun pseudo n'est lu, tout est dans la bibliothèque.
+Moins il y a de formules, moins il y a de phrases à générer.
 
 ```
 npm run pregenerate                 compte les phrases et génère celles qui manquent
@@ -186,7 +187,7 @@ La page `cache/library.html` permet de tout écouter, situation par situation.
 Pour l'écouter depuis un téléphone ou un autre PC du même réseau : `npm run library`, puis l'adresse « from the network » qu'il affiche
 (Windows demande la première fois d'autoriser Node.js sur les réseaux privés).
 Avec les voix gratuites, le bot complète aussi la bibliothèque tout seul au lancement (`"pregenerate": false` pour désactiver).
-Après un changement de phrase ou de surnom, seules les nouvelles phrases sont générées.
+Après un changement de phrase ou de joueur, seules les nouvelles phrases sont générées.
 
 ### Voix OpenAI (payantes)
 

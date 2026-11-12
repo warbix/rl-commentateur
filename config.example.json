@@ -6,20 +6,18 @@
     "_follow": "Discord members to follow, by priority (id, username or display name): the bot joins their voice channel and follows them when they move. Nobody in voice: voiceChannelId.",
     "follow": []
   },
-  "_target": "'our-team': only players of the team with at least one name from nicknames. 'everyone': both teams. Can be changed while the bot is running.",
+  "_target": "'our-team': only players of the team with at least one player from players. 'everyone': both teams. Can be changed while the bot is running.",
   "target": "our-team",
-  "_nicknames": "In-game name -> spoken nicknames, one drawn at random for each line. Case, accents, spaces and punctuation don't matter, and a name cut short by the game (8 characters or more) is recognized: MonSuperPseudo2000 = MonSuperPséudo20. These names also define our team. Unknown names are read as is. Can be changed while the bot is running.",
-  "nicknames": {
-    "MonPseudo": [
-      "Mon surnom",
-      "Jojo"
+  "_players": "Spoken name -> in-game names (one player can have several accounts: they count as one). Case, accents, spaces and punctuation don't matter, and a name cut short by the game (8 characters or more) is recognized: MonSuperPseudo2000 = MonSuperPséudo20. These players define our team. Can be changed while the bot is running.",
+  "players": {
+    "Jojo": [
+      "MonPseudo"
     ],
-    "Coequipier1": [
-      "Coéquipier un",
-      "Bébert"
+    "Bébert": [
+      "Coequipier1"
     ],
-    "Coequipier2": [
-      "Coéquipier deux"
+    "Albert": [
+      "Coequipier2"
     ]
   },
   "_opponentNames": "What the voice says instead of an opponent's name (one drawn at random). The Discord posts keep the real names.",
@@ -28,6 +26,12 @@
     "un joueur d'en face",
     "un joueur de l'équipe adverse",
     "un adversaire"
+  ],
+  "_unknownNames": "What the voice says instead of the name of a teammate who is not in players (one drawn at random), so that every line can be prepared in advance. Empty list: the in-game name is read.",
+  "unknownNames": [
+    "notre coéquipier du jour",
+    "notre random",
+    "notre coéquipier de passage"
   ],
   "_pronunciation": "Words replaced right before the voice, so that it says them correctly. Can be changed while the bot is running.",
   "pronunciation": {
@@ -63,7 +67,7 @@
       "instructions": "Tu es un commentateur sportif français, moqueur et piquant. Parle en français de France, avec un ton ironique et vivant."
     }
   },
-  "_pregenerate": "Voice library: every line about the squad (nicknames) is generated in advance, so it plays without waiting. With the free voices the missing ones are made in the background at launch; with paid voices, only with npm run pregenerate (which shows the cost first).",
+  "_pregenerate": "Voice library: every line (players, unknownNames, opponentNames) is generated in advance, so it plays without waiting. With the free voices the missing ones are made in the background at launch; with paid voices, only with npm run pregenerate (which shows the cost first).",
   "pregenerate": true,
   "_recordMatches": "Records every match in matches/ (replayable with --replay), with the bot's comments in it.",
   "recordMatches": true,

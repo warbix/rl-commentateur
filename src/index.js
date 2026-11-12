@@ -20,6 +20,7 @@ const library = require("./library");
 const { Recap } = require("./recap");
 const { jingleFile } = require("./jingle");
 const { Feedback, format, isVotable, clockText } = require("./feedback");
+const { squadName } = require("./names");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
@@ -149,7 +150,11 @@ async function main() {
   detector = new Detector({ options: readConfig });
   const recorder = !replayFile && config.recordMatches !== false ? new Recorder(path.join(ROOT, "matches")) : null;
   detector.on("warning", (msg) => console.log(msg));
-  detector.on("fact", (f) => recap.addFact(f));
+  // Only the squad in the recap, under its spoken name (both accounts of a player count together)
+  detector.on("fact", (f) => {
+    const name = squadName(readConfig().players, f.player);
+    if (name) recap.addFact({ ...f, player: name });
+  });
   detector.on("result", (r) => recap.addResult(r));
   // Ctrl+C or closing: print the recap before leaving
   process.on("SIGINT", () => { console.log(`\n${recapText()}`); process.exit(0); });
@@ -159,7 +164,7 @@ async function main() {
   const publish = (type, c, phrase) => {
     if (!feedback) return "";
     const e = feedback.add({ type, ...c, phrase });
-    if (output && output.post && isVotable(e, readConfig().nicknames)) {
+    if (output && output.post && isVotable(e, readConfig().players)) {
       output.post(format(e), type === "nearMiss" ? ["👍", "👎"] : ["✅", "❌"])
         .then((messageId) => messageId && feedback.setMessage(e.id, messageId));
     }

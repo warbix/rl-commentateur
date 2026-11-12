@@ -1,7 +1,8 @@
 // Reads config.json. Re-read on every call: nicknames, pronunciation, voices and thresholds
 // can be edited while the bot is running. If the file is momentarily invalid (being edited),
 // the last valid version is kept.
-// Configs written with the former French keys are migrated to the English ones on first read.
+// Older configs are migrated on first read: the former French keys become the English ones, and
+// nicknames (in-game name → spoken names) becomes players (spoken name → in-game names).
 
 const fs = require("fs");
 const path = require("path");
@@ -56,13 +57,37 @@ function renameKeys(obj, map) {
   return changed;
 }
 
+const PLAYERS_DOC = "Spoken name -> in-game names (one player can have several accounts: they count as one). Case, accents, spaces and punctuation don't matter, and a name cut short by the game (8 characters or more) is recognized: MonSuperPseudo2000 = MonSuperPséudo20. These players define our team. Can be changed while the bot is running.";
+
+// Replaces a key by another one at the same place
+function replaceKey(obj, oldKey, newKey, value) {
+  for (const [k, v] of Object.entries(obj)) {
+    delete obj[k];
+    if (k === oldKey) obj[newKey] = value;
+    else obj[k] = v;
+  }
+}
+
+// nicknames { in-game name: [spoken names] } → players { first spoken name: [in-game names] }
+function nicknamesToPlayers(config) {
+  if (!config.nicknames || config.players) return false;
+  const players = {};
+  for (const [account, names] of Object.entries(config.nicknames)) {
+    const name = (Array.isArray(names) && names[0]) || account;
+    (players[name] = players[name] || []).push(account);
+  }
+  if ("_nicknames" in config) replaceKey(config, "_nicknames", "_players", PLAYERS_DOC);
+  replaceKey(config, "nicknames", "players", players);
+  return true;
+}
+
 function migrate(config) {
   let changed = renameKeys(config, KEYS[""]);
   for (const section of ["discord", "voice", "rocketLeague", "thresholds"]) changed = renameKeys(config[section], KEYS[section]) || changed;
   if (VALUES.target[config.target]) { config.target = VALUES.target[config.target]; changed = true; }
   if (config.voice && VALUES.rotation[config.voice.rotation]) { config.voice.rotation = VALUES.rotation[config.voice.rotation]; changed = true; }
   if (config.voice && config.voice.nom && !config.voice.list) { config.voice.list = [config.voice.nom]; delete config.voice.nom; changed = true; }
-  return changed;
+  return nicknamesToPlayers(config) || changed;
 }
 
 function readConfig() {
@@ -70,7 +95,7 @@ function readConfig() {
     const config = JSON.parse(fs.readFileSync(FILE, "utf8"));
     if (migrate(config)) {
       fs.writeFileSync(FILE, JSON.stringify(config, null, 2) + "\n");
-      console.log(`${path.basename(FILE)}: migrated to the English keys`);
+      console.log(`${path.basename(FILE)}: migrated to the current format`);
     }
     last = config;
   } catch (e) {

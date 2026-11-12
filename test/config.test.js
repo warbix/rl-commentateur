@@ -18,7 +18,7 @@ test("a config with the former French keys is migrated to the English ones", () 
   assert.deepStrictEqual(old, {
     discord: { token: "x", voiceChannelId: "1", textChannelId: "2", follow: ["MonPseudoDiscord"] },
     target: "our-team",
-    nicknames: { A: ["a"] },
+    players: { a: ["A"] },
     pronunciation: { MVP: "aime vie pie" },
     voice: { jingle: true, rotation: "random", list: ["v"], rate: "+0%", pitch: "+0Hz", volume: 1 },
     pregenerate: true,
