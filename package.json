@@ -8,7 +8,8 @@
     "test": "node --test",
     "check-api": "node src/apiStats.js",
     "calibrate": "node src/calibrate.js",
-    "pregenerate": "node src/pregenerate.js"
+    "pregenerate": "node src/pregenerate.js",
+    "library": "node src/serveLibrary.js"
   },
   "keywords": [],
   "author": "",
