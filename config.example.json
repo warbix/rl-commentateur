@@ -98,8 +98,6 @@
     "mvpMaxGap": 50,
     "ghost3v3Ms": 40000,
     "ghost2v2Ms": 30000,
-    "ghostCooldownMs": 120000,
-    "ghostSpacingMs": 60000,
     "giveawayMinMs": 1000,
     "giveawayMinDistance": 1500,
     "giveawayMinOwnGoalDistance": 2500,

@@ -113,7 +113,7 @@ Fréquence mesurée : 5 sur 39 matchs enregistrés avec 50 points (environ 1 mat
 le 95ᵉ centile des durées sans toucher est de 23 s en 2v2 contre 29 s en 3v3. Ces seuils donnent environ
 **un fantôme par match et demi pour une équipe** (0,7 par match en 2v2, 0,8 en 3v3).
 
-**Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 2 min, et au moins 1 min entre deux fantômes.
+**Cible** : le joueur. **Quand** : en direct. **Pas d'anti-spam** : une fois par période sans toucher la balle (le compteur repart à la touche suivante), avec seulement l'écart de 15 s entre deux commentaires en direct.
 
 ## 9. Craquage 💥
 **Retiré** : trop rare, et il reposait sur l'arrêt manqué.

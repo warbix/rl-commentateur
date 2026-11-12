@@ -29,7 +29,7 @@ const DEFAULTS = {
   mvpMaxGap: 50,
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
   // about one ghost every match and a half per team (one touches the ball less at three than at two)
-  ghost3v3Ms: 40000, ghost2v2Ms: 30000, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
+  ghost3v3Ms: 40000, ghost2v2Ms: 30000,
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
   // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
   giveawayBackwardNoShot: 1500,
@@ -103,7 +103,6 @@ class Detector extends EventEmitter {
     this.lastFrameT = -Infinity;
     this.pendingGoal = null;
     this.lastLiveT = -Infinity;
-    this.lastGhostT = -Infinity; // two ghosts (of different players) at least a minute apart
     this.mvpChecked = false;
     this.giveawayOfTheMatchDone = false;
     this.warnedNoTeam = false;
@@ -234,7 +233,7 @@ class Detector extends EventEmitter {
   player(name, team) {
     let p = this.players.get(name);
     if (!p) {
-      p = { name, team, stats: {}, idleMs: 0, lastTouchT: -Infinity, lastGhostT: -Infinity };
+      p = { name, team, stats: {}, idleMs: 0, ghostSaid: false, lastTouchT: -Infinity };
       this.players.set(name, p);
     }
     if (team !== undefined) p.team = team;
@@ -256,7 +255,7 @@ class Detector extends EventEmitter {
         this.inPlay = true;
         this.roundStart = t;
         // New round: the ghost starts again from zero
-        for (const p of this.players.values()) p.idleMs = 0;
+        for (const p of this.players.values()) { p.idleMs = 0; p.ghostSaid = false; }
         break;
       case "CountdownBegin":
       case "GoalReplayStart":
@@ -355,14 +354,11 @@ class Detector extends EventEmitter {
     if (!s.bHasCar) return;
     p.idleMs += dt;
     const ghostKey = this.teamSize >= 3 ? "ghost3v3Ms" : this.teamSize === 2 ? "ghost2v2Ms" : null;
-    // The minute between two ghosts only applies to the ones said out loud
+    // Once per stretch without touching the ball (no other limit than the spacing between live comments)
     const vars = { player: p.name, seconds: Math.round(p.idleMs / 1000) };
-    if (ghostKey && p.idleMs >= S[ghostKey] && t - p.lastGhostT >= S.ghostCooldownMs &&
-        (t - this.lastGhostT >= S.ghostSpacingMs || !this.isTarget("ghost", vars))) {
+    if (ghostKey && !p.ghostSaid && p.idleMs >= S[ghostKey]) {
       const measures = [{ ...condition("sans toucher la balle", ghostKey, p.idleMs, "min", "ms"), threshold: S[ghostKey], ok: true }];
-      const r = this.live("ghost", vars, t, measures);
-      if (r) p.lastGhostT = t;
-      if (r === "spoken") this.lastGhostT = t;
+      if (this.live("ghost", vars, t, measures)) p.ghostSaid = true;
     }
   }
 
@@ -380,7 +376,7 @@ class Detector extends EventEmitter {
     this.hits.push(hit);
     this.hits = this.hits.filter((h) => t - h.t <= 60000);
     // Ghost: any touch of the ball counts
-    for (const p of hit.players) { const pl = this.player(p.name, p.team); pl.lastTouchT = t; pl.idleMs = 0; }
+    for (const p of hit.players) { const pl = this.player(p.name, p.team); pl.lastTouchT = t; pl.idleMs = 0; pl.ghostSaid = false; }
 
     if (!prev) return;
 
