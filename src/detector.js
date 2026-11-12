@@ -40,7 +40,10 @@ const DEFAULTS = {
   nearAssistMaxOwnGoalDistance: 5120, nearAssistMaxForward: 500, nearAssistMinMs: 1000,
   nearAssistShotWindowMs: 4000, nearAssistSaveWindowMs: 2500,
   // Save for the opponent: a teammate is the first to touch a shot on target, close to the opponent goal, and no goal follows
+  // The teammate's touch must take the ball out of the frame: made in front of the goal (within its width and height,
+  // plus a ball), not itself a shot on target, and the opponents do not have to save it afterwards
   teamBlockMaxDistance: 1200, teamBlockMaxMs: 2500, teamBlockNoGoalMs: 3000,
+  teamBlockMaxSideOffset: 1000, teamBlockMaxHeight: 750, teamBlockShotWindowMs: 2000,
   // Near goal: a shot hits the frame (crossbar, post, top corner) and does not go in. The shot must be recent and
   // real (not a ball rolling onto the post); the frame zone is told by the impact point (crossbar above, posts on the side).
   nearGoalShotMaxMs: 2500, nearGoalMinSpeed: 30, nearGoalNoGoalMs: 2000, nearGoalCrossbarMinHeight: 550, nearGoalPostMinSideOffset: 750,
@@ -334,7 +337,11 @@ class Detector extends EventEmitter {
     const tb = this.teamBlock;
     if (tb && t - tb.t >= S.teamBlockNoGoalMs) {
       this.teamBlock = null;
-      const r = this.evaluate([condition("touche du coéquipier à la ligne adverse", "teamBlockMaxDistance", tb.distance, "max", "uu")]);
+      const r = this.evaluate([
+        condition("touche du coéquipier à la ligne adverse", "teamBlockMaxDistance", tb.distance, "max", "uu"),
+        condition("touche du coéquipier, écart au centre de la cage", "teamBlockMaxSideOffset", tb.side, "max", "uu"),
+        condition("touche du coéquipier, hauteur", "teamBlockMaxHeight", tb.height, "max", "uu"),
+      ]);
       const measures = [...r.measures, { name: "délai après le tir", value: tb.t - tb.shotAt, unit: "ms" }];
       const vars = { blocker: tb.blocker, shooter: tb.shooter };
       if (r.ok) this.live("teamBlock", vars, t, measures);
@@ -403,7 +410,10 @@ class Detector extends EventEmitter {
     if (ls) {
       this.lastShot = null;
       if (t - ls.t <= S.teamBlockMaxMs && onlyTeam(hit, ls.team) && !has(hit, ls.shooter)) {
-        this.teamBlock = { blocker: hit.players[0].name, shooter: ls.shooter, shotAt: ls.t, t, distance: distToOpponentGoal(ls.team, hit.loc.Y) };
+        this.teamBlock = {
+          blocker: hit.players[0].name, team: ls.team, shooter: ls.shooter, shotAt: ls.t, t,
+          distance: distToOpponentGoal(ls.team, hit.loc.Y), side: Math.abs(hit.loc.X), height: hit.loc.Z,
+        };
       }
     }
 
@@ -458,9 +468,12 @@ class Detector extends EventEmitter {
     }
 
     if (f.type === "Shot") {
-      if (this.teamBlock && f.name === this.teamBlock.blocker && t - this.teamBlock.t <= S.shotDelayMs) this.teamBlock = null;
+      // The teammate's touch was itself on target (the game reports it late): it did not take the ball out
+      if (this.teamBlock && f.name === this.teamBlock.blocker && t - this.teamBlock.t <= S.teamBlockShotWindowMs) this.teamBlock = null;
       else this.lastShot = { shooter: f.name, team: f.team, t };
     }
+    // The opponents had to save it after the teammate's touch: the ball was still on target
+    if (this.teamBlock && ["Save", "EpicSave"].includes(f.type) && f.team !== this.teamBlock.team) this.teamBlock = null;
 
     // Near assist: the opponent shoots in time, then the giver's team saves it → said (instead of a plain giveaway)
     const na = this.nearAssist;

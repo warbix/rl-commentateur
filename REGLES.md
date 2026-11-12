@@ -165,11 +165,15 @@ Si l'adversaire marque à la place : « bénévole de l'année ».
 **Règle** :
 - Un joueur A fait un **tir cadré** (`Shot` du jeu)
 - La **première touche** après le tir (≤ 2,5 s, `teamBlockMaxMs`) est celle d'un **coéquipier B** (pas A, pas un adversaire)
-- B touche la balle à **≤ 12 m de la ligne adverse** (`teamBlockMaxDistance`), et ce n'est pas lui-même un tir cadré
+- B **sort la balle du cadre**. L'API ne donne pas la trajectoire de la balle, seulement sa position aux touches, donc on le déduit :
+  - B touche la balle **devant la cage** : à ≤ 12 m de la ligne adverse (`teamBlockMaxDistance`), à ≤ 10 m du centre sur le côté
+    (`teamBlockMaxSideOffset`, la cage fait ±8,9 m) et à ≤ 7,5 m de haut (`teamBlockMaxHeight`, la barre est à 6,4 m) ⚙️
+  - sa touche n'est pas elle-même un tir cadré (pas de `Shot` pour B dans les 2 s, `teamBlockShotWindowMs`)
+  - les adversaires n'ont **pas eu à l'arrêter** ensuite (pas de `Save` adverse) : la balle n'allait plus au but
 - **Pas de but** dans les 3 s qui suivent (`teamBlockNoGoalMs`)
 
 **Cible** : B, en citant A. **Quand** : en direct, 3 s après la touche.
-Rare : 1 cas sur les 13 premiers matchs enregistrés.
+Rare : 2 sur 39 matchs enregistrés (4 avant d'exiger que la balle sorte du cadre).
 
 ---
 
