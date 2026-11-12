@@ -25,7 +25,6 @@ const DEFAULTS = {
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
   // about one ghost every match and a half per team (one touches the ball less at three than at two)
   ghost3v3Ms: 40000, ghost2v2Ms: 30000, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
-  chokeMaxSecondsLeft: 10,
   giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
   // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
   giveawayBackwardNoShot: 1500,
@@ -47,13 +46,13 @@ const DEFAULTS = {
 };
 
 // Priority when several rules fire on the same goal
-const GOAL_PRIORITY = ["choke", "steal", "giveaway.goal", "missedSave.escorted", "missedSave.ownGoal", "tapIn", "adminAssist"];
+const GOAL_PRIORITY = ["steal", "giveaway.goal", "missedSave.escorted", "missedSave.ownGoal", "tapIn", "adminAssist"];
 // Near misses that can be offered on a goal, by priority
 const NEAR_MISS_PRIORITY = ["missedSave", "tapIn", "adminAssist"];
 
 // The player each situation targets (the one being mocked)
 const TARGET = {
-  tapIn: "scorer", steal: "thief", missedSave: "defender", choke: "defender", finish: "scorer",
+  tapIn: "scorer", steal: "thief", missedSave: "defender", finish: "scorer",
   adminAssist: "passer", mvp: "mvp", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
 };
 
@@ -89,7 +88,6 @@ class Detector extends EventEmitter {
     this.overtime = false;
     this.teamSize = 3;
     this.scores = [0, 0];
-    this.kickoffScores = null; // score at the last kickoff (unknown when joining mid-round)
     this.blunders = new Map(); // player → count, for the undeserved MVP
     this.giveaways = new Map();
     this.giveaway = null;
@@ -256,7 +254,6 @@ class Detector extends EventEmitter {
       case "RoundStarted":
         this.inPlay = true;
         this.roundStart = t;
-        this.kickoffScores = [...this.scores];
         // New round: the ghost starts again from zero
         for (const p of this.players.values()) p.idleMs = 0;
         break;
@@ -300,8 +297,6 @@ class Detector extends EventEmitter {
     const S = this.S;
     const game = d.Game || {};
     if (Array.isArray(game.Teams)) for (const team of game.Teams) this.scores[team.TeamNum] = team.Score || 0;
-    // Joined mid-round (bot restarted): the current score stands for the kickoff score
-    if (!this.kickoffScores && Array.isArray(game.Teams)) this.kickoffScores = [...this.scores];
     if (typeof game.TimeSeconds === "number") this.time = game.TimeSeconds;
     this.overtime = !!game.bOvertime;
 
@@ -532,7 +527,7 @@ class Detector extends EventEmitter {
       }
     }
 
-    // Missed save (and choke): slightly older touches are looked at too, for near misses
+    // Missed save: slightly older touches are looked at too, for near misses
     const window = S.missedSaveMaxMs * (1 + S.nearMissMargin);
     const iD = findLastIndex(hits, (h) => t - h.t <= window && h.players.some((p) => p.team === TD));
     if (iD >= 0) {
@@ -550,9 +545,6 @@ class Detector extends EventEmitter {
       ]);
       if (r.ok) {
         found[key] = { vars, measures: r.measures };
-        const [s, o] = this.kickoffScores ? [this.kickoffScores[TS], this.kickoffScores[TD]] : [NaN, NaN];
-        const c = this.evaluate([condition("temps restant", "chokeMaxSecondsLeft", this.time, "max", "n")]);
-        if (!this.overtime && c.ok && (s === o - 1 || s === o)) found.choke = { vars, measures: [...c.measures, ...r.measures] };
       } else if (r.nearMiss) {
         nearMisses.missedSave = { key, vars, measures: r.measures };
       }
@@ -608,10 +600,10 @@ class Detector extends EventEmitter {
     const missed = found["missedSave.escorted"] || found["missedSave.ownGoal"];
     if (missed) this.addBlunder(missed.vars.defender);
 
-    // Everything counts for the recap (a choke is already a missed save, giveaways are counted separately)
+    // Everything counts for the recap (giveaways are counted separately)
     for (const [k, { vars }] of Object.entries(found)) {
       const type = k.split(".")[0];
-      if (type !== "choke" && type !== "giveaway" && this.enabled(k)) this.fact(k, vars[TARGET[type]]);
+      if (type !== "giveaway" && this.enabled(k)) this.fact(k, vars[TARGET[type]]);
     }
 
     // The spiciest situation among those targeting a player of our team is said; all the others are detections

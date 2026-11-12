@@ -116,15 +116,7 @@ le 95ᵉ centile des durées sans toucher est de 23 s en 2v2 contre 29 s en 3v3.
 **Cible** : le joueur. **Quand** : en direct. **Anti-spam** : 1 fois par joueur toutes les 2 min, et au moins 1 min entre deux fantômes.
 
 ## 9. Craquage 💥
-**Idée** : le but qui fait mal, au pire moment, avec une erreur défensive.
-
-**Règle** — sur `GoalScored`, **toutes** les conditions :
-- Il reste **≤ 10 s** de temps réglementaire (`TimeSeconds ≤ 10`, `bOvertime = false`)
-- Le but **change l'issue** : égalisation, ou l'équipe qui marque passe devant
-- Il y a un **arrêt manqué** (règle 3) sur ce but
-
-**Cible** : le défenseur de l'arrêt manqué. **Quand** : pendant le replay — **remplace** le commentaire d'arrêt manqué.
-_Option_ : appliquer aussi aux buts en prolongation (ils changent toujours l'issue).
+**Retiré** : trop rare, et il reposait sur l'arrêt manqué.
 
 ## 10. Le bénévole 🎁
 **Idée** : il rend la balle à l'adversaire sans aucune pression, et ça part en contre.
@@ -210,7 +202,6 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 | `adminAssist` | Passe décisive par procuration |
 | `mvp` | MVP illégitime |
 | `ghost` | Fantôme |
-| `choke` | Craquage |
 | `giveaway` | Bénévole, presque passe décisive à l'adversaire, bénévole du match |
 | `teamBlock` | Arrêt pour l'adversaire |
 | `nearGoal` | Barre, poteau, équerre |
@@ -229,7 +220,7 @@ le fantôme seulement pour un joueur de la bande, qui est seul à pouvoir en jug
 ## Priorités (1 seul commentaire par but)
 
 Si plusieurs règles se déclenchent sur le même but, on garde la plus piquante parmi celles qui visent un joueur de notre équipe :
-**Craquage > Vol de but > Bénévole de l'année > Arrêt manqué > Tap-in > Passe décisive par procuration > Lucarne**
+**Vol de but > Bénévole de l'année > Arrêt manqué > Tap-in > Passe décisive par procuration > Lucarne**
 
 Les règles en direct (fantôme, bénévole, quasi-buts) ne parlent jamais pendant un replay, et laissent
 **≥ 15 s** entre deux commentaires.

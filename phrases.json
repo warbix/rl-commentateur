@@ -218,21 +218,6 @@
       "{player} fait le tour du terrain comme un touriste. La balle ? Connais pas."
     ]
   },
-  "choke": {
-    "_variables": "{defender} = the defender who touched the ball without saving it, {scorer} = the scorer",
-    "phrases": [
-      "Dans les dix dernières secondes ! {defender} touche la balle et la laisse rentrer. On appelle ça craquer.",
-      "{defender} avait le match entre les mains. Il l'a lâché. Dans la cage. À quelques secondes de la fin.",
-      "Craquage total de {defender}. {scorer} n'en demandait pas tant.",
-      "Pression maximale, et {defender} a fondu comme un glaçon. Merci pour le cadeau de fin de match.",
-      "{defender}, tu viens de servir le but décisif à {scorer} sur un plateau. Les nerfs, ça se travaille.",
-      "Les dernières secondes, c'est là qu'on reconnaît les patrons. Et là, on vient de reconnaître {defender}.",
-      "{defender} craque au pire moment. Un timing parfait. Pour l'adversaire.",
-      "{scorer} n'y croyait plus. {defender} lui a rendu espoir. Quel humaniste.",
-      "{defender}, tu avais une seule chose à faire. Une seule. Et c'était à la fin.",
-      "Fin de match, la pression monte, et {defender} se liquéfie. On le ramasse à la petite cuillère."
-    ]
-  },
   "giveaway": {
     "shot": {
       "_variables": "{giver} = the player who gave the ball away, {opponent} = the opponent who took advantage",

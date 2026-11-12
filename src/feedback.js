@@ -12,7 +12,7 @@ const FOR = ["✅", "👍"];
 const AGAINST = ["❌", "👎"];
 
 const LABELS = {
-  tapIn: "Tap-in", steal: "Vol de but", teamBlock: "Arrêt pour l'adversaire", choke: "Craquage",
+  tapIn: "Tap-in", steal: "Vol de but", teamBlock: "Arrêt pour l'adversaire",
   "missedSave.escorted": "Arrêt manqué", "missedSave.ownGoal": "Contre son camp",
   "finish.topCorner": "Lucarne",
   "nearGoal.crossbar": "Barre", "nearGoal.post": "Poteau", "nearGoal.topCorner": "Équerre",
