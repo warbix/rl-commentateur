@@ -140,51 +140,19 @@
     ]
   },
   "mvp": {
-    "light": {
-      "_variables": "{mvp} = the MVP, {realMvp} = the teammate who did the work",
-      "phrases": [
-        "{mvp} est MVP. On va dire que oui. Mais {realMvp} mérite une petite pensée.",
-        "MVP pour {mvp}. Un titre un peu flatteur, mais on ne va pas gâcher sa soirée.",
-        "{mvp} récupère le MVP. {realMvp}, tu as fait le ménage, lui il a pris la photo.",
-        "Félicitations à {mvp}, MVP du match. Les vrais savent que {realMvp} y est pour beaucoup.",
-        "{mvp} MVP, d'accord. Mais regardez les touches de balle de {realMvp} avant de le couronner.",
-        "{mvp} MVP. {realMvp} a fait le match, {mvp} a fait les statistiques.",
-        "MVP pour {mvp}, mention passable. {realMvp}, mention réelle.",
-        "{mvp} prend le MVP. On ne dit rien, mais on n'en pense pas moins, hein {realMvp} ?",
-        "Le MVP va à {mvp}. Le travail, lui, est allé à {realMvp}.",
-        "{mvp}, MVP du match. Pense à remercier {realMvp} dans ton discours. En premier."
-      ]
-    },
-    "mocking": {
-      "_variables": "{mvp} = the MVP, {realMvp} = the teammate who did the work",
-      "phrases": [
-        "{mvp} MVP ? Il a passé le match à attendre devant la cage que {realMvp} lui apporte la balle.",
-        "Le jeu a donné le MVP à {mvp}. Le jeu ne regarde que les buts, nous on a regardé le match.",
-        "{mvp}, MVP avec des buts poussés et des cadeaux. {realMvp}, on sait que c'est toi.",
-        "MVP pour {mvp}, sponsorisé par le travail de {realMvp}. Merci pour ta générosité.",
-        "{mvp} sur le podium. Il remercie {realMvp}, sans qui il n'aurait strictement rien fait.",
-        "{mvp} MVP grâce aux points. {realMvp} MVP grâce au jeu. Devinez lequel compte pour le jeu.",
-        "{mvp} a son MVP comme on a un diplôme acheté sur internet. {realMvp}, lui, a passé l'examen.",
-        "MVP pour {mvp}. Il ramassait les miettes pendant que {realMvp} faisait le pain.",
-        "{mvp}, ce MVP, c'est un cadeau de {realMvp}. Dis merci. Plus fort.",
-        "Le jeu couronne {mvp}. {realMvp}, rassure-toi, tout le monde sait qui portait l'équipe."
-      ]
-    },
-    "refund": {
-      "_variables": "{mvp} = the MVP, {realMvp} = the teammate who did the work",
-      "phrases": [
-        "Remboursez le MVP de {mvp}. Tout de suite. {realMvp}, viens récupérer ce qui t'appartient.",
-        "{mvp} MVP. Je répète : {mvp} MVP. Je crois que le jeu a un bug.",
-        "Casseroles en série, et pourtant {mvp} est MVP. Le système de points de Rocket League est officiellement cassé.",
-        "{mvp}, ce MVP c'est un braquage. {realMvp} a travaillé, toi tu as volé la couronne.",
-        "On ouvre une enquête sur le MVP de {mvp}. Principal témoin à charge : {realMvp}.",
-        "{mvp} MVP. Laissez-moi deux secondes, je dois m'allonger. {realMvp}, toutes mes condoléances.",
-        "Si {mvp} est MVP, moi je suis champion du monde. {realMvp}, exige un recomptage.",
-        "{mvp} MVP malgré toutes ses bourdes. On appelle ça la méritocratie à l'envers. Courage {realMvp}.",
-        "Scandale : {mvp} MVP. Le vrai MVP, {realMvp}, est prié de se rendre au bureau des réclamations.",
-        "{mvp}, ce MVP, tu le rends à {realMvp}. Ce soir. Avec des excuses écrites."
-      ]
-    }
+    "_variables": "{mvp} = the MVP (may be an opponent), {runnerUp} = the second best score, a few points behind",
+    "phrases": [
+      "{mvp} est MVP de justesse. {runnerUp}, tu as le droit d'avoir le seum. Beaucoup de seum.",
+      "Quelques points d'écart, et c'est {mvp} qui monte sur la plus haute marche. {runnerUp}, respire un grand coup.",
+      "{runnerUp} termine deuxième, à un cheveu du MVP. Le cheveu s'appelle {mvp}.",
+      "MVP pour {mvp}, d'une courte tête. {runnerUp}, on t'entend ruminer d'ici.",
+      "{runnerUp}, si près du MVP. Mais si près, ça ne compte pas. Demande à {mvp}.",
+      "Photo-finish pour le MVP, et c'est {mvp} qui gagne. {runnerUp}, le seum est autorisé ce soir.",
+      "{runnerUp} rate le MVP pour une poignée de points. Il va y repenser toute la nuit.",
+      "{mvp} chipe le MVP sous le nez de {runnerUp}. Ça pique, hein ?",
+      "Il manquait trois fois rien à {runnerUp} pour être MVP. Trois fois rien, et un énorme seum.",
+      "Le MVP se joue à rien, et ce rien est pour {mvp}. {runnerUp}, va pleurer dans ta voiture."
+    ]
   },
   "ghost": {
     "_variables": "{player} = the player who has not touched the ball for a while",

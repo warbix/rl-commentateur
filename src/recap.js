@@ -12,7 +12,7 @@ const TITLES = [
   { type: "ownGoal", title: "Buteur à l'envers", unit: ["but contre son camp", "buts contre son camp"] },
   { type: "giveaway", title: "Bénévole de la soirée", unit: ["ballon rendu", "ballons rendus"] },
   { type: "adminAssist", title: "Fonctionnaire de la passe", unit: ["passe décisive par procuration", "passes décisives par procuration"] },
-  { type: "mvp", title: "Braqueur de MVP", unit: ["MVP volé", "MVP volés"] },
+  { type: "mvp", title: "Seum de la soirée", unit: ["MVP raté de justesse", "MVP ratés de justesse"] },
   { type: "ghost", title: "Fantôme de la soirée", unit: ["disparition", "disparitions"] },
   { type: "nearGoal", title: "Ferrailleur de la soirée", unit: ["tir sur le cadre", "tirs sur le cadre"] },
   { type: "finish", title: "Sniper de la soirée", unit: ["lucarne", "lucarnes"] },

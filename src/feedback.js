@@ -17,7 +17,7 @@ const LABELS = {
   "finish.topCorner": "Lucarne",
   "nearGoal.crossbar": "Barre", "nearGoal.post": "Poteau", "nearGoal.topCorner": "Équerre",
   adminAssist: "Passe décisive par procuration", ghost: "Fantôme",
-  "mvp.light": "MVP illégitime (léger)", "mvp.mocking": "MVP illégitime", "mvp.refund": "MVP illégitime (remboursez)",
+  mvp: "MVP de justesse",
   "giveaway.shot": "Bénévole", "giveaway.backward": "Balle rendue", "giveaway.saved": "Presque passe décisive à l'adversaire", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
 };
 

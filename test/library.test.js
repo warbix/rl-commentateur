@@ -19,14 +19,14 @@ test("every line said during a match is in the voice library", () => {
   const texts = new Set(library.lines(phrases).map((l) => l.text));
   const all = phrases.all();
   const keys = Object.keys(OPPONENT).concat(["tapIn", "steal", "teamBlock", "ownGoal", "finish.topCorner", "nearGoal.crossbar",
-    "nearGoal.post", "nearGoal.topCorner", "adminAssist", "mvp.light", "mvp.mocking", "mvp.refund", "ghost", "giveaway.ofTheMatch"]);
+    "nearGoal.post", "nearGoal.topCorner", "adminAssist", "mvp", "ghost", "giveaway.ofTheMatch"]);
   for (const key of keys) {
     const node = phrases.node(key, all);
     const declared = [...node._variables.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
     for (let i = 0; i < 40; i++) {
       const squad = [...SQUAD].sort(() => Math.random() - 0.5);
       const vars = {};
-      for (const v of declared) vars[v] = v === "count" ? 3 + (i % 8) : v === OPPONENT[key] ? "Adversaire1" : squad.pop();
+      for (const v of declared) vars[v] = v === "count" ? 3 + (i % 8) : v === OPPONENT[key] || (key === "mvp" && v === "mvp" && i % 2) ? "Adversaire1" : squad.pop();
       const text = phrases.pick(key, vars, { opponents: ["Adversaire1"] });
       assert.ok(texts.has(text), `${key}: not in the library: ${text}`);
     }

@@ -95,7 +95,7 @@
     "topCornerMinSideOffset": 550,
     "adminAssistMinMs": 4000,
     "adminAssistMinTouches": 3,
-    "mvpMinHighlightRatio": 0.7,
+    "mvpMaxGap": 50,
     "ghost3v3Ms": 40000,
     "ghost2v2Ms": 30000,
     "ghostCooldownMs": 120000,

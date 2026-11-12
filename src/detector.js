@@ -25,7 +25,8 @@ const DEFAULTS = {
   ownGoalMaxMs: 3000, ownGoalOnLineDistance: 1000, ownGoalShotWindowMs: 3000,
   topCornerMinHeight: 450, topCornerMinSideOffset: 550,
   adminAssistMinMs: 4000, adminAssistMinTouches: 3,
-  mvpMinHighlightRatio: 0.7,
+  // Close MVP: the MVP has at most this many points more than the second best player of the match
+  mvpMaxGap: 50,
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
   // about one ghost every match and a half per team (one touches the ball less at three than at two)
   ghost3v3Ms: 40000, ghost2v2Ms: 30000, ghostCooldownMs: 120000, ghostSpacingMs: 60000,
@@ -58,7 +59,7 @@ const NEAR_MISS_PRIORITY = ["ownGoal", "tapIn", "adminAssist"];
 // The player each situation targets (the one being mocked)
 const TARGET = {
   tapIn: "scorer", steal: "thief", ownGoal: "defender", finish: "scorer",
-  adminAssist: "passer", mvp: "mvp", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
+  adminAssist: "passer", mvp: "runnerUp", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
 };
 
 const distToOpponentGoal = (team, y) => (team === 0 ? GOAL_LINE - y : GOAL_LINE + y);
@@ -93,7 +94,6 @@ class Detector extends EventEmitter {
     this.overtime = false;
     this.teamSize = 3;
     this.scores = [0, 0];
-    this.blunders = new Map(); // player → count, for the undeserved MVP
     this.giveaways = new Map();
     this.giveaway = null;
     this.nearAssist = null;
@@ -241,10 +241,6 @@ class Detector extends EventEmitter {
     return p;
   }
 
-  addBlunder(name) {
-    this.blunders.set(name, (this.blunders.get(name) || 0) + 1);
-  }
-
   handle(event, d, t) {
     this.now = t;
     this.S = { ...DEFAULTS, ...((this.options() || {}).thresholds || {}) };
@@ -332,7 +328,6 @@ class Detector extends EventEmitter {
     const ng = this.nearGoal;
     if (ng && t - ng.t >= S.nearGoalNoGoalMs) {
       this.nearGoal = null;
-      this.addBlunder(ng.shooter);
       this.live(ng.key, { shooter: ng.shooter }, t, ng.measures);
     }
 
@@ -343,7 +338,7 @@ class Detector extends EventEmitter {
       const r = this.evaluate([condition("touche du coéquipier à la ligne adverse", "teamBlockMaxDistance", tb.distance, "max", "uu")]);
       const measures = [...r.measures, { name: "délai après le tir", value: tb.t - tb.shotAt, unit: "ms" }];
       const vars = { blocker: tb.blocker, shooter: tb.shooter };
-      if (r.ok) { this.addBlunder(tb.blocker); this.live("teamBlock", vars, t, measures); }
+      if (r.ok) this.live("teamBlock", vars, t, measures);
       else if (r.nearMiss) this.emitNearMiss("teamBlock", vars, measures);
     }
 
@@ -598,11 +593,6 @@ class Detector extends EventEmitter {
       }
     }
 
-    // Blunders for the undeserved MVP
-    if (found.steal) this.addBlunder(scorer);
-    if (found.adminAssist) this.addBlunder(assister);
-    if (found.ownGoal) this.addBlunder(found.ownGoal.vars.defender);
-
     // Everything counts for the recap (giveaways are counted separately)
     for (const [k, { vars }] of Object.entries(found)) {
       const type = k.split(".")[0];
@@ -638,7 +628,6 @@ class Detector extends EventEmitter {
       const low = this.evaluate([condition("hauteur dans la cage", "tapInMaxImpactHeight", Z, "max", "uu")]);
       const measures = [...g.tapIn.measures, ...low.measures];
       if (low.ok) {
-        this.addBlunder(g.scorer);
         this.fact("tapIn", g.scorer);
         if (g.said) this.emitDetection("tapIn", vars, false, measures);
         else this.report("tapIn", vars, measures);
@@ -690,21 +679,21 @@ class Detector extends EventEmitter {
     const mvp = this.players.get(name);
     if (!mvp || this.mvpChecked) return;
     this.mvpChecked = true;
-    const m = mvp.stats;
-    const score = m.Score || 0;
-    const ratio = score ? (100 * (m.Goals || 0) + 50 * (m.Assists || 0)) / score : 0;
-    const mates = [...this.players.values()].filter((p) => p.team === mvp.team);
-    const avgTouches = mates.reduce((a, p) => a + (p.stats.Touches || 0), 0) / mates.length;
-    const blunders = this.blunders.get(mvp.name) || 0;
-    const real = mates.filter((p) => p !== mvp).sort((a, b) => (b.stats.Touches || 0) - (a.stats.Touches || 0))[0];
-    if (real && ratio >= S.mvpMinHighlightRatio && (m.Touches || 0) <= avgTouches && !(m.Saves > 0) && blunders >= 1) {
-      const tier = blunders >= 3 ? "refund" : blunders === 2 ? "mocking" : "light";
-      const measures = [
-        { ...condition("part des points venant des buts et passes", "mvpMinHighlightRatio", ratio, "min", "n"), threshold: S.mvpMinHighlightRatio, ok: true },
-        { name: "casseroles", value: blunders, ok: true },
-      ];
-      this.fact("mvp", mvp.name);
-      this.report(`mvp.${tier}`, { mvp: mvp.name, realMvp: real.name }, measures);
+    // Close MVP: the second best score of the match (either team) is only a few points behind. Mocks the second.
+    // (If someone of the losing team scored more than the MVP, it was not a race for the MVP: nothing.)
+    const score = (p) => p.stats.Score || 0;
+    const runnerUp = [...this.players.values()].filter((p) => p !== mvp).sort((a, b) => score(b) - score(a))[0];
+    if (!runnerUp) return;
+    const gap = score(mvp) - score(runnerUp);
+    if (gap < 0) return;
+    const r = this.evaluate([condition("écart de points avec le deuxième", "mvpMaxGap", gap, "max", "n")]);
+    const measures = [...r.measures, { name: "points du MVP", value: score(mvp) }, { name: "points du deuxième", value: score(runnerUp) }];
+    const vars = { mvp: mvp.name, runnerUp: runnerUp.name };
+    if (r.ok) {
+      this.fact("mvp", runnerUp.name);
+      this.report("mvp", vars, measures);
+    } else if (r.nearMiss) {
+      this.emitNearMiss("mvp", vars, measures);
     }
   }
 

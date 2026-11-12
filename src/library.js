@@ -19,6 +19,8 @@ const OPPONENT_VARS = {
   "giveaway.saved": ["opponent"],
   "giveaway.goal": ["opponent"],
 };
+// Variables that name a player of either team (the MVP: the second may be ours while the MVP is an opponent)
+const EITHER_VARS = { mvp: ["mvp"] };
 // Values a number can take in a spoken line
 const NUMBERS = { count: [3, 4, 5, 6, 7, 8, 9, 10] };
 
@@ -29,12 +31,16 @@ function situations(node, prefix = "") {
     .flatMap(([k, v]) => situations(v, prefix ? `${prefix}.${k}` : k));
 }
 
-// Every way to give each variable a value. ours: a different player of the squad for each.
-function casts(ours, opponents, numbers, { players, opponentNames }) {
+// Every way to give each variable a value. ours: a different player of the squad for each; either: one more
+// player of the squad, or the opponent.
+function casts(ours, opponents, numbers, either, { players, opponentNames }) {
   let result = [{ values: {}, used: [] }];
+  const squad = (c) => Object.keys(players).filter((p) => !c.used.includes(p));
   for (const v of ours) {
-    result = result.flatMap((c) => Object.keys(players).filter((p) => !c.used.includes(p))
-      .map((p) => ({ values: { ...c.values, [v]: p }, used: [...c.used, p] })));
+    result = result.flatMap((c) => squad(c).map((p) => ({ values: { ...c.values, [v]: p }, used: [...c.used, p] })));
+  }
+  for (const v of either) {
+    result = result.flatMap((c) => [...squad(c).map((p) => ({ values: { ...c.values, [v]: p }, used: [...c.used, p] })), ...each(v, c, opponentNames)]);
   }
   for (const v of opponents) result = result.flatMap((c) => each(v, c, opponentNames));
   for (const v of numbers) result = result.flatMap((c) => each(v, c, NUMBERS[v]));
@@ -55,11 +61,12 @@ function lines(phrases) {
     const declared = [...(node._variables || "").matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
     const opponents = declared.filter((v) => (OPPONENT_VARS[key] || []).includes(v));
     const numbers = declared.filter((v) => NUMBERS[v]);
-    const ours = declared.filter((v) => !opponents.includes(v) && !numbers.includes(v));
+    const either = declared.filter((v) => (EITHER_VARS[key] || []).includes(v));
+    const ours = declared.filter((v) => !opponents.includes(v) && !numbers.includes(v) && !either.includes(v));
     for (const line of node.phrases) {
       const used = new Set([...line.matchAll(/\{(\w+)\}/g)].map((m) => m[1]));
       // Only the variables of this line: a line without {count} is not repeated for every count
-      const cast = casts(ours.filter((v) => used.has(v)), opponents.filter((v) => used.has(v)), numbers.filter((v) => used.has(v)), people);
+      const cast = casts(ours.filter((v) => used.has(v)), opponents.filter((v) => used.has(v)), numbers.filter((v) => used.has(v)), either.filter((v) => used.has(v)), people);
       for (const values of cast) {
         const text = phrases.render(line, (v) => values[v], pronunciation);
         if (seen.has(text)) continue;

@@ -88,19 +88,16 @@ Fréquence mesurée : 3 sur 39 matchs enregistrés.
 
 **Cible** : le passeur. **Quand** : pendant le replay.
 
-## 6. MVP illégitime 👑
-**Idée** : un MVP fait de coups d'éclat et de chance, sans travail derrière.
+## 6. MVP de justesse 👑
+**Idée** : le MVP s'est joué à quelques points. On appuie sur le seum du deuxième.
 
-**Règle** — sur `StatfeedEvent` `MVP`, avec les stats finales de `UpdateState` + l'historique du match :
-- **Part des points venant des faits marquants** : `(100 × Goals + 50 × Assists) / Score` **≥ 70 %** ⚙️
-- **Peu de travail** : `Touches` **≤ moyenne de son équipe** et `Saves = 0` ⚙️
-- **Au moins 1 casserole** dans le match : un de ses buts est un **tap-in** ou un **vol**, ou une de ses passes décisives est **par procuration**, ou il a un **arrêt manqué**
-- Plus il cumule de casseroles, plus le commentaire est appuyé (le curseur) :
-  - 1 casserole → pique légère
-  - 2 → franchement moqueur
-  - 3+ → « remboursez le MVP »
+**Règle** — sur `StatfeedEvent` `MVP`, avec les scores finaux de `UpdateState` :
+- Le **deuxième** est le meilleur score du match après le MVP, dans n'importe quelle équipe
+- Le MVP a **au plus 50 points** de plus que lui (`mvpMaxGap`) ⚙️
+- Si un joueur de l'équipe perdante a plus de points que le MVP, ce n'était pas une course au MVP : rien
 
-**Cible** : le MVP, en citant le coéquipier qui a le plus de touches (« le vrai MVP »). **Quand** : `PodiumStart`.
+**Cible** : le deuxième (c'est lui qui a le seum), en citant le MVP (« l'adversaire » s'il est en face). **Quand** : à l'annonce du MVP.
+Fréquence mesurée : 5 sur 39 matchs enregistrés avec 50 points (environ 1 match sur 8) ; 100 points en donnerait environ 1 sur 4.
 
 ## 7. Le mendiant 🪙
 **Retiré** : le boost d'un joueur ne disait pas assez s'il jouait mal.
@@ -171,7 +168,7 @@ Si l'adversaire marque à la place : « bénévole de l'année ».
 - B touche la balle à **≤ 12 m de la ligne adverse** (`teamBlockMaxDistance`), et ce n'est pas lui-même un tir cadré
 - **Pas de but** dans les 3 s qui suivent (`teamBlockNoGoalMs`)
 
-**Cible** : B, en citant A. **Quand** : en direct, 3 s après la touche. Compte comme une casserole pour le MVP illégitime.
+**Cible** : B, en citant A. **Quand** : en direct, 3 s après la touche.
 Rare : 1 cas sur les 13 premiers matchs enregistrés.
 
 ---
@@ -185,7 +182,7 @@ Rare : 1 cas sur les 13 premiers matchs enregistrés.
 - **Pas de but** dans les 2 s (`nearGoalNoGoalMs`) : les poteaux rentrants ne comptent pas
 - Zone : **barre** si l'impact est à ≥ 5,5 m de haut (`nearGoalCrossbarMinHeight`), **poteau** sinon ; **équerre** si en plus il est à ≥ 7,5 m du centre (`nearGoalPostMinSideOffset`)
 
-**Cible** : le tireur. **Quand** : en direct, 2 s après l'impact. Compte comme une casserole pour le MVP illégitime, et dans le bilan (« Ferrailleur de la soirée »).
+**Cible** : le tireur. **Quand** : en direct, 2 s après l'impact. Compte dans le bilan (« Ferrailleur de la soirée »).
 Fréquence mesurée : 12 sur les 14 premiers matchs enregistrés.
 
 ---
@@ -203,7 +200,7 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 | `ownGoal` | Contre son camp |
 | `finish` | Lucarne |
 | `adminAssist` | Passe décisive par procuration |
-| `mvp` | MVP illégitime |
+| `mvp` | MVP de justesse |
 | `ghost` | Fantôme |
 | `giveaway` | Bénévole, presque passe décisive à l'adversaire, bénévole du match |
 | `teamBlock` | Arrêt pour l'adversaire |
