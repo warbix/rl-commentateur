@@ -213,7 +213,7 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un joueur de la bande (`players`). Les comptes d'un même joueur comptent comme un seul.
-Le joueur visé (buteur du tap-in, voleur, auteur du contre son camp, passeur, MVP, fantôme, bénévole) doit en faire partie.
+Le joueur visé (buteur du tap-in, voleur, auteur du contre son camp, passeur, deuxième du MVP de justesse, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible : la voix dit « l'adversaire » ou un synonyme.
 Le bilan de la soirée ne parle que de la bande.
 
@@ -224,7 +224,8 @@ le fantôme seulement pour un joueur de la bande, qui est seul à pouvoir en jug
 ## Priorités (1 seul commentaire par but)
 
 Si plusieurs règles se déclenchent sur le même but, on garde la plus piquante parmi celles qui visent un joueur de notre équipe :
-**Vol de but > Bénévole de l'année > Contre son camp > Tap-in > Passe décisive par procuration > Lucarne**
+**Vol de but > Bénévole de l'année > Contre son camp > Passe décisive par procuration > Tap-in > Lucarne**
+(le tap-in et la lucarne sont décidés pendant le replay, avec le point d'impact dans la cage : ils passent après les autres)
 
 Les règles en direct (fantôme, bénévole, quasi-buts) ne parlent jamais pendant un replay, et laissent
 **≥ 15 s** entre deux commentaires.

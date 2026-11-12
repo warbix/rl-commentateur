@@ -1,7 +1,7 @@
 # Commentateur Rocket League pour Discord
 
 Le programme écoute Rocket League pendant que tu joues, repère les situations de [REGLES.md](REGLES.md)
-(tap-in, vol de but, arrêt manqué, bénévole…), tire une phrase au hasard dans [phrases.json](phrases.json)
+(tap-in, vol de but, contre son camp, bénévole…), tire une phrase au hasard dans [phrases.json](phrases.json)
 et la fait lire par une voix française dans votre salon vocal Discord.
 
 Tout tourne **sur ton PC** : pas de serveur à louer.
