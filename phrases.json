@@ -45,37 +45,20 @@
       "{shooter} va se souvenir longtemps de ce but. Celui que {blocker} lui a arraché sur la ligne."
     ]
   },
-  "missedSave": {
-    "escorted": {
-      "_variables": "{defender} = the defender who touched the ball without saving it, {scorer} = the scorer",
-      "phrases": [
-        "{defender} touche la balle, et la raccompagne poliment au fond de ses filets. Quel gentleman.",
-        "Il était là, {defender}. Il l'a touchée. Et elle est rentrée quand même. Remarquable.",
-        "Arrêt manqué de {defender}. Il avait la balle, il a juste oublié de la sortir.",
-        "{scorer} marque, avec l'aide précieuse de {defender} qui a donné la petite touche finale.",
-        "{defender}, la prochaine fois, essaie de la toucher dans l'autre sens. Ça marche mieux.",
-        "{defender} était pile sur la trajectoire. La balle est passée quand même. Un plot aurait fait mieux.",
-        "Arrêt manqué de {defender}. Il a touché la balle juste assez pour apparaître sur le replay.",
-        "{defender} défend comme une porte de saloon. Ça s'ouvre dans les deux sens.",
-        "{scorer} remercie {defender} pour la déviation. Beau travail d'équipe. Pas la bonne équipe.",
-        "{defender}, on t'a mis en défense, pas en escorte."
-      ]
-    },
-    "ownGoal": {
-      "_variables": "{defender} = the defender who touched the ball without saving it",
-      "phrases": [
-        "Contre son camp de {defender}. Aucun adversaire n'a été nécessaire.",
-        "{defender} a vu que l'attaque adverse galérait, alors il a décidé de les aider. Quel grand cœur.",
-        "Personne ne tirait, et pourtant ça rentre. Merci {defender}, le meilleur attaquant de l'équipe adverse.",
-        "{defender} marque. Petit souci : c'est dans la mauvaise cage.",
-        "Et le but est pour l'équipe adverse, sur une passe décisive magistrale de {defender}.",
-        "{defender} trompe son propre gardien. Ah non, attendez, c'était lui le gardien.",
-        "Contre son camp de {defender}. L'équipe adverse aurait pu aller boire un café, ça rentrait quand même.",
-        "{defender} vient de marquer son plus beau but de la soirée. Dommage pour la direction.",
-        "Un but, c'est bien. Dans la bonne cage, c'est mieux. {defender}, on reprend les bases.",
-        "{defender} change de camp en plein match. Personne ne lui a dit que ça ne se faisait pas."
-      ]
-    }
+  "ownGoal": {
+    "_variables": "{defender} = the player of the conceding team whose touch put the ball in his own goal",
+    "phrases": [
+      "Contre son camp de {defender}. Aucun adversaire n'a été nécessaire.",
+      "{defender} a vu que l'attaque adverse galérait, alors il a décidé de les aider. Quel grand cœur.",
+      "Personne ne tirait, et pourtant ça rentre. Merci {defender}, le meilleur attaquant de l'équipe adverse.",
+      "{defender} marque. Petit souci : c'est dans la mauvaise cage.",
+      "Et le but est pour l'équipe adverse, sur une passe décisive magistrale de {defender}.",
+      "{defender} trompe son propre gardien. Ah non, attendez, c'était lui le gardien.",
+      "Contre son camp de {defender}. L'équipe adverse aurait pu aller boire un café, ça rentrait quand même.",
+      "{defender} vient de marquer son plus beau but de la soirée. Dommage pour la direction.",
+      "Un but, c'est bien. Dans la bonne cage, c'est mieux. {defender}, on reprend les bases.",
+      "{defender} change de camp en plein match. Personne ne lui a dit que ça ne se faisait pas."
+    ]
   },
   "finish": {
     "topCorner": {

@@ -10,7 +10,7 @@ const { sameName, squadName } = require("../src/names");
 
 const all = JSON.parse(fs.readFileSync(path.join(ROOT, "phrases.json"), "utf8"));
 
-// Every list of lines, with its key (e.g. "missedSave.ownGoal")
+// Every list of lines, with its key (e.g. "giveaway.goal")
 function situations(node = all, prefix = "") {
   if (node.phrases) return [[prefix, node]];
   return Object.entries(node).filter(([k, v]) => typeof v === "object" && !k.startsWith("_"))
@@ -73,7 +73,7 @@ test("names: accents, spaces and truncated names", () => {
 test("elision before a name starting with a vowel", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
   for (let i = 0; i < 20; i++) {
-    const text = phrases.pick("missedSave.escorted", { defender: "Coequipier2", scorer: "Adversaire1" }, { opponents: ["Adversaire1"] });
+    const text = phrases.pick("giveaway.goal", { giver: "Coequipier2", opponent: "Adversaire1" }, { opponents: ["Adversaire1"] });
     assert.doesNotMatch(text, /\b[dD]e Albert|\b[qQ]ue Albert|\bde un\b/, text);
   }
 });
@@ -96,7 +96,7 @@ test("a situation can borrow the lines of another one", () => {
 test("opponents are said as \"l'adversaire\" and synonyms, with elision and a capital at the start", () => {
   const phrases = new Phrases(path.join(ROOT, "phrases.json"));
   for (let i = 0; i < 30; i++) {
-    const text = phrases.pick("missedSave.escorted", { defender: "MonPseudo", scorer: "Adversaire1" }, { opponents: ["Adversaire1"] });
+    const text = phrases.pick("giveaway.goal", { giver: "MonPseudo", opponent: "Adversaire1" }, { opponents: ["Adversaire1"] });
     assert.doesNotMatch(text, /Adversaire1/, text);
     assert.doesNotMatch(text, /\bde un\b|^[a-zà-ÿ]/, text);
   }

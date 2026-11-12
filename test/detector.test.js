@@ -38,9 +38,9 @@ test("our team: never a comment about an opponent", () => {
   for (const c of replay(example).comments) assert.doesNotMatch(c, /Adversaire/);
 });
 
-test("everyone: the opponent's missed save beats the tap-in", () => {
+test("everyone: the opponents' situations are said too", () => {
   const { comments } = replay({ ...example, target: "everyone" });
-  assert.strictEqual(comments[comments.length - 1], "missedSave.escorted → Adversaire3");
+  assert.ok(comments.includes("giveaway.saved → Adversaire3"));
 });
 
 test("recap: facts and win", () => {

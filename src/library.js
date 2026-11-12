@@ -15,7 +15,6 @@ const { ruleEnabled } = require("./rules");
 
 // Variables that name an opponent (all the others name one of our players)
 const OPPONENT_VARS = {
-  "missedSave.escorted": ["scorer"],
   "giveaway.shot": ["opponent"],
   "giveaway.saved": ["opponent"],
   "giveaway.goal": ["opponent"],

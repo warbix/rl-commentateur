@@ -9,7 +9,7 @@ const TITLES = [
   { type: "tapIn", title: "Roi du tap-in", unit: ["tap-in", "tap-ins"] },
   { type: "steal", title: "Pickpocket de la soirée", unit: ["but volé", "buts volés"] },
   { type: "teamBlock", title: "Gardien de l'équipe adverse", unit: ["but sauvé pour l'adversaire", "buts sauvés pour l'adversaire"] },
-  { type: "missedSave", title: "Passoire d'or", unit: ["arrêt manqué", "arrêts manqués"] },
+  { type: "ownGoal", title: "Buteur à l'envers", unit: ["but contre son camp", "buts contre son camp"] },
   { type: "giveaway", title: "Bénévole de la soirée", unit: ["ballon rendu", "ballons rendus"] },
   { type: "adminAssist", title: "Fonctionnaire de la passe", unit: ["passe décisive par procuration", "passes décisives par procuration"] },
   { type: "mvp", title: "Braqueur de MVP", unit: ["MVP volé", "MVP volés"] },

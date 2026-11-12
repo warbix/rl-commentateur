@@ -18,7 +18,8 @@ const DEFAULTS = {
   tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxSpeed: 50, tapInMaxGapMs: 2000, tapInMaxTouches: 2,
   shotDelayMs: 300,
   stealMaxDistance: 1500,
-  missedSaveMaxMs: 1000, missedSaveMaxDistance: 1500, missedSaveOnLineDistance: 1000, missedSaveShotWindowMs: 3000,
+  // Own goal: the last touch before the goal is the conceding team's, and the ball was not already going in
+  ownGoalMaxMs: 3000, ownGoalOnLineDistance: 1000, ownGoalShotWindowMs: 3000,
   topCornerMinHeight: 450, topCornerMinSideOffset: 550,
   adminAssistMinMs: 4000, adminAssistMinTouches: 3,
   mvpMinHighlightRatio: 0.7,
@@ -46,13 +47,13 @@ const DEFAULTS = {
 };
 
 // Priority when several rules fire on the same goal
-const GOAL_PRIORITY = ["steal", "giveaway.goal", "missedSave.escorted", "missedSave.ownGoal", "tapIn", "adminAssist"];
+const GOAL_PRIORITY = ["steal", "giveaway.goal", "ownGoal", "tapIn", "adminAssist"];
 // Near misses that can be offered on a goal, by priority
-const NEAR_MISS_PRIORITY = ["missedSave", "tapIn", "adminAssist"];
+const NEAR_MISS_PRIORITY = ["ownGoal", "tapIn", "adminAssist"];
 
 // The player each situation targets (the one being mocked)
 const TARGET = {
-  tapIn: "scorer", steal: "thief", missedSave: "defender", finish: "scorer",
+  tapIn: "scorer", steal: "thief", ownGoal: "defender", finish: "scorer",
   adminAssist: "passer", mvp: "mvp", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
 };
 
@@ -527,27 +528,20 @@ class Detector extends EventEmitter {
       }
     }
 
-    // Missed save: slightly older touches are looked at too, for near misses
-    const window = S.missedSaveMaxMs * (1 + S.nearMissMargin);
-    const iD = findLastIndex(hits, (h) => t - h.t <= window && h.players.some((p) => p.team === TD));
-    if (iD >= 0) {
-      const defender = hits[iD].players.find((p) => p.team === TD).name;
-      const iAtk = findLastIndex(hits.slice(0, iD), (h) => h.players.some((p) => p.team === TS));
-      // The ball was going in if the attacker had a shot on target shortly before the defender's touch (the game
-      // sometimes sends it before the touch itself), or touched it on the line (the game does not always send "Shot" that close)
-      const onTarget = iAtk >= 0 && (distToOpponentGoal(TS, hits[iAtk].loc.Y) <= S.missedSaveOnLineDistance ||
-        this.feed.some((f) => f.type === "Shot" && f.team === TS && f.t >= hits[iD].t - S.missedSaveShotWindowMs && f.t <= hits[iD].t));
-      const key = onTarget ? "missedSave.escorted" : "missedSave.ownGoal";
-      const vars = { defender, scorer };
-      const r = this.evaluate([
-        condition("touche avant le but", "missedSaveMaxMs", t - hits[iD].t, "max", "ms"),
-        condition("touche à sa propre ligne", "missedSaveMaxDistance", distToOwnGoal(TD, hits[iD].loc.Y), "max", "uu"),
-      ]);
-      if (r.ok) {
-        found[key] = { vars, measures: r.measures };
-      } else if (r.nearMiss) {
-        nearMisses.missedSave = { key, vars, measures: r.measures };
-      }
+    // Own goal: the last touch before the goal is a player of the team that concedes, and the ball was not
+    // going in before it (no shot on target by the attackers just before, no attacker touch on the line)
+    const last = hits[hits.length - 1];
+    if (last && onlyTeam(last, TD)) {
+      const defender = last.players[0].name;
+      const iAtk = findLastIndex(hits, (h) => h.players.some((p) => p.team === TS));
+      // The game sometimes sends "Shot" before the touch itself, and not always for a touch on the line
+      const onTarget = iAtk >= 0 && (distToOpponentGoal(TS, hits[iAtk].loc.Y) <= S.ownGoalOnLineDistance ||
+        this.feed.some((f) => f.type === "Shot" && f.team === TS && f.t >= last.t - S.ownGoalShotWindowMs && f.t <= last.t));
+      const vars = { defender };
+      const r = this.evaluate([condition("dernière touche avant le but", "ownGoalMaxMs", t - last.t, "max", "ms")]);
+      const measures = [...r.measures, { name: "touche à sa propre ligne", value: distToOwnGoal(TD, last.loc.Y), unit: "uu" }];
+      if (!onTarget && r.ok) found.ownGoal = { vars, measures };
+      else if (!onTarget && r.nearMiss) nearMisses.ownGoal = { key: "ownGoal", vars, measures };
     }
 
     // Giveaway of the year (also when a near assist to the opponent ends in a goal)
@@ -597,8 +591,7 @@ class Detector extends EventEmitter {
     if (found.tapIn) this.addBlunder(scorer);
     if (found.steal) this.addBlunder(scorer);
     if (found.adminAssist) this.addBlunder(assister);
-    const missed = found["missedSave.escorted"] || found["missedSave.ownGoal"];
-    if (missed) this.addBlunder(missed.vars.defender);
+    if (found.ownGoal) this.addBlunder(found.ownGoal.vars.defender);
 
     // Everything counts for the recap (giveaways are counted separately)
     for (const [k, { vars }] of Object.entries(found)) {

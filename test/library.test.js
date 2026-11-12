@@ -11,14 +11,14 @@ const { TTS } = require("../src/tts");
 const library = require("../src/library");
 
 const phrases = new Phrases(path.join(ROOT, "phrases.json"));
-const OPPONENT = { "missedSave.escorted": "scorer", "giveaway.shot": "opponent", "giveaway.backward": "opponent", "giveaway.saved": "opponent", "giveaway.goal": "opponent" };
+const OPPONENT = { "giveaway.shot": "opponent", "giveaway.backward": "opponent", "giveaway.saved": "opponent", "giveaway.goal": "opponent" };
 // The squad of config.example.json
 const SQUAD = ["MonPseudo", "Coequipier1", "Coequipier2"];
 
 test("every line said during a match is in the voice library", () => {
   const texts = new Set(library.lines(phrases).map((l) => l.text));
   const all = phrases.all();
-  const keys = Object.keys(OPPONENT).concat(["tapIn", "steal", "teamBlock", "missedSave.ownGoal", "finish.topCorner", "nearGoal.crossbar",
+  const keys = Object.keys(OPPONENT).concat(["tapIn", "steal", "teamBlock", "ownGoal", "finish.topCorner", "nearGoal.crossbar",
     "nearGoal.post", "nearGoal.topCorner", "adminAssist", "mvp.light", "mvp.mocking", "mvp.refund", "ghost", "giveaway.ofTheMatch"]);
   for (const key of keys) {
     const node = phrases.node(key, all);

@@ -54,18 +54,17 @@ part cadrée, le jeu envoie `Shot` dans la foulée ; on n'a pas à refaire la ph
 _Exemple réel_ : un but en prolongation n'est **pas** un vol — le dernier tir cadré du coéquipier date de 2,4 s,
 et sa dernière touche (0,7 s avant) n'était pas cadrée.
 
-## 3. Arrêt manqué 🧤
-**Idée** : un défenseur touche la balle juste avant qu'elle rentre.
+## 3. Contre son camp 🙃
+**Idée** : la balle ne rentrait pas, et c'est un joueur de l'équipe qui encaisse qui l'a mise dans sa propre cage.
+(Remplace l'arrêt manqué : savoir si un arrêt était faisable est trop incertain.)
 
 **Règle** — sur `GoalScored` :
-- Un joueur de l'équipe **qui encaisse** a touché la balle **≤ 1 s** avant le but ⚙️
-- Touche à **≤ 1500** de sa propre ligne ⚙️
-- Deux variantes :
-  - **« Accompagné »** : un `Shot` adverse existait déjà, ou l'attaquant a touché la balle à **≤ 1000** de la ligne → la balle rentrait, il l'a juste escortée
-  - **« But contre son camp »** : pas de `Shot` adverse depuis la dernière touche adverse → c'est lui qui l'a mise
+- La **dernière touche** avant le but est celle d'un joueur de l'équipe **qui encaisse** (seul, pas un duel), **≤ 3 s** avant le but (`ownGoalMaxMs`) ⚙️
+- La balle **ne rentrait pas avant** : pas de `Shot` des attaquants dans les **3 s** avant sa touche (`ownGoalShotWindowMs`),
+  et la dernière touche d'un attaquant n'était pas sur la ligne (à plus de **10 m**, `ownGoalOnLineDistance`)
 
-**Cible** : le défenseur. **Quand** : pendant le replay.
-_Exemple réel_ : un défenseur adverse a touché la balle 0,2 s avant un but en prolongation.
+**Cible** : le joueur qui marque contre son camp. **Quand** : pendant le replay.
+Fréquence mesurée : 3 sur 39 matchs enregistrés.
 
 ## 4. Lucarne 🎯
 **Règle** — sur le `GoalScored` du replay (le 2e, pour un `ImpactLocation` fiable) :
@@ -197,7 +196,7 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 |---|---|
 | `tapIn` | Tap-in |
 | `steal` | Vol de but |
-| `missedSave` | Arrêt manqué |
+| `ownGoal` | Contre son camp |
 | `finish` | Lucarne |
 | `adminAssist` | Passe décisive par procuration |
 | `mvp` | MVP illégitime |
@@ -209,7 +208,7 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un joueur de la bande (`players`). Les comptes d'un même joueur comptent comme un seul.
-Le joueur visé (buteur du tap-in, voleur, défenseur de l'arrêt manqué, passeur, MVP, fantôme, bénévole) doit en faire partie.
+Le joueur visé (buteur du tap-in, voleur, auteur du contre son camp, passeur, MVP, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible : la voix dit « l'adversaire » ou un synonyme.
 Le bilan de la soirée ne parle que de la bande.
 
@@ -220,7 +219,7 @@ le fantôme seulement pour un joueur de la bande, qui est seul à pouvoir en jug
 ## Priorités (1 seul commentaire par but)
 
 Si plusieurs règles se déclenchent sur le même but, on garde la plus piquante parmi celles qui visent un joueur de notre équipe :
-**Vol de but > Bénévole de l'année > Arrêt manqué > Tap-in > Passe décisive par procuration > Lucarne**
+**Vol de but > Bénévole de l'année > Contre son camp > Tap-in > Passe décisive par procuration > Lucarne**
 
 Les règles en direct (fantôme, bénévole, quasi-buts) ne parlent jamais pendant un replay, et laissent
 **≥ 15 s** entre deux commentaires.

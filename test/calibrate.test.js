@@ -74,7 +74,7 @@ test("ideas are kept with their match and clock", () => {
 test("votes are asked on what can be seen, the ghost only for the squad", () => {
   const { isVotable } = require("../src/feedback");
   const players = { Moi: ["MonPseudo"] };
-  assert.ok(isVotable({ key: "missedSave.ownGoal", target: "Adversaire1" }, players));
+  assert.ok(isVotable({ key: "ownGoal", target: "Adversaire1" }, players));
   assert.ok(isVotable({ key: "giveaway.saved", target: "Adversaire1" }, players));
   assert.ok(isVotable({ key: "ghost", target: "MonPseudo" }, players));
   assert.ok(!isVotable({ key: "ghost", target: "CoequipierAleatoire" }, players));
