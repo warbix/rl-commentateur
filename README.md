@@ -67,6 +67,11 @@ Le bot change de voix d'une phrase à l'autre parmi `voice.list` dans `config.js
 - `alternate` : chacune son tour
 - `fixed` : toujours la première de la liste
 
+Une voix peut aussi être réglée à part, pour en faire plusieurs à partir d'une seule :
+`{ "name": "fr-FR-HenriNeural", "pitch": "-12Hz", "rate": "-8%" }` (Henri plus grave et plus lent).
+Seules trois voix fr-FR ne sont pas « Multilingual » : Henri, Denise et Eloise (voix d'enfant). La config par défaut
+en fait six (Henri et Denise, normale, grave et lente, aiguë et rapide).
+
 Écoute les extraits du dossier `samples/` et garde dans `voice.list` celles qui te plaisent :
 
 | Fichier | Nom à mettre dans `voice.list` |

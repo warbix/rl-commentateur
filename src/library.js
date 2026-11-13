@@ -133,7 +133,7 @@ function writePage(file, entries) {
   }
   const sections = [...groups].map(([key, list]) => `
 <details><summary>${escapeHtml(LABELS[key] || key)} <small>(${list.length})</small></summary>
-${list.map((e) => `<div class="line"><audio controls preload="none" src="${escapeHtml(path.relative(path.dirname(file), e.file).split(path.sep).join("/"))}"></audio><span>${escapeHtml(e.text)} <small>${escapeHtml(e.voice)}</small></span></div>`).join("\n")}
+${list.map((e) => `<div class="line"><audio controls preload="none" src="${escapeHtml(path.relative(path.dirname(file), e.file).split(path.sep).join("/"))}"></audio><span>${escapeHtml(e.text)} <small>${escapeHtml(e.voice.label)}</small></span></div>`).join("\n")}
 </details>`).join("\n");
   fs.writeFileSync(file, `<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">

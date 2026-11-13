@@ -31,14 +31,19 @@ class TTS {
     const v = config.voice || {};
     const provider = v.provider === "openai" ? "openai" : "edge";
     const openai = { ...OPENAI_DEFAULTS, ...(v.openai || {}) };
-    const list = provider === "openai"
+    const rate = v.rate || "+0%", pitch = v.pitch || "+0Hz";
+    const raw = provider === "openai"
       ? (openai.voices.length ? openai.voices : OPENAI_DEFAULTS.voices)
       : (Array.isArray(v.list) && v.list.length ? v.list : ["fr-FR-HenriNeural"]);
-    return {
-      provider, list, openai,
-      rotation: v.rotation || "line",
-      rate: v.rate || "+0%", pitch: v.pitch || "+0Hz", python: config.python || "python",
-    };
+    // A voice is a name, or { name, rate, pitch } to make several voices out of one (e.g. a deeper, slower Henri)
+    const list = raw.map((x) => {
+      const voice = typeof x === "string" ? { name: x } : { ...x };
+      if (provider === "edge") { voice.rate = voice.rate || rate; voice.pitch = voice.pitch || pitch; }
+      const tweaks = [voice.rate, voice.pitch].filter((t) => t && t !== rate && t !== pitch && !/^[+-]0(%|Hz)$/.test(t));
+      voice.label = tweaks.length ? `${voice.name} (${tweaks.join(", ")})` : voice.name;
+      return voice;
+    });
+    return { provider, list, openai, rotation: v.rotation || "line", rate, pitch, python: config.python || "python" };
   }
 
   // "line": each line always has the same voice (the voices still change from one line to the next),
@@ -48,7 +53,7 @@ class TTS {
     if (rotation === "fixed" || list.length === 1) voice = list[0];
     else if (rotation === "alternate") voice = list[this.turn++ % list.length];
     else if (rotation === "random") {
-      const others = list.filter((x) => x !== this.lastVoice);
+      const others = list.filter((x) => !this.lastVoice || x.label !== this.lastVoice.label);
       voice = others[Math.floor(Math.random() * others.length)];
     } else voice = list[parseInt(sha1(text).slice(0, 8), 16) % list.length];
     this.lastVoice = voice;
@@ -58,8 +63,8 @@ class TTS {
   // The cache file of a line, whether it exists or not
   fileFor(text, voice, s = this.settings()) {
     const id = s.provider === "openai"
-      ? ["openai", s.openai.model, voice, s.openai.instructions, text].join("|")
-      : [voice, s.rate, s.pitch, text].join("|");
+      ? ["openai", s.openai.model, voice.name, s.openai.instructions, text].join("|")
+      : [voice.name, voice.rate, voice.pitch, text].join("|");
     return path.join(this.cacheDir, `${sha1(id)}.mp3`);
   }
 
@@ -83,8 +88,9 @@ class TTS {
       } catch (e) {
         // Some voices refuse some texts for good (Edge's multilingual ones): the next voice says it,
         // kept under the same file so that the line is still found
-        const other = s.list[(s.list.indexOf(voice) + 1) % s.list.length];
-        if (other === voice) throw e;
+        const i = s.list.findIndex((x) => x.label === voice.label);
+        const other = s.list[(i + 1) % s.list.length];
+        if (other.label === voice.label) throw e;
         await this.generate(text, other, file, s);
       }
     }
@@ -95,17 +101,17 @@ class TTS {
     return s.provider === "openai" ? this.generateOpenAI(text, voice, file, s) : this.generateEdge(text, voice, file, s);
   }
 
-  generateEdge(text, voice, file, { rate, pitch, python }) {
+  generateEdge(text, { name, rate, pitch }, file, { python }) {
     const tmp = `${file}.tmp`;
     // "--rate=-10%" as a single argument: otherwise a negative value would be taken for an option
-    const args = ["-m", "edge_tts", "--voice", voice, `--rate=${rate}`, `--pitch=${pitch}`, "--text", text, "--write-media", tmp];
+    const args = ["-m", "edge_tts", "--voice", name, `--rate=${rate}`, `--pitch=${pitch}`, "--text", text, "--write-media", tmp];
     return new Promise((resolve, reject) => {
       const proc = spawn(python, args, { env: { ...process.env, PYTHONIOENCODING: "utf-8" } });
       let err = "";
       proc.stderr.on("data", (c) => (err += c));
       proc.on("error", (e) => reject(new Error(`Cannot start ${python} (is Python installed?): ${e.message}`)));
       proc.on("close", (code) => {
-        if (code !== 0 || !fs.existsSync(tmp)) return reject(new Error(`edge-tts failed with ${voice} (code ${code}): ${err.trim().split("\n").pop()}`));
+        if (code !== 0 || !fs.existsSync(tmp)) return reject(new Error(`edge-tts failed with ${name} (code ${code}): ${err.trim().split("\n").pop()}`));
         fs.renameSync(tmp, file);
         resolve(file);
       });
@@ -115,7 +121,7 @@ class TTS {
   async generateOpenAI(text, voice, file, { openai }) {
     const key = openai.apiKey || process.env.OPENAI_API_KEY;
     if (!key) throw new Error("OpenAI: no API key (voice.openai.apiKey in config.json, or the OPENAI_API_KEY variable)");
-    const body = { model: openai.model, voice, input: text, response_format: "mp3" };
+    const body = { model: openai.model, voice: voice.name, input: text, response_format: "mp3" };
     // Only the gpt-4o-mini-tts family takes a tone instruction
     if (openai.instructions && !/^tts-1/.test(openai.model)) body.instructions = openai.instructions;
     const res = await fetch("https://api.openai.com/v1/audio/speech", {

@@ -41,3 +41,12 @@ test("a line always has the same voice, and the voices still change from one lin
   assert.ok(new Set(lines.map((l) => tts.voiceFor(l.text, s))).size > 1);
   assert.strictEqual(tts.locate(lines[0].text, s).file, tts.fileFor(lines[0].text, tts.voiceFor(lines[0].text, s), s));
 });
+
+test("one voice can make several voices, with its own rate and pitch", () => {
+  const tts = new TTS({ cacheDir: fs.mkdtempSync(path.join(os.tmpdir(), "tts-")) });
+  const s = tts.settings();
+  const henri = s.list.filter((v) => v.name === "fr-FR-HenriNeural");
+  assert.ok(henri.length > 1);
+  assert.strictEqual(new Set(henri.map((v) => v.label)).size, henri.length);
+  assert.strictEqual(new Set(henri.map((v) => tts.fileFor("Bonjour", v, s))).size, henri.length);
+});

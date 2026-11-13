@@ -31,18 +31,34 @@
   "pronunciation": {
     "MVP": "aime vie pie"
   },
-  "_voice": "provider: \"edge\" (free Microsoft voices, list) or \"openai\" (paid, openai.voices, key in openai.apiKey or the OPENAI_API_KEY variable). rotation: \"line\" (each line always has the same voice, the voices still change from one line to the next: needed for the voice library), \"random\", \"alternate\" or \"fixed\" (always the first). jingle: true (ding before each line), false, or the path of your own sound. Can be changed while the bot is running, except the volume.",
+  "_voice": "provider: \"edge\" (free Microsoft voices, list) or \"openai\" (paid, openai.voices, key in openai.apiKey or the OPENAI_API_KEY variable). rotation: \"line\" (each line always has the same voice, the voices still change from one line to the next: needed for the voice library), \"random\", \"alternate\" or \"fixed\" (always the first). jingle: true (ding before each line), false, or the path of your own sound. Can be changed while the bot is running, except the volume. list: a voice is a name, or { \"name\", \"rate\", \"pitch\" } to make several voices out of one (e.g. a deeper, slower Henri).",
   "voice": {
     "provider": "edge",
     "jingle": true,
     "rotation": "line",
     "list": [
       "fr-FR-HenriNeural",
-      "fr-FR-RemyMultilingualNeural",
+      {
+        "name": "fr-FR-HenriNeural",
+        "pitch": "-12Hz",
+        "rate": "-8%"
+      },
+      {
+        "name": "fr-FR-HenriNeural",
+        "pitch": "+10Hz",
+        "rate": "+12%"
+      },
       "fr-FR-DeniseNeural",
-      "fr-FR-VivienneMultilingualNeural",
-      "fr-CA-AntoineNeural",
-      "fr-BE-GerardNeural"
+      {
+        "name": "fr-FR-DeniseNeural",
+        "pitch": "-10Hz",
+        "rate": "-5%"
+      },
+      {
+        "name": "fr-FR-DeniseNeural",
+        "pitch": "+8Hz",
+        "rate": "+12%"
+      }
     ],
     "rate": "+0%",
     "pitch": "+0Hz",
