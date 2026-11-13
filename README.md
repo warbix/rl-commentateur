@@ -192,6 +192,8 @@ npm run pregenerate -- --prune      supprime aussi les voix qui ne servent plus
 La page `cache/library.html` permet de tout écouter, situation par situation.
 Pour l'écouter depuis un téléphone ou un autre PC du même réseau : `npm run library`, puis l'adresse « from the network » qu'il affiche
 (Windows demande la première fois d'autoriser Node.js sur les réseaux privés).
+En haut de cette page, **Tester une phrase** lit en direct n'importe quel texte avec la voix choisie, et permet d'essayer
+une correction de prononciation (ex. « seum » écrit « sœum ») puis de l'enregistrer dans `config.json` → `pronunciation`.
 Avec les voix gratuites, le bot complète aussi la bibliothèque tout seul au lancement (`"pregenerate": false` pour désactiver).
 Après un changement de phrase ou de joueur, seules les nouvelles phrases sont générées.
 

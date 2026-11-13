@@ -146,9 +146,87 @@ summary { cursor: pointer; font-weight: 600; padding: 8px 0; border-bottom: 1px 
 small { color: var(--muted); font-weight: normal; }
 .line { display: flex; gap: 12px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
 audio { flex: none; width: 220px; height: 32px; }
+.test { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin: 16px 0 24px; }
+.test h2 { font-size: 17px; margin: 0 0 8px; }
+.test textarea, .test input, .test select, .test button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
+.test textarea { width: 100%; box-sizing: border-box; min-height: 64px; }
+.test button { cursor: pointer; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 8px 0; }
+.row input[type=text] { flex: 1 1 140px; min-width: 0; }
+#spoken, #status { color: var(--muted); }
+#fixes-list span { display: inline-block; margin: 2px 8px 2px 0; }
+@media (max-width: 600px) { .line { flex-direction: column; align-items: flex-start; } audio { width: 100%; } }
 </style></head><body>
 <h1>Phrases du commentateur</h1>
 <p><small>${entries.length} phrases. Une voix par phrase, toujours la même.</small></p>
+<section class="test" id="test">
+<h2>Tester une phrase</h2>
+<p><small>Fonctionne avec <code>npm run library</code> (pas en ouvrant le fichier directement).</small></p>
+<textarea id="text">Arracheur, tu as le droit d'avoir le seum.</textarea>
+<div class="row">
+<select id="voice"></select>
+<label><input type="checkbox" id="fixes" checked> avec les corrections de prononciation</label>
+<button id="play">Écouter</button>
+</div>
+<div id="spoken"></div>
+<audio id="player" controls></audio>
+<h2>Corrections de prononciation</h2>
+<p><small>Le mot est remplacé juste avant la voix, dans toutes les phrases (ex. « MVP » dit « aime vie pie »). Essaie une orthographe dans le texte ci-dessus, puis enregistre-la.</small></p>
+<div class="row">
+<input type="text" id="word" placeholder="Mot (ex. seum)">
+<input type="text" id="said" placeholder="Dit comme (ex. sœum)">
+<button id="try">Essayer</button>
+<button id="save">Enregistrer</button>
+</div>
+<div id="status"></div>
+<div id="fixes-list"></div>
+</section>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var api = function (url, body) {
+    return fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  };
+  function showFixes(p) {
+    var list = Object.keys(p).map(function (w) { return "<span><b>" + esc(w) + "</b> → " + esc(p[w]) + "</span>"; });
+    $("fixes-list").innerHTML = list.length ? list.join("") : "<small>Aucune correction.</small>";
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function say(text, fixes, extra) {
+    $("spoken").textContent = "Génération…";
+    return api("api/preview", { text: text, voice: $("voice").value, fixes: fixes, extra: extra || {} }).then(function (r) {
+      if (!r.ok) return r.json().then(function (e) { throw new Error(e.error); });
+      $("spoken").textContent = "Texte lu : " + decodeURIComponent(r.headers.get("X-Spoken-Text") || "");
+      return r.blob();
+    }).then(function (b) {
+      $("player").src = URL.createObjectURL(b);
+      $("player").play();
+    }).catch(function (e) { $("spoken").textContent = "Erreur : " + e.message; });
+  }
+  fetch("api/info").then(function (r) { return r.json(); }).then(function (d) {
+    $("voice").innerHTML = d.voices.map(function (v, i) { return "<option value='" + i + "'>" + esc(v) + "</option>"; }).join("");
+    showFixes(d.pronunciation);
+  }).catch(function () {
+    $("test").querySelector("p small").textContent = "Indisponible : lance npm run library et ouvre la page par son adresse.";
+  });
+  $("play").onclick = function () { say($("text").value, $("fixes").checked); };
+  // The fix being tried is applied by the server, with the saved ones
+  $("try").onclick = function () {
+    var w = $("word").value.trim(), s = $("said").value.trim();
+    if (!w || !s) return;
+    var extra = {};
+    extra[w] = s;
+    say($("text").value, true, extra);
+  };
+  $("save").onclick = function () {
+    api("api/pronunciation", { word: $("word").value, said: $("said").value }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d.error) throw new Error(d.error);
+      showFixes(d.pronunciation);
+      $("status").textContent = "Enregistré dans config.json. Les phrases concernées seront regénérées au prochain lancement du bot.";
+    }).catch(function (e) { $("status").textContent = "Erreur : " + e.message; });
+  };
+})();
+</script>
 ${sections}
 </body></html>
 `);
