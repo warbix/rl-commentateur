@@ -185,7 +185,10 @@ audio { flex: none; width: 220px; height: 32px; }
 (function () {
   var $ = function (id) { return document.getElementById(id); };
   var api = function (url, body) {
-    return fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    return fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(function (r) {
+      if (r.status === 404) throw new Error("le serveur de la page est une ancienne version : relance npm run library");
+      return r;
+    });
   };
   function showFixes(p) {
     var list = Object.keys(p).map(function (w) { return "<span><b>" + esc(w) + "</b> → " + esc(p[w]) + "</span>"; });
