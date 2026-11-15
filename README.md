@@ -91,6 +91,9 @@ Autres voix possibles : `fr-FR-EloiseNeural`, `fr-CA-JeanNeural`, `fr-CA-Thierry
 ## Utilisation
 
 **Double-clic sur `start.bat`** (ou `npm start` dans un terminal ouvert dans ce dossier).
+
+**`menu.bat`** regroupe toutes les commandes : lancer le bot, le bot avec la page des voix, la page des voix seule,
+générer les voix manquantes, calibrer les seuils, vérifier l'API, lancer les tests.
 Le bot rejoint le salon vocal, puis attend Rocket League. L'ordre de lancement n'a pas d'importance.
 Ferme la fenêtre pour l'arrêter.
 
