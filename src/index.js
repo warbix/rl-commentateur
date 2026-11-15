@@ -103,7 +103,7 @@ async function main() {
     );
     output.addCommand(
       new SlashCommandBuilder().setName("idea").setDescription("Suggest a situation the commentator should notice")
-        .addStringOption((o) => o.setName("text").setDescription("E.g. 2:10, Marcel and I both went for the ball").setRequired(true)),
+        .addStringOption((o) => o.setName("text").setDescription("E.g. 2:10, Bébert and I both went for the ball").setRequired(true)),
       (interaction) => {
         if (!feedback) return { content: "Pas d'idées pendant un rejeu.", flags: MessageFlags.Ephemeral };
         const text = interaction.options.getString("text");

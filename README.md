@@ -106,7 +106,7 @@ Dans n'importe quel salon du serveur :
 | `/mute` | Coupe les commentaires (le bot reste dans le vocal) |
 | `/unmute` | Les relance |
 | `/volume 80` | Règle le volume du commentateur (0 à 200 %) |
-| `/idea 2:10 Marcel et moi on est partis tous les deux` | Propose une situation que le bot devrait repérer : elle est notée avec le match et son chrono, et apparaît dans `npm run calibrate` |
+| `/idea 2:10 Bébert et moi on est partis tous les deux` | Propose une situation que le bot devrait repérer : elle est notée avec le match et son chrono, et apparaît dans `npm run calibrate` |
 | `/recap` | Bilan de la soirée en vocal et par écrit : victoires, roi du tap-in, passoire d'or, bénévole, fantôme… |
 
 Quand tu fermes Rocket League (depuis plus d'une minute), le bot lit et poste le bilan tout seul.
