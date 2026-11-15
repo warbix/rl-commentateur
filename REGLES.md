@@ -87,15 +87,14 @@ Fréquence mesurée : 3 sur 39 matchs enregistrés.
 **Cible** : le passeur. **Quand** : pendant le replay.
 
 ## 6. MVP de justesse 👑
-**Idée** : le MVP s'est joué à quelques points. On appuie sur le seum du deuxième.
+**Idée** : le MVP s'est joué à quelques points entre coéquipiers. On appuie sur le seum de celui qui l'a raté.
 
 **Règle** — sur `StatfeedEvent` `MVP`, avec les scores finaux de `UpdateState` :
-- Le **deuxième** est le meilleur score du match après le MVP, dans n'importe quelle équipe
+- Le MVP est toujours dans l'équipe gagnante : on le compare à son **meilleur coéquipier**
 - Le MVP a **au plus 50 points** de plus que lui (`mvpMaxGap`) ⚙️
-- Si un joueur de l'équipe perdante a plus de points que le MVP, ce n'était pas une course au MVP : rien
 
-**Cible** : le deuxième (c'est lui qui a le seum), en citant le MVP (« l'adversaire » s'il est en face). **Quand** : à l'annonce du MVP.
-Fréquence mesurée : 5 sur 39 matchs enregistrés avec 50 points (environ 1 match sur 8) ; 100 points en donnerait environ 1 sur 4.
+**Cible** : le coéquipier (c'est lui qui a le seum), en citant le MVP. **Quand** : à l'annonce du MVP.
+Fréquence mesurée sur 33 matchs complets : 9 avec 50 points, 8 avec 30, 7 avec 20.
 
 ## 7. Le mendiant 🪙
 **Retiré** : le boost d'un joueur ne disait pas assez s'il jouait mal.
@@ -211,7 +210,7 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 ## Qui est commenté
 
 Par défaut (`target: "our-team"` dans config.json), seul **notre équipe** se fait chambrer : l'équipe où joue au moins un joueur de la bande (`players`). Les comptes d'un même joueur comptent comme un seul.
-Le joueur visé (buteur du tap-in, voleur, auteur du contre son camp, passeur, deuxième du MVP de justesse, fantôme, bénévole) doit en faire partie.
+Le joueur visé (buteur du tap-in, voleur, auteur du contre son camp, passeur, coéquipier du MVP de justesse, fantôme, bénévole) doit en faire partie.
 Les adversaires peuvent être cités (ex. celui qui marque après un cadeau), mais ne sont jamais la cible : la voix dit « l'adversaire » ou un synonyme.
 Le bilan de la soirée ne parle que de la bande.
 

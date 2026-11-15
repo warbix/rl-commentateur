@@ -185,7 +185,7 @@
     ]
   },
   "mvp": {
-    "_variables": "{mvp} = the MVP (may be an opponent), {runnerUp} = the second best score, a few points behind",
+    "_variables": "{mvp} = the MVP, {runnerUp} = his teammate, a few points behind",
     "phrases": [
       "{mvp} est MVP de justesse. {runnerUp}, tu as le droit d'avoir le seum. Beaucoup de seum.",
       "Quelques points d'écart, et c'est {mvp} qui monte sur la plus haute marche. {runnerUp}, respire un grand coup.",

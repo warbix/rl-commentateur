@@ -25,7 +25,7 @@ const DEFAULTS = {
   ownGoalMaxMs: 3000, ownGoalOnLineDistance: 1000, ownGoalShotWindowMs: 3000,
   topCornerMinHeight: 450, topCornerMinSideOffset: 550,
   adminAssistMinMs: 4000, adminAssistMinTouches: 3,
-  // Close MVP: the MVP has at most this many points more than the second best player of the match
+  // Close MVP: the MVP (always on the winning team) has at most this many points more than his best teammate
   mvpMaxGap: 50,
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
   // about one ghost every match and a half per team (one touches the ball less at three than at two)
@@ -670,15 +670,15 @@ class Detector extends EventEmitter {
     const mvp = this.players.get(name);
     if (!mvp || this.mvpChecked) return;
     this.mvpChecked = true;
-    // Close MVP: the second best score of the match (either team) is only a few points behind. Mocks the second.
-    // (If someone of the losing team scored more than the MVP, it was not a race for the MVP: nothing.)
+    // Close MVP: the MVP's best teammate is only a few points behind (the MVP always goes to the winning team).
+    // Mocks the teammate who just missed it.
     const score = (p) => p.stats.Score || 0;
-    const runnerUp = [...this.players.values()].filter((p) => p !== mvp).sort((a, b) => score(b) - score(a))[0];
+    const runnerUp = [...this.players.values()].filter((p) => p !== mvp && p.team === mvp.team).sort((a, b) => score(b) - score(a))[0];
     if (!runnerUp) return;
     const gap = score(mvp) - score(runnerUp);
     if (gap < 0) return;
-    const r = this.evaluate([condition("écart de points avec le deuxième", "mvpMaxGap", gap, "max", "n")]);
-    const measures = [...r.measures, { name: "points du MVP", value: score(mvp) }, { name: "points du deuxième", value: score(runnerUp) }];
+    const r = this.evaluate([condition("écart de points avec le meilleur coéquipier", "mvpMaxGap", gap, "max", "n")]);
+    const measures = [...r.measures, { name: "points du MVP", value: score(mvp) }, { name: "points du coéquipier", value: score(runnerUp) }];
     const vars = { mvp: mvp.name, runnerUp: runnerUp.name };
     if (r.ok) {
       this.fact("mvp", runnerUp.name);

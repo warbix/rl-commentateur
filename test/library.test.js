@@ -26,7 +26,7 @@ test("every line said during a match is in the voice library", () => {
     for (let i = 0; i < 40; i++) {
       const squad = [...SQUAD].sort(() => Math.random() - 0.5);
       const vars = {};
-      for (const v of declared) vars[v] = v === "count" ? 3 + (i % 8) : v === OPPONENT[key] || (key === "mvp" && v === "mvp" && i % 2) ? "Adversaire1" : squad.pop();
+      for (const v of declared) vars[v] = v === "count" ? 3 + (i % 8) : v === OPPONENT[key] ? "Adversaire1" : squad.pop();
       const text = phrases.pick(key, vars, { opponents: ["Adversaire1"] });
       assert.ok(texts.has(text), `${key}: not in the library: ${text}`);
     }

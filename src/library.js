@@ -19,8 +19,8 @@ const OPPONENT_VARS = {
   "giveaway.saved": ["opponent"],
   "giveaway.goal": ["opponent"],
 };
-// Variables that name a player of either team (the MVP: the second may be ours while the MVP is an opponent)
-const EITHER_VARS = { mvp: ["mvp"] };
+// Variables that name a player of either team (none at the moment)
+const EITHER_VARS = {};
 // Values a number can take in a spoken line
 const NUMBERS = { count: [3, 4, 5, 6, 7, 8, 9, 10] };
 
