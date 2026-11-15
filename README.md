@@ -197,6 +197,9 @@ Pour l'écouter depuis un téléphone ou un autre PC du même réseau : `npm run
 (Windows demande la première fois d'autoriser Node.js sur les réseaux privés).
 En haut de cette page, **Tester une phrase** lit en direct n'importe quel texte avec la voix choisie, et permet d'essayer
 une correction de prononciation (ex. « seum » écrit « sœum ») puis de l'enregistrer dans `config.json` → `pronunciation`.
+**Modifier les phrases** permet de changer, ajouter ou supprimer les phrases de chaque situation, de les écouter avec les surnoms,
+puis de les enregistrer dans `phrases.json` (le bot les utilise tout de suite). **Générer les voix manquantes** prépare
+les voix des nouvelles phrases (voix gratuites ; avec OpenAI, passe par `npm run pregenerate`, qui annonce le coût).
 Avec les voix gratuites, le bot complète aussi la bibliothèque tout seul au lancement (`"pregenerate": false` pour désactiver).
 Après un changement de phrase ou de joueur, seules les nouvelles phrases sont générées.
 

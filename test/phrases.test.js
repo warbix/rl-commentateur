@@ -19,9 +19,9 @@ function situations(node = all, prefix = "") {
 
 const NUMBERS = ["seconds", "speed", "count"];
 
-test("every situation has at least 10 lines that only use its declared variables", () => {
+test("every situation has lines that only use its declared variables", () => {
   for (const [key, node] of situations()) {
-    assert.ok(node.phrases.length >= 10, key);
+    assert.ok(node.phrases.length >= 1, key);
     const declared = [...node._variables.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
     for (const p of node.phrases) {
       const used = [...p.matchAll(/\{(\w+)\}/g)].map((m) => m[1]);

@@ -49,6 +49,34 @@ function casts(ours, opponents, numbers, either, { players, opponentNames }) {
 }
 const each = (v, c, list) => list.map((x) => ({ ...c, values: { ...c.values, [v]: x } }));
 
+// The variables of a situation, by kind
+function roles(key, node) {
+  const declared = [...(node._variables || "").matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
+  const opponents = declared.filter((v) => (OPPONENT_VARS[key] || []).includes(v));
+  const numbers = declared.filter((v) => NUMBERS[v]);
+  const either = declared.filter((v) => (EITHER_VARS[key] || []).includes(v));
+  const ours = declared.filter((v) => !opponents.includes(v) && !numbers.includes(v) && !either.includes(v));
+  return { declared, opponents, numbers, either, ours };
+}
+
+// One example of a line: the squad's spoken names in turn, the first opponent formula, a plausible number
+function sample(phrases, key, line) {
+  const node = phrases.node(key);
+  const { players = {}, pronunciation = {}, opponentNames = OPPONENT_NAMES } = readConfig();
+  const { opponents, numbers } = roles(key, node);
+  const squad = Object.keys(players);
+  let i = 0;
+  const values = {};
+  return phrases.render(line, (v) => {
+    if (!(v in values)) {
+      if (opponents.includes(v)) values[v] = opponentNames[0];
+      else if (numbers.includes(v)) values[v] = NUMBERS[v][1];
+      else values[v] = squad[i++ % Math.max(squad.length, 1)] || v;
+    }
+    return values[v];
+  }, pronunciation);
+}
+
 // All the lines of the library: [{ key, text }], without duplicates
 function lines(phrases) {
   const all = phrases.all();
@@ -59,11 +87,7 @@ function lines(phrases) {
   for (const key of situations(all)) {
     if (!ruleEnabled(rules, key)) continue;
     const node = phrases.node(key, all);
-    const declared = [...(node._variables || "").matchAll(/\{(\w+)\}/g)].map((m) => m[1]);
-    const opponents = declared.filter((v) => (OPPONENT_VARS[key] || []).includes(v));
-    const numbers = declared.filter((v) => NUMBERS[v]);
-    const either = declared.filter((v) => (EITHER_VARS[key] || []).includes(v));
-    const ours = declared.filter((v) => !opponents.includes(v) && !numbers.includes(v) && !either.includes(v));
+    const { opponents, numbers, either, ours } = roles(key, node);
     for (const line of node.phrases) {
       const used = new Set([...line.matchAll(/\{(\w+)\}/g)].map((m) => m[1]));
       // Only the variables of this line: a line without {count} is not repeated for every count
@@ -156,6 +180,10 @@ audio { flex: none; width: 220px; height: 32px; }
 .row input[type=text] { flex: 1 1 140px; min-width: 0; }
 #spoken, #status { color: var(--muted); }
 #fixes-list span { display: inline-block; margin: 2px 8px 2px 0; }
+#edit-status, #gen-status, #vars { color: var(--muted); }
+.edit-line { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0; }
+.edit-line textarea { flex: 1; min-height: 48px; }
+.edit-line.bad textarea { border-color: #d33; }
 @media (max-width: 600px) { .line { flex-direction: column; align-items: flex-start; } audio { width: 100%; } }
 </style></head><body>
 <h1>Phrases du commentateur</h1>
@@ -182,58 +210,27 @@ audio { flex: none; width: 220px; height: 32px; }
 <div id="status"></div>
 <div id="fixes-list"></div>
 </section>
-<script>
-(function () {
-  var $ = function (id) { return document.getElementById(id); };
-  var api = function (url, body) {
-    return fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(function (r) {
-      if (r.status === 404) throw new Error("le serveur de la page est une ancienne version : relance npm run library");
-      return r;
-    });
-  };
-  function showFixes(p) {
-    var list = Object.keys(p).map(function (w) { return "<span><b>" + esc(w) + "</b> → " + esc(p[w]) + "</span>"; });
-    $("fixes-list").innerHTML = list.length ? list.join("") : "<small>Aucune correction.</small>";
-  }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  function say(text, fixes, extra) {
-    $("spoken").textContent = "Génération…";
-    return api("api/preview", { text: text, voice: $("voice").value, fixes: fixes, extra: extra || {} }).then(function (r) {
-      if (!r.ok) return r.json().then(function (e) { throw new Error(e.error); });
-      $("spoken").textContent = "Texte lu : " + decodeURIComponent(r.headers.get("X-Spoken-Text") || "");
-      return r.blob();
-    }).then(function (b) {
-      $("player").src = URL.createObjectURL(b);
-      $("player").play();
-    }).catch(function (e) { $("spoken").textContent = "Erreur : " + e.message; });
-  }
-  fetch("api/info").then(function (r) { return r.json(); }).then(function (d) {
-    $("voice").innerHTML = d.voices.map(function (v, i) { return "<option value='" + i + "'>" + esc(v) + "</option>"; }).join("");
-    showFixes(d.pronunciation);
-  }).catch(function () {
-    $("test").querySelector("p small").textContent = "Indisponible : lance npm run library et ouvre la page par son adresse.";
-  });
-  $("play").onclick = function () { say($("text").value, $("fixes").checked); };
-  // The fix being tried is applied by the server, with the saved ones
-  $("try").onclick = function () {
-    var w = $("word").value.trim(), s = $("said").value.trim();
-    if (!w || !s) return;
-    var extra = {};
-    extra[w] = s;
-    say($("text").value, true, extra);
-  };
-  $("save").onclick = function () {
-    api("api/pronunciation", { word: $("word").value, said: $("said").value }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d.error) throw new Error(d.error);
-      showFixes(d.pronunciation);
-      $("status").textContent = "Enregistré dans config.json. Les phrases concernées seront regénérées au prochain lancement du bot.";
-    }).catch(function (e) { $("status").textContent = "Erreur : " + e.message; });
-  };
-})();
-</script>
+<section class="test" id="edit">
+<h2>Modifier les phrases</h2>
+<p><small>Les noms entre accolades sont remplacés par les surnoms (ou « l'adversaire »). Une phrase doit en citer au moins un.
+Enregistré dans <code>phrases.json</code> : le bot l'utilise tout de suite, même en pleine partie.</small></p>
+<div class="row">
+<select id="situation"></select>
+<button id="add">Ajouter une phrase</button>
+<button id="save-lines">Enregistrer</button>
+</div>
+<p><small id="vars"></small></p>
+<div id="lines"></div>
+<div id="edit-status"></div>
+<div class="row">
+<button id="generate">Générer les voix manquantes</button>
+<span id="gen-status"></span>
+</div>
+</section>
+<script src="library-page.js"></script>
 ${sections}
 </body></html>
 `);
 }
 
-module.exports = { lines, status, generate, prune, writePage };
+module.exports = { lines, status, generate, prune, writePage, situations, roles, sample };
