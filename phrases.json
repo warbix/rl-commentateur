@@ -12,7 +12,12 @@
       "Tap-in de {scorer}. Un vrai renard des surfaces. Enfin, un renard qui attend qu'on lui ouvre la porte du poulailler.",
       "{scorer} n'avait rien d'autre à faire que d'être là. Mission accomplie, c'est déjà ça.",
       "{scorer} marque à un mètre de la ligne. Si tu rates celui-là, tu désinstalles le jeu.",
-      "But de {scorer}, à la vitesse d'un caddie sur un parking. Mais ça compte."
+      "But de {scorer}, à la vitesse d'un caddie sur un parking. Mais ça compte.",
+      "{scorer} marque et regarde le replay comme si c'était un chef-d'œuvre. Mon gars, tu as poussé une balle à l'arrêt.",
+      "Applaudissements polis pour {scorer}, qui a réussi l'exploit de ne pas rater une cage vide.",
+      "{scorer}, un but comme ça, tu ne le racontes à personne. On a honte pour toi.",
+      "Même le gardien adverse a eu pitié. {scorer}, ramasse ton but de charité et tais-toi.",
+      "{scorer} vient de marquer le but qu'un bot aurait mis. Un bot débutant. Débranché."
     ]
   },
   "steal": {
@@ -27,7 +32,12 @@
       "La balle de {victim} était déjà dedans. {thief} a juste mis son nom dessus, comme sur les exposés de groupe.",
       "{thief}, voler un but à {victim}, c'est petit. Très petit. Microscopique.",
       "Merci {thief} d'avoir raccompagné le tir de {victim} jusqu'au fond. Il ne connaissait pas le chemin, peut-être ?",
-      "But volé ! {victim} fait le travail, {thief} fait la célébration. Il y a des claques qui se perdent."
+      "But volé ! {victim} fait le travail, {thief} fait la célébration. Il y a des claques qui se perdent.",
+      "{thief}, tu n'as aucune honte. Le but de {victim} était dedans, et tu viens poser tes mains sales dessus.",
+      "{victim}, tu peux le dire : ton coéquipier est un rapace. Un rapace sans talent, en plus.",
+      "{thief} vient de voler {victim} en direct. Même les pickpockets du métro trouvent ça abusé.",
+      "Le seul talent de {thief} ce soir : arriver après tout le monde et prendre les points. Bravo le parasite.",
+      "{victim}, à ta place, je ne lui passerais plus jamais la balle. Plus jamais."
     ]
   },
   "teamBlock": {
@@ -42,7 +52,12 @@
       "{shooter} tire, {blocker} sort la balle. L'adversaire n'a même plus besoin de défendre, {blocker} s'en occupe.",
       "{blocker}, tu étais censé suivre l'action, pas l'annuler.",
       "Agent double repéré : {blocker}. Il vient de sauver un but que {shooter} avait déjà marqué.",
-      "{shooter} va se souvenir longtemps de ce but. Celui que {blocker} lui a arraché sur la ligne."
+      "{shooter} va se souvenir longtemps de ce but. Celui que {blocker} lui a arraché sur la ligne.",
+      "{blocker} sauve plus de buts pour l'adversaire que pour nous. Sérieusement, tu es payé par qui ?",
+      "{shooter} marquait. {blocker} a dit non. On appelle ça un traître.",
+      "{blocker}, le seul arrêt propre de ta soirée, et tu le fais dans la mauvaise cage. Légendaire.",
+      "Si tu voulais jouer en face, {blocker}, il fallait le dire avant le match.",
+      "{shooter}, tu peux insulter {blocker}. On ne dira rien. On est d'accord avec toi."
     ]
   },
   "ownGoal": {
@@ -57,7 +72,12 @@
       "Contre son camp de {defender}. L'équipe adverse aurait pu aller boire un café, ça rentrait quand même.",
       "{defender} vient de marquer son plus beau but de la soirée. Dommage pour la direction.",
       "Un but, c'est bien. Dans la bonne cage, c'est mieux. {defender}, on reprend les bases.",
-      "{defender} change de camp en plein match. Personne ne lui a dit que ça ne se faisait pas."
+      "{defender} change de camp en plein match. Personne ne lui a dit que ça ne se faisait pas.",
+      "{defender} marque enfin un but ce soir. Dommage, c'est pour eux.",
+      "Magnifique frappe de {defender}. Cadrée, puissante, imparable. Dans sa propre cage.",
+      "{defender}, tu joues pour quelle équipe exactement ? Parce que là, ils te remercient.",
+      "Même en le faisant exprès, {defender} n'aurait pas fait mieux. Et on n'est pas sûrs qu'il ne l'ait pas fait exprès.",
+      "Contre son camp de {defender}. On va encadrer le replay et l'accrocher dans les toilettes."
     ]
   },
   "finish": {
@@ -73,7 +93,12 @@
         "{scorer} en pleine lucarne. Faites une capture d'écran, ça ne se reproduira pas.",
         "Lucarne de {scorer}. Même lui est choqué, regardez sa voiture, elle tremble encore.",
         "Joli but de {scorer}. Je cherche encore comment me moquer. Bon, c'est sûrement de la chance.",
-        "{scorer} met une lucarne et va en parler pendant trois semaines. Courage à tous."
+        "{scorer} met une lucarne et va en parler pendant trois semaines. Courage à tous.",
+        "Lucarne de {scorer}. Une par saison, il vient de griller son quota.",
+        "{scorer} met une lucarne et se prend pour un pro. Rappel : tu as raté une cage vide il y a dix minutes.",
+        "Belle lucarne de {scorer}. Le hasard fait bien les choses, parfois.",
+        "{scorer}, profite. Demain tu redeviens le joueur moyen qu'on connaît tous.",
+        "Lucarne pour {scorer}. Il visait le milieu, mais on ne va pas gâcher sa joie."
       ]
     }
   },
@@ -90,7 +115,12 @@
         "Barre ! {shooter} a la précision d'un lancer de dés.",
         "{shooter} tape la barre. On garde ça précieusement pour le bêtisier de fin de saison.",
         "Le tir de {shooter} rebondit sur la barre et ressort. Un peu comme sa carrière.",
-        "{shooter}, sur la barre. Même quand c'est ouvert, il trouve le moyen de ne pas marquer."
+        "{shooter}, sur la barre. Même quand c'est ouvert, il trouve le moyen de ne pas marquer.",
+        "{shooter} tape la barre. Même la cage ne veut pas de tes tirs.",
+        "La barre ! {shooter}, tu as la précision d'un mec qui joue avec les pieds.",
+        "{shooter} trouve la transversale. C'est sa meilleure amie ce soir, vu que personne d'autre ne veut de lui.",
+        "Barre pour {shooter}. Il visait la lucarne, il a eu la honte.",
+        "{shooter}, tu es à dix centimètres du but et à des années-lumière du niveau."
       ]
     },
     "post": {
@@ -105,7 +135,12 @@
         "{shooter} vise le poteau avec une précision chirurgicale. Dommage, c'est la cage qu'il fallait viser.",
         "Le poteau dit merci à {shooter}, il commençait à s'ennuyer.",
         "{shooter} au poteau. À un mètre près, c'était un but. À un mètre près, {shooter} serait bon.",
-        "Poteau de {shooter}. Le genre de raté qu'il racontera en disant : j'ai pas eu de chance."
+        "Poteau de {shooter}. Le genre de raté qu'il racontera en disant : j'ai pas eu de chance.",
+        "Poteau ! {shooter}, la cage fait la taille d'un garage et toi tu trouves le montant.",
+        "{shooter} tape le poteau. Enfin quelque chose de solide dans son jeu.",
+        "Encore un poteau. {shooter}, tu le fais exprès pour qu'on parle de toi ?",
+        "{shooter} au poteau. Le plus gros raté de la soirée, et la soirée n'est pas finie.",
+        "Le poteau a sauvé l'adversaire. {shooter}, tu viens de jouer pour eux, félicitations."
       ]
     },
     "topCorner": {
@@ -120,7 +155,12 @@
         "L'équerre ! {shooter} a frôlé la gloire. La gloire a changé de trottoir.",
         "{shooter} était à un centimètre de l'exploit. Et à un centimètre de ne plus jamais se taire.",
         "Équerre de {shooter}. Heureusement, on n'aurait pas supporté la célébration.",
-        "{shooter} tape l'équerre. Le jeu a décidé que ce serait trop beau pour lui."
+        "{shooter} tape l'équerre. Le jeu a décidé que ce serait trop beau pour lui.",
+        "{shooter} tape l'équerre et se croit à deux doigts du génie. Non. À deux doigts du ridicule.",
+        "Équerre ! {shooter} a frôlé le but de l'année, il a eu le raté de l'année.",
+        "{shooter}, l'équerre, c'est joli au replay. Sur le tableau des scores, ça fait zéro.",
+        "L'équerre a rejeté {shooter}. Comme tout le monde, en fait.",
+        "{shooter} rate de peu. Mais rater, c'est un peu sa spécialité."
       ]
     }
   },
@@ -136,7 +176,12 @@
       "{passer} gagne une passe décisive sans rien faire. Le rêve de tout fonctionnaire.",
       "{scorer} dribble, tire, marque. Et {passer} lève la main pour réclamer la passe. Culotté.",
       "Passe décisive pour {passer}, qui regardait l'action depuis les tribunes.",
-      "{passer}, tu peux encadrer cette passe décisive. Tu ne la méritais pas, mais elle fera joli sur le tableau."
+      "{passer}, tu peux encadrer cette passe décisive. Tu ne la méritais pas, mais elle fera joli sur le tableau.",
+      "{passer}, cette passe décisive, tu l'as eue en regardant. Littéralement en regardant.",
+      "{scorer} a fait le boulot, {passer} encaisse le chèque. Toujours le même parasite.",
+      "Passe décisive pour {passer}. Le jeu est généreux, nous on ne l'est pas : ça ne compte pas.",
+      "{passer} va s'en vanter, de cette passe. Il va juste oublier de dire qu'il n'a rien fait.",
+      "Merci {scorer} d'avoir offert une statistique à {passer}. Il en avait bien besoin."
     ]
   },
   "mvp": {
@@ -151,7 +196,12 @@
       "{runnerUp} rate le MVP pour une poignée de points. Il va y repenser toute la nuit.",
       "{mvp} chipe le MVP sous le nez de {runnerUp}. Ça pique, hein ?",
       "Il manquait trois fois rien à {runnerUp} pour être MVP. Trois fois rien, et un énorme seum.",
-      "Le MVP se joue à rien, et ce rien est pour {mvp}. {runnerUp}, va pleurer dans ta voiture."
+      "Le MVP se joue à rien, et ce rien est pour {mvp}. {runnerUp}, va pleurer dans ta voiture.",
+      "{runnerUp}, deuxième. Le premier des perdants. Savoure.",
+      "{mvp} MVP, {runnerUp} juste derrière. Si près, et pourtant si loin du niveau.",
+      "{runnerUp}, tu perds le MVP pour trois fois rien. Comme d'habitude, il t'a manqué un petit quelque chose. Le talent, peut-être.",
+      "Le MVP pour {mvp}, le seum pour {runnerUp}. Chacun son trophée.",
+      "{runnerUp}, ne pleure pas dans le micro, on t'entend."
     ]
   },
   "ghost": {
@@ -166,7 +216,12 @@
       "On signale la disparition de {player}. Dernière apparition près de la balle : plus personne ne s'en souvient.",
       "{player} joue en mode spectateur. Il a juste oublié de prévenir le reste de l'équipe.",
       "La balle demande des nouvelles de {player}. Ils ne se sont pas vus depuis longtemps.",
-      "{player} fait le tour du terrain comme un touriste. La balle ? Connais pas."
+      "{player} fait le tour du terrain comme un touriste. La balle ? Connais pas.",
+      "{player}, si tu es parti faire un sandwich, dis-le, on appellera ta mère.",
+      "On joue à un de moins depuis tout à l'heure. {player} fait de la figuration, sans le talent.",
+      "{player} n'a pas touché la balle depuis si longtemps qu'elle a oublié son nom.",
+      "Quelqu'un peut vérifier si {player} est toujours vivant ? Sa voiture ne bouge que pour éviter la balle.",
+      "{player} joue en mode fantôme. Le seul mode où il est bon."
     ]
   },
   "giveaway": {
@@ -182,7 +237,12 @@
         "Ballon offert par {giver}. {opponent} n'en revient pas, et nous non plus.",
         "{giver} dégage... directement sur {opponent}. La définition même du dégagement raté.",
         "Merci {giver}, l'équipe adverse t'envoie une carte de remerciement.",
-        "{giver} perd la balle tout seul. {opponent} n'a même pas eu besoin de jouer."
+        "{giver} perd la balle tout seul. {opponent} n'a même pas eu besoin de jouer.",
+        "{giver} rend la balle sans pression. Zéro pression. Juste de l'incompétence.",
+        "{giver}, tu viens de faire une passe parfaite. Pour l'autre équipe. Comme d'habitude.",
+        "Cadeau de {giver} pour {opponent}. Il manque juste le papier et le ruban.",
+        "{giver}, la balle était à nous. Était.",
+        "{opponent} n'avait rien demandé. {giver} lui a tout donné."
       ]
     },
     "backward": "giveaway.shot",
@@ -198,7 +258,12 @@
         "{saver} vient de sauver {giver} de la honte. Pour cette fois.",
         "Grosse occasion pour {opponent}, signée {giver}. Heureusement que {saver} ne dormait pas, lui.",
         "{giver} crée le danger, {saver} l'efface. On sait qui paie la prochaine tournée.",
-        "Encore une passe de {giver} pour l'équipe adverse. Merci {saver} de servir de filet de sécurité."
+        "Encore une passe de {giver} pour l'équipe adverse. Merci {saver} de servir de filet de sécurité.",
+        "{giver} offre le but, {saver} le reprend. {saver}, ajoute ça à la liste des fois où tu l'as sauvé.",
+        "{saver} vient encore de réparer une bêtise de {giver}. On devrait le payer comme baby-sitter.",
+        "{giver}, sans {saver} tu serais déjà dans le bêtisier. Dis merci. À genoux.",
+        "{opponent} a failli remercier {giver} en marquant. {saver} a gâché la fête.",
+        "Encore une boulette de {giver}, encore un sauvetage de {saver}. Toujours le même scénario."
       ]
     },
     "goal": {
@@ -213,7 +278,12 @@
         "Et voilà ce qui arrive quand {giver} distribue des ballons : un but pour {opponent}.",
         "But encaissé, fabriqué à la main par {giver}. Du travail d'artisan.",
         "{opponent} marque grâce à {giver}. Prochaine étape : {giver} célèbre avec eux.",
-        "{giver} vient d'inventer la passe décisive pour l'adversaire. Il devrait déposer un brevet."
+        "{giver} vient d'inventer la passe décisive pour l'adversaire. Il devrait déposer un brevet.",
+        "But adverse, signé {giver}. Il peut aller célébrer avec eux, il l'a mérité.",
+        "{giver}, tu viens de marquer pour l'autre équipe sans même toucher leur cage. Talent rare.",
+        "Merci {giver} pour ce but encaissé. Fait maison, avec amour.",
+        "{opponent} marque, mais c'est {giver} qui a tout préparé. Grand chef, mauvaise cuisine.",
+        "{giver}, regarde le replay et réfléchis à ta vie."
       ]
     },
     "ofTheMatch": {
@@ -228,7 +298,12 @@
         "Record du match : {giver} et ses {count} cadeaux à l'adversaire. Ils l'applaudissent encore.",
         "{giver} a rendu {count} balles. L'équipe adverse demande s'il est libre la semaine prochaine.",
         "{count} ballons rendus. {giver}, à ce niveau-là, ce n'est plus de la générosité, c'est du sabotage.",
-        "Bilan de {giver} : {count} ballons donnés. Les Restos du Cœur ont demandé son numéro."
+        "Bilan de {giver} : {count} ballons donnés. Les Restos du Cœur ont demandé son numéro.",
+        "{count} ballons rendus pour {giver}. À ce stade, c'est un agent infiltré.",
+        "{giver} termine avec {count} cadeaux. Il a joué pour les deux équipes, mais surtout pour l'autre.",
+        "Bénévole du match : {giver}. {count} ballons rendus. On envisage une plainte.",
+        "{giver}, {count} ballons rendus. Même un plot en aurait perdu moins.",
+        "{count} fois. {giver} a donné la balle {count} fois. Respire, et désinstalle."
       ]
     }
   }
