@@ -173,6 +173,9 @@ small { color: var(--muted); font-weight: normal; }
 audio { flex: none; width: 220px; height: 32px; }
 .test { border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; margin: 16px 0 24px; }
 .test h2 { font-size: 17px; margin: 0 0 8px; }
+.part > summary { border: 0; padding: 0; }
+.part > summary h2 { display: inline; margin: 0; }
+.part[open] > summary { margin-bottom: 8px; }
 .test textarea, .test input, .test select, .test button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
 .test textarea { width: 100%; box-sizing: border-box; min-height: 64px; }
 .test button { cursor: pointer; }
@@ -188,8 +191,8 @@ audio { flex: none; width: 220px; height: 32px; }
 </style></head><body>
 <h1>Phrases du commentateur</h1>
 <p><small>${entries.length} phrases. Une voix par phrase, toujours la même.</small></p>
-<section class="test" id="test">
-<h2>Tester une phrase</h2>
+<details class="test part" id="test" open>
+<summary><h2>Tester une phrase</h2></summary>
 <p><small>Fonctionne avec <code>npm run library</code> (pas en ouvrant le fichier directement).</small></p>
 <textarea id="text">Tu as le droit d'avoir le seum.</textarea>
 <div class="row">
@@ -209,9 +212,9 @@ audio { flex: none; width: 220px; height: 32px; }
 </div>
 <div id="status"></div>
 <div id="fixes-list"></div>
-</section>
-<section class="test" id="edit">
-<h2>Modifier les phrases</h2>
+</details>
+<details class="test part" id="edit" open>
+<summary><h2>Modifier les phrases</h2></summary>
 <p><small>Les noms entre accolades sont remplacés par les surnoms (ou « l'adversaire »). Une phrase doit en citer au moins un.
 Enregistré dans <code>phrases.json</code> : le bot l'utilise tout de suite, même en pleine partie.</small></p>
 <div class="row">
@@ -226,9 +229,12 @@ Enregistré dans <code>phrases.json</code> : le bot l'utilise tout de suite, mê
 <button id="generate">Générer les voix manquantes</button>
 <span id="gen-status"></span>
 </div>
-</section>
+</details>
 <script src="library-page.js"></script>
+<details class="test part" id="listen" open>
+<summary><h2>Écouter les phrases</h2></summary>
 ${sections}
+</details>
 </body></html>
 `);
 }

@@ -16,6 +16,13 @@
     return r.json().then(function (d) { if (!r.ok || d.error) throw new Error(d.error || r.statusText); return d; });
   };
 
+  // ---- Folded or open parts, remembered on this device ----
+  Array.prototype.forEach.call(document.querySelectorAll("details.part"), function (d) {
+    var key = "part-" + d.id;
+    try { var saved = localStorage.getItem(key); if (saved !== null) d.open = saved === "1"; } catch (e) {}
+    d.addEventListener("toggle", function () { try { localStorage.setItem(key, d.open ? "1" : "0"); } catch (e) {} });
+  });
+
   // ---- Test a text ----
   function say(text, fixes, extra, out) {
     out = out || $("spoken");
