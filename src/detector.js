@@ -15,8 +15,8 @@ const GOAL_LINE = 5120;
 
 // Default thresholds ⚙️ (see REGLES.md). Distances in game units (1 = 1 cm), speeds in km/h, durations in ms.
 const DEFAULTS = {
-  // Tap-in: a ball pushed in from close, touched low, slow, and not placed high in the goal (no pass needed)
-  tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxSpeed: 50, tapInMaxTouchHeight: 250, tapInMaxImpactHeight: 300,
+  // Tap-in: the scorer only had to touch the ball very close to the goal, low (no pass needed)
+  tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxTouchHeight: 250,
   shotDelayMs: 300,
   // Steal: a teammate's shot on target, touched close to the goal by the scorer. The game reports "Shot" up to
   // a few seconds after the touch (half the time after 0.5 s, sometimes after the next touch): stealShotWindowMs.
@@ -54,8 +54,7 @@ const DEFAULTS = {
 };
 
 // Priority when several rules fire on the same goal
-// (the tap-in is decided during the replay, once the impact point in the goal is known: it comes after these)
-const GOAL_PRIORITY = ["steal", "giveaway.goal", "ownGoal", "adminAssist"];
+const GOAL_PRIORITY = ["steal", "giveaway.goal", "ownGoal", "tapIn", "adminAssist"];
 // Near misses that can be offered on a goal, by priority
 const NEAR_MISS_PRIORITY = ["ownGoal", "tapIn", "adminAssist"];
 
@@ -504,10 +503,8 @@ class Detector extends EventEmitter {
     const found = {}; // key → { vars, measures }
     const nearMisses = {}; // family → { key, vars, measures }
 
-    // Tap-in: the scorer's last touch is close to the line, low and slow (a defender touching it after
-    // without stopping it changes nothing). The impact point in the goal is only known during the replay:
-    // decided then (see onReplayGoal).
-    let tapIn = null;
+    // Tap-in: the scorer's last touch is very close to the goal and low: he had nothing left to do
+    // (a defender touching it after without stopping it changes nothing)
     const iS = findLastIndex(hits, (h) => has(h, scorer));
     if (iS >= 0) {
       const lastS = hits[iS];
@@ -515,9 +512,8 @@ class Detector extends EventEmitter {
         condition("dernière touche à la ligne", "tapInMaxDistance", distToOpponentGoal(TS, lastS.loc.Y), "max", "uu"),
         condition("décalage sur le côté", "tapInMaxSideOffset", Math.abs(lastS.loc.X), "max", "uu"),
         condition("hauteur de la touche", "tapInMaxTouchHeight", lastS.loc.Z, "max", "uu"),
-        condition("vitesse après la touche", "tapInMaxSpeed", lastS.post, "max", "kmh"),
       ]);
-      if (r.ok) tapIn = { vars: { scorer }, measures: r.measures };
+      if (r.ok) found.tapIn = { vars: { scorer }, measures: [...r.measures, { name: "vitesse après la touche", value: lastS.post, unit: "kmh" }] };
       else if (r.nearMiss) nearMisses.tapIn = { key: "tapIn", vars: { scorer }, measures: r.measures };
     }
 
@@ -614,8 +610,8 @@ class Detector extends EventEmitter {
     for (const k of GOAL_PRIORITY) {
       if (found[k] && k !== key) this.emitDetection(k, found[k].vars, false, found[k].measures);
     }
-    // Wait for the 2nd GoalScored (replay) and its impact point: tap-in, or top corner if nothing was said
-    this.pendingGoal = { t, scorer, speed: d.GoalSpeed || 0, tapIn, said: !!key };
+    // Nothing said: wait for the 2nd GoalScored (replay) and its impact point, for the top corner
+    this.pendingGoal = key ? null : { t, scorer, speed: d.GoalSpeed || 0 };
 
     // One near miss per goal at most (any team), from another family than the comment made
     const done = key ? key.split(".")[0] : null;
@@ -631,20 +627,6 @@ class Detector extends EventEmitter {
     this.pendingGoal = null;
     const { X, Z } = d.ImpactLocation;
     const vars = { scorer: g.scorer };
-
-    // Tap-in: not placed high in the goal (under the crossbar or in the top corner, it is a real finish)
-    if (g.tapIn) {
-      const low = this.evaluate([condition("hauteur dans la cage", "tapInMaxImpactHeight", Z, "max", "uu")]);
-      const measures = [...g.tapIn.measures, ...low.measures];
-      if (low.ok) {
-        this.fact("tapIn", g.scorer);
-        if (g.said) this.emitDetection("tapIn", vars, false, measures);
-        else this.report("tapIn", vars, measures);
-        return;
-      }
-      if (!g.said && low.nearMiss) this.emitNearMiss("tapIn", vars, measures);
-    }
-    if (g.said) return;
 
     const topCorner = this.evaluate([
       condition("hauteur dans la cage", "topCornerMinHeight", Z, "min", "uu"),

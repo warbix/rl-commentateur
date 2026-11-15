@@ -28,17 +28,15 @@ le 2e (pendant le replay, `Scorer.Name` vide) contient le **bon** `ImpactLocatio
 ---
 
 ## 1. Tap-in 🥱
-**Idée** : le buteur n'a eu qu'à pousser la balle, tout près du but. Pas besoin de passe.
+**Idée** : le buteur n'avait plus rien à faire, il a touché la balle tout près du but. Pas besoin de passe.
 
-**Règle** — sur `GoalScored`, décidé pendant le replay (le 2e `GoalScored` donne le point d'impact dans la cage) :
+**Règle** — sur `GoalScored` :
 - Dernière touche du buteur à **≤ 9 m** de la ligne adverse (`tapInMaxDistance`) et à **≤ 12 m** du centre sur le côté (`tapInMaxSideOffset`) ⚙️
-- Touchée **pas haut** : balle à **≤ 2,5 m** du sol au moment de la touche (`tapInMaxTouchHeight`) ⚙️
-- Balle **poussée** : **≤ 50 km/h** après la touche (`tapInMaxSpeed`) ⚙️
-- **Pas placée** : elle entre à **≤ 3 m** de haut dans la cage (`tapInMaxImpactHeight`), donc ni sous la barre ni en lucarne ⚙️
+- Touchée **pas haut** : balle à **≤ 2,5 m** du sol au moment de la touche (`tapInMaxTouchHeight`) ⚙️ (une reprise aérienne demande un vrai geste)
 - Un défenseur qui la touche après sans l'arrêter ne change rien
 
 **Cible** : le buteur. **Quand** : pendant le replay.
-Fréquence mesurée : 3 sur 39 matchs enregistrés (le seuil de vitesse est le plus strict, à ajuster avec les votes).
+Fréquence mesurée : 19 sur 34 matchs complets (les deux équipes).
 
 ## 2. Vol de but 🦹
 **Idée** : la balle rentrait toute seule, un coéquipier l'a touchée pour se l'attribuer.
@@ -224,8 +222,8 @@ le fantôme seulement pour un joueur de la bande, qui est seul à pouvoir en jug
 ## Priorités (1 seul commentaire par but)
 
 Si plusieurs règles se déclenchent sur le même but, on garde la plus piquante parmi celles qui visent un joueur de notre équipe :
-**Vol de but > Bénévole de l'année > Contre son camp > Passe décisive par procuration > Tap-in > Lucarne**
-(le tap-in et la lucarne sont décidés pendant le replay, avec le point d'impact dans la cage : ils passent après les autres)
+**Vol de but > Bénévole de l'année > Contre son camp > Tap-in > Passe décisive par procuration > Lucarne**
+(la lucarne est décidée pendant le replay, avec le point d'impact dans la cage : elle passe après les autres)
 
 Les règles en direct (fantôme, bénévole, quasi-buts) ne parlent jamais pendant un replay, et laissent
 **≥ 15 s** entre deux commentaires.

@@ -98,9 +98,7 @@
   "thresholds": {
     "tapInMaxDistance": 900,
     "tapInMaxSideOffset": 1200,
-    "tapInMaxSpeed": 50,
     "tapInMaxTouchHeight": 250,
-    "tapInMaxImpactHeight": 300,
     "shotDelayMs": 300,
     "stealMaxDistance": 1500,
     "stealShotWindowMs": 2000,
