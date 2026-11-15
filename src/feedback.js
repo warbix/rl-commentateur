@@ -18,7 +18,7 @@ const LABELS = {
   "nearGoal.crossbar": "Barre", "nearGoal.post": "Poteau", "nearGoal.topCorner": "Équerre",
   adminAssist: "Passe décisive par procuration", ghost: "Fantôme",
   mvp: "MVP de justesse",
-  "giveaway.shot": "Bénévole", "giveaway.backward": "Balle rendue", "giveaway.saved": "Presque passe décisive à l'adversaire", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
+  "giveaway.shot": "Passe à l'adversaire", "giveaway.saved": "Presque passe décisive à l'adversaire", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
 };
 
 // Only the player concerned can judge these (a teammate's or an opponent's idleness is not visible)

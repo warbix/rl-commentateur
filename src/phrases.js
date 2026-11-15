@@ -32,7 +32,7 @@ class Phrases {
     return JSON.parse(fs.readFileSync(this.phrasesFile, "utf8"));
   }
 
-  // The lines of a situation. A situation can borrow the lines of another one: "backward": "giveaway.shot"
+  // The lines of a situation. A situation can borrow the lines of another one: "b": "a"
   node(key, all = this.all()) {
     const find = (k) => k.split(".").reduce((n, part) => (n ? n[part] : undefined), all);
     let node = find(key);

@@ -11,7 +11,7 @@ const { TTS } = require("../src/tts");
 const library = require("../src/library");
 
 const phrases = new Phrases(path.join(ROOT, "phrases.json"));
-const OPPONENT = { "giveaway.shot": "opponent", "giveaway.backward": "opponent", "giveaway.saved": "opponent", "giveaway.goal": "opponent" };
+const OPPONENT = { "giveaway.shot": "opponent", "giveaway.saved": "opponent", "giveaway.goal": "opponent" };
 // The squad of config.example.json
 const SQUAD = ["MonPseudo", "Coequipier1", "Coequipier2"];
 

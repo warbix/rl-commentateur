@@ -87,10 +87,9 @@ test("the 5 lines of a situation all come out before one comes back, never twice
 });
 
 test("a situation can borrow the lines of another one", () => {
-  const phrases = new Phrases(path.join(ROOT, "phrases.json"));
-  const text = phrases.pick("giveaway.backward", { giver: "MonPseudo", opponent: "Adversaire1" }, { opponents: ["Adversaire1"] });
-  assert.match(text, /Jojo/);
-  assert.doesNotMatch(text, /\{\w+\}/);
+  const file = path.join(require("os").tmpdir(), "phrases-alias.json");
+  fs.writeFileSync(file, JSON.stringify({ a: { _variables: "{player}", phrases: ["Bravo {player}."] }, b: "a" }));
+  assert.strictEqual(new Phrases(file).pick("b", { player: "MonPseudo" }), "Bravo Jojo.");
 });
 
 test("opponents are said as \"l'adversaire\" and synonyms, with elision and a capital at the start", () => {

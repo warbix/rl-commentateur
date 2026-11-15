@@ -115,30 +115,23 @@ le 95ᵉ centile des durées sans toucher est de 23 s en 2v2 contre 29 s en 3v3.
 ## 9. Craquage 💥
 **Retiré** : trop rare, et il reposait sur l'arrêt manqué.
 
-## 10. Le bénévole 🎁
-**Idée** : il rend la balle à l'adversaire sans aucune pression, et ça part en contre.
+## 10. Passe à l'adversaire 🎁
+**Idée** : il donne la balle à l'adversaire, sans être sous pression, et ça part en contre.
 
-**Pourquoi ces filtres** : sur un match 3v3 classé, 77 des 127 changements de possession sont
-« touche → récupération adverse à distance ». C'est surtout des attaques qui finissent chez le gardien
-adverse : normal, pas un cadeau. On ne garde que les balles rendues **vers l'arrière** qui coûtent quelque chose.
-
-**Règle** — touche du joueur P (équipe A), touche suivante par un adversaire R (équipe B) :
-- **Pas un duel** : écart **≥ 1 s** et **≥ 1500** de distance entre les deux touches ⚙️
-- **Balle rendue vers chez soi** : R récupère la balle **plus près du but de P** que là où P l'a touchée (recul **≥ 800**) ⚙️,
-  ou directement **dans la moitié de terrain de P**
+**Règle** — touche du joueur P, touche suivante par un adversaire R :
+- **Pas un duel** : R la récupère **≥ 1 s** après la touche de P (`giveawayMinMs`) ⚙️
+- **R garde la balle** : la touche d'après est aussi celle de son équipe
 - **Pas une excuse** :
-  - la touche de P n'est pas un dégagement depuis son tiers défensif (touche à **≥ 2500** de sa ligne)
-  - la touche de P n'est pas un tir cadré (`Shot`) arrêté
-- **Récupération propre** : la touche d'après est aussi faite par l'équipe B
-- **Ça coûte** : `Shot` ou `Goal` de l'équipe B **≤ 6 s** après la récupération ⚙️
+  - la touche de P n'est pas un dégagement depuis son tiers défensif (touche à **≥ 25 m** de sa ligne, `giveawayMinOwnGoalDistance`)
+  - ce n'est pas un tir ni un arrêt : pas de `Shot` / `Save` pour P dans les **2 s** (`giveawayShotWindowMs`, le jeu les annonce en retard)
+  - ce n'est pas dans les **5 s** après l'engagement (`giveawayKickoffMs`)
+- **Ça coûte** : l'équipe de R tire dans les **6 s** (`giveawayWindowMs`) ⚙️. Sans tir, rien n'est dit.
 
-**Paliers** : `Shot` adverse → « bénévole » ; but adverse → « bénévole de l'année » (le commentaire du but le cite).
-**Sans tir** : si la balle est renvoyée d'au moins **15 m vers son propre but** (`giveawayBackwardNoShot`) et récupérée proprement,
-le bot le dit quand même (« balle rendue »), dès que son équipe récupère la balle ou au bout de 6 s.
-**Cible** : P. **Quand** : au `Shot` adverse (en direct) ou pendant le replay du but.
-**Fréquence attendue** : ~2-3 par match en 3v3 (mesuré sur la capture : 3 cas).
-**Limite** : sans position des voitures, on ne sait pas si c'était une passe vers un coéquipier mal placé
-(le cadeau est alors partagé). En fin de match, on peut aussi annoncer le **« bénévole du match »** (le plus de ballons rendus, même sans tir).
+**Paliers** : tir adverse → « passe à l'adversaire » (dit dès que l'équipe de P récupère la balle, ou 4 s après le tir) ;
+but adverse → « bénévole de l'année » (le commentaire du but). En fin de match, **bénévole du match** : le joueur qui a fait
+le plus de passes à l'adversaire (tir ou but), au moins 3 (`giveawayOfTheMatchMin`).
+**Cible** : P. Fréquence mesurée : environ 2 par match pour les deux équipes (64 sur 34 matchs).
+**Limite** : sans position des voitures, on ne sait pas si c'était une passe vers un coéquipier mal placé.
 
 ---
 
@@ -203,7 +196,7 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 | `adminAssist` | Passe décisive par procuration |
 | `mvp` | MVP de justesse |
 | `ghost` | Fantôme |
-| `giveaway` | Bénévole, presque passe décisive à l'adversaire, bénévole du match |
+| `giveaway` | Passe à l'adversaire, presque passe décisive à l'adversaire, bénévole de l'année, bénévole du match |
 | `teamBlock` | Arrêt pour l'adversaire |
 | `nearGoal` | Barre, poteau, équerre |
 

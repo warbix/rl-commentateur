@@ -24,7 +24,7 @@ const EITHER_VARS = {};
 // Values a number can take in a spoken line
 const NUMBERS = { count: [3, 4, 5, 6, 7, 8, 9, 10] };
 
-// Every situation with its own lines (aliases like "backward": "giveaway.shot" are skipped: same lines)
+// Every situation with its own lines (aliases like "b": "a" are skipped: same lines)
 function situations(node, prefix = "") {
   if (node.phrases) return [prefix];
   return Object.entries(node).filter(([k, v]) => typeof v === "object" && !k.startsWith("_"))

@@ -30,9 +30,10 @@ const DEFAULTS = {
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
   // about one ghost every match and a half per team (one touches the ball less at three than at two)
   ghost3v3Ms: 40000, ghost2v2Ms: 30000,
-  giveawayMinMs: 1000, giveawayMinDistance: 1500, giveawayMinOwnGoalDistance: 2500, giveawayMinBackward: 800, giveawayWindowMs: 6000, giveawayOfTheMatchMin: 3,
-  // A ball sent at least this far back towards one's own goal is commented on even without an opponent shot
-  giveawayBackwardNoShot: 1500,
+  // Pass to the opponent: a touch picked up cleanly by an opponent (not a 50/50, he keeps the ball), not a shot
+  // nor a clear from one's own third, and the opponents shoot soon after. The game reports a shot late:
+  // a "Shot" for the giver up to giveawayShotWindowMs after his touch cancels it.
+  giveawayMinMs: 1000, giveawayMinOwnGoalDistance: 2500, giveawayWindowMs: 6000, giveawayShotWindowMs: 2000, giveawayOfTheMatchMin: 3,
   // Kickoff: a ball lost in the first seconds after the kickoff is not a giveaway (nor a near assist)
   giveawayKickoffMs: 5000,
   // Near assist to the opponent: a touch in one's own half that does not go forward, picked up by an opponent
@@ -130,8 +131,8 @@ class Detector extends EventEmitter {
   }
 
   // Did the game report a shot on target or a save for this touch? Then it is not a ball handed back or a mere pass.
-  wasShotOrSave(name, t) {
-    return this.feed.some((f) => ["Shot", "Save", "EpicSave"].includes(f.type) && f.name === name && f.t >= t - 100 && f.t <= t + this.S.shotDelayMs);
+  wasShotOrSave(name, t, windowMs = this.S.shotDelayMs) {
+    return this.feed.some((f) => ["Shot", "Save", "EpicSave"].includes(f.type) && f.name === name && f.t >= t - 100 && f.t <= t + windowMs);
   }
 
   // Switched off in config.json → rules: not detected at all
@@ -146,12 +147,13 @@ class Detector extends EventEmitter {
     if (p && this.ourTeams().has(p.team)) this.emit("fact", { type: key.split(".")[0], player: name });
   }
 
-  // With an opponent shot: "giveaway.shot". Without one, only for a ball sent far back: "giveaway.backward".
+  // Pass to the opponent followed by an opponent shot (without a goal): counted and said
   announceGiveaway(t) {
     const g = this.giveaway;
     this.giveaway = null;
-    if (g.shotAt) this.live("giveaway.shot", { giver: g.giver, opponent: g.shooter }, t, g.measures);
-    else if (g.clean && g.backward.ok) this.live("giveaway.backward", { giver: g.giver, opponent: g.taker }, t, [...g.measures, ...g.backward.measures]);
+    this.countGiveaway(g.giver);
+    const measures = [...g.measures, { name: "tir adverse après la récupération", value: g.shotAt - g.pickedUpAt, unit: "ms" }];
+    this.live("giveaway.shot", { giver: g.giver, opponent: g.shooter }, t, measures);
   }
 
   countGiveaway(name) {
@@ -317,13 +319,12 @@ class Detector extends EventEmitter {
       for (const s of d.Players || []) this.tickPlayer(this.player(s.Name), s, dt, t);
     }
 
-    // Giveaway: opponent shot without a goal → said once the danger is over
+    // Pass to the opponent: opponent shot without a goal → said once the danger is over
     // (normally as soon as the giver's team gets the ball back, see onHit; here after 4 s at worst).
-    // No shot within the window: said only for a ball sent far back, otherwise forgotten.
+    // No shot within the window: it cost nothing, forgotten.
     const g = this.giveaway;
-    if (g && ((g.shotAt && t - g.shotAt >= 4000) || (!g.shotAt && t - g.pickedUpAt > S.giveawayWindowMs))) {
-      this.announceGiveaway(t);
-    }
+    if (g && g.shotAt && t - g.shotAt >= 4000) this.announceGiveaway(t);
+    else if (g && !g.shotAt && t - g.pickedUpAt > S.giveawayWindowMs) this.giveaway = null;
 
     // Near goal: still no goal a moment after hitting the frame → said
     const ng = this.nearGoal;
@@ -386,22 +387,17 @@ class Detector extends EventEmitter {
 
     if (!prev) return;
 
-    // Giveaway: after the opponent's shot (or a clean pick-up of a ball sent far back), the giver's team
-    // got the ball back → the action is over, it can be said
+    // Pass to the opponent: after the opponent's shot, the giver's team got the ball back → the action is over, it can be said
     // (not when the same ball can still become a near assist: the game reports the save just after the touch)
     const ga = this.giveaway;
     const naPending = this.nearAssist && this.nearAssist.shotAt && ga && this.nearAssist.giver === ga.giver;
-    if (ga && !naPending && (ga.shotAt || (ga.clean && ga.backward.ok)) && hit.players.some((p) => p.team === ga.giverTeam)) this.announceGiveaway(t);
+    if (ga && !naPending && ga.shotAt && hit.players.some((p) => p.team === ga.giverTeam)) this.announceGiveaway(t);
 
-    // Giveaway: was the opponent's pick-up clean?
+    // Pass to the opponent: did the opponent keep the ball (the next touch is his team's too)?
     const g = this.giveaway;
     if (g && !g.clean && g.pickupHit === prev) {
-      if (onlyTeam(hit, g.takerTeam)) {
-        g.clean = true;
-        this.countGiveaway(g.giver);
-      } else {
-        this.giveaway = null;
-      }
+      if (onlyTeam(hit, g.takerTeam)) g.clean = true;
+      else this.giveaway = null;
     }
 
     // Save for the opponent: the first touch after a shot on target is a teammate's (not the shooter's, no opponent)
@@ -431,24 +427,21 @@ class Detector extends EventEmitter {
       }
     }
 
-    // Giveaway: a new ball handed back?
+    // Pass to the opponent: a touch picked up by an opponent?
     if (prev.players.length !== 1 || hit.players.length !== 1) return;
     const giver = prev.players[0], taker = hit.players[0];
     if (giver.team === taker.team) return;
-    const dist = Math.hypot(prev.loc.X - hit.loc.X, prev.loc.Y - hit.loc.Y);
-    const ownGiver = distToOwnGoal(giver.team, prev.loc.Y), ownTaker = distToOwnGoal(giver.team, hit.loc.Y);
-    const wasShot = this.wasShotOrSave(giver.name, prev.t) || prev.t - this.roundStart < S.giveawayKickoffMs;
-    if (wasShot || !(ownGiver - ownTaker >= S.giveawayMinBackward || ownTaker < GOAL_LINE)) return;
+    const ownGiver = distToOwnGoal(giver.team, prev.loc.Y);
+    if (this.wasShotOrSave(giver.name, prev.t, S.giveawayShotWindowMs) || prev.t - this.roundStart < S.giveawayKickoffMs) return;
     const r = this.evaluate([
       condition("délai avant la récupération", "giveawayMinMs", t - prev.t, "min", "ms"),
-      condition("distance entre les deux touches", "giveawayMinDistance", dist, "min", "uu"),
       condition("distance à sa propre ligne", "giveawayMinOwnGoalDistance", ownGiver, "min", "uu"),
     ]);
     if (r.ok) {
-      const backward = this.evaluate([condition("recul vers son propre but", "giveawayBackwardNoShot", ownGiver - ownTaker, "min", "uu")]);
+      const measures = [...r.measures, { name: "distance entre les deux touches", value: Math.hypot(prev.loc.X - hit.loc.X, prev.loc.Y - hit.loc.Y), unit: "uu" }];
       this.giveaway = {
-        giver: giver.name, giverTeam: giver.team, taker: taker.name, takerTeam: taker.team,
-        pickedUpAt: t, pickupHit: hit, clean: false, shotAt: null, shooter: null, measures: r.measures, backward,
+        giver: giver.name, giverTeam: giver.team, giverTouchT: prev.t, taker: taker.name, takerTeam: taker.team,
+        pickedUpAt: t, pickupHit: hit, clean: false, shotAt: null, shooter: null, measures,
       };
     }
   }
@@ -460,6 +453,9 @@ class Detector extends EventEmitter {
     this.feed.push(f);
     this.feed = this.feed.filter((x) => t - x.t <= 60000);
 
+    // The giver's touch was a shot or a save after all (the game reports it late): not a pass to the opponent
+    if (this.giveaway && ["Shot", "Save", "EpicSave"].includes(f.type) && f.name === this.giveaway.giver &&
+        t - this.giveaway.giverTouchT <= S.giveawayShotWindowMs) this.giveaway = null;
     const g = this.giveaway;
     if (f.type === "Shot" && g && f.team === g.takerTeam && !g.shotAt && t - g.pickedUpAt <= S.giveawayWindowMs) {
       g.shotAt = t;
@@ -482,11 +478,10 @@ class Detector extends EventEmitter {
     } else if (na && na.shotAt && ["Save", "EpicSave"].includes(f.type) && f.team === na.giverTeam && t - na.shotAt <= S.nearAssistSaveWindowMs) {
       this.nearAssist = null;
       const measures = [...na.measures, { name: "tir adverse après la récupération", value: na.shotAt - na.pickedUpAt, unit: "ms" }, { name: "arrêt", value: f.type === "EpicSave" ? "miraculeux" : "simple" }];
-      const sameBall = this.giveaway && this.giveaway.giver === na.giver;
-      if (sameBall) this.giveaway = null;
+      if (this.giveaway && this.giveaway.giver === na.giver) this.giveaway = null;
       // Saved by the giver himself: it does not really count, nothing is said
       if (f.name === na.giver) return;
-      if (!sameBall) this.countGiveaway(na.giver);
+      this.countGiveaway(na.giver);
       this.live("giveaway.saved", { giver: na.giver, opponent: na.shooter, saver: f.name }, t, measures);
     }
 
@@ -565,7 +560,7 @@ class Detector extends EventEmitter {
     }
     const g = this.giveaway;
     if (g && g.takerTeam === TS && t - g.pickedUpAt <= S.giveawayWindowMs) {
-      if (!g.clean) this.countGiveaway(g.giver);
+      this.countGiveaway(g.giver);
       found["giveaway.goal"] = { vars: { giver: g.giver, opponent: scorer }, measures: g.measures };
       this.giveaway = null;
     }

@@ -245,7 +245,6 @@
         "{opponent} n'avait rien demandé. {giver} lui a tout donné."
       ]
     },
-    "backward": "giveaway.shot",
     "saved": {
       "_variables": "{giver} = the player who gave the ball away, {opponent} = the opponent who shot, {saver} = the teammate who saved it",
       "phrases": [
