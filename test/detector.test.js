@@ -32,6 +32,7 @@ test("our team: the match comments", () => {
     "ghost → Coequipier2",
     "tapIn → MonPseudo",
     "mvp → MonPseudo",
+    "deadWeight → Coequipier2",
   ]);
 });
 

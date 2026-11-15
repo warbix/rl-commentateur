@@ -17,6 +17,7 @@ const LABELS = {
   "finish.topCorner": "Lucarne",
   "nearGoal.crossbar": "Barre", "nearGoal.post": "Poteau", "nearGoal.topCorner": "Équerre",
   adminAssist: "Passe décisive par procuration", ghost: "Fantôme",
+  demoSeries: "Démoli en série", deadWeight: "Boulet du match",
   mvp: "MVP de justesse",
   "giveaway.shot": "Passe à l'adversaire", "giveaway.saved": "Presque passe décisive à l'adversaire", "giveaway.goal": "Bénévole de l'année", "giveaway.ofTheMatch": "Bénévole du match",
 };

@@ -305,5 +305,45 @@
         "{count} fois. {giver} a donné la balle {count} fois. Respire, et désinstalle."
       ]
     }
+  },
+  "demoSeries": {
+    "_variables": "{victim} = the player demolished again and again, {demolisher} = the opponent who demolished him last",
+    "phrases": [
+      "{victim} vient encore de se faire exploser. À ce stade, c'est une habitude.",
+      "Encore une démolition pour {victim}. Il passe plus de temps à réapparaître qu'à jouer.",
+      "{victim}, tu sais qu'on peut esquiver ? Non ? D'accord.",
+      "{demolisher} a trouvé son jouet préféré : {victim}.",
+      "{victim} démoli en série. Le punching-ball officiel du match.",
+      "Encore une démolition pour {victim}. L'assurance ne te rembourse plus.",
+      "{victim} se fait détruire en boucle. Même les plots de chantier résistent mieux.",
+      "{demolisher} collectionne les démolitions sur {victim}. Il lui manque juste l'album.",
+      "{victim}, ta voiture est en carton ou c'est toi qui fonces dans le décor ?",
+      "Encore {victim} en morceaux. Quelqu'un peut lui apprendre à regarder autour de lui ?",
+      "{victim}, l'écran de réapparition, tu le connais par cœur maintenant.",
+      "{demolisher} a pris un abonnement pour démolir {victim}. Illimité, visiblement.",
+      "{victim} se fait démolir plus souvent qu'il ne touche la balle. Belle performance.",
+      "Si on comptait les points en démolitions subies, {victim} serait MVP.",
+      "{victim}, arrête de servir de cible d'entraînement, ils vont finir par s'ennuyer."
+    ]
+  },
+  "deadWeight": {
+    "_variables": "{player} = the lowest score of the team, far behind his teammates",
+    "phrases": [
+      "Boulet du match : {player}. Le score parle de lui-même, et il ne dit rien de gentil.",
+      "{player} termine loin, très loin derrière ses coéquipiers. Il a joué, paraît-il.",
+      "{player}, ton score ressemble à celui d'un joueur déconnecté. Tu étais connecté ?",
+      "Merci à {player} d'avoir occupé une place dans l'équipe. C'était à peu près tout.",
+      "{player} a porté l'équipe. Sur son dos, comme un sac de ciment.",
+      "Le boulet du match est {player}. Ses coéquipiers ont joué à un de moins, avec un poids en plus.",
+      "{player}, dernier de ton équipe avec une marge impressionnante. Bravo pour la constance.",
+      "Le score de {player} ferait pleurer un débutant.",
+      "{player} a fait le minimum syndical. Et encore, le syndicat proteste.",
+      "Si {player} avait laissé sa manette sur la table, l'équipe aurait eu le même résultat.",
+      "{player}, ce match s'est joué malgré toi. Surtout malgré toi.",
+      "Le score de {player} tient dans une main. Et il reste des doigts.",
+      "{player} termine avec un score de figurant. Même pas premier rôle chez les figurants.",
+      "On cherche encore ce que {player} a fait ce match. Les stats aussi.",
+      "{player}, à ce niveau-là, on ne joue pas avec toi, on joue malgré toi."
+    ]
   }
 }

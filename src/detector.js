@@ -48,6 +48,11 @@ const DEFAULTS = {
   // Near goal: a shot hits the frame (crossbar, post, top corner) and does not go in. The shot must be recent and
   // real (not a ball rolling onto the post); the frame zone is told by the impact point (crossbar above, posts on the side).
   nearGoalShotMaxMs: 2500, nearGoalMinSpeed: 30, nearGoalNoGoalMs: 2000, nearGoalCrossbarMinHeight: 550, nearGoalPostMinSideOffset: 750,
+  // Demolished in series: a player demolished this many times in the match (said once, live)
+  demoSeriesMin: 3,
+  // Dead weight: at the end of the match, the lowest score of a team is at most this share of his teammates' average,
+  // and at least this many points behind the next one
+  deadWeightMaxRatio: 0.5, deadWeightMinGap: 100,
   liveCooldownMs: 15000,
   topCornerWaitMs: 20000,
   // Near miss: every failed measure misses its threshold by less than 30 %
@@ -63,6 +68,7 @@ const NEAR_MISS_PRIORITY = ["ownGoal", "tapIn", "adminAssist"];
 const TARGET = {
   tapIn: "scorer", steal: "thief", ownGoal: "defender", finish: "scorer",
   adminAssist: "passer", mvp: "runnerUp", ghost: "player", giveaway: "giver", teamBlock: "blocker", nearGoal: "shooter",
+  demoSeries: "victim", deadWeight: "player",
 };
 
 const distToOpponentGoal = (team, y) => (team === 0 ? GOAL_LINE - y : GOAL_LINE + y);
@@ -108,6 +114,10 @@ class Detector extends EventEmitter {
     this.lastLiveT = -Infinity;
     this.mvpChecked = false;
     this.giveawayOfTheMatchDone = false;
+    this.demos = new Map(); // victim → demolitions suffered
+    this.demoSaid = new Set();
+    this.demoPending = null;
+    this.deadWeightDone = false;
     this.warnedNoTeam = false;
   }
 
@@ -293,6 +303,7 @@ class Detector extends EventEmitter {
         break;
       case "PodiumStart":
         this.giveawayOfTheMatch();
+        this.checkDeadWeight();
         break;
     }
   }
@@ -346,6 +357,14 @@ class Detector extends EventEmitter {
       const vars = { blocker: tb.blocker, shooter: tb.shooter };
       if (r.ok) this.live("teamBlock", vars, t, measures);
       else if (r.nearMiss) this.emitNearMiss("teamBlock", vars, measures);
+    }
+
+    // Demolished in series: said as soon as a live comment is allowed (forgotten after 20 s)
+    const dp = this.demoPending;
+    if (dp && t - dp.t > 20000) this.demoPending = null;
+    else if (dp && this.live("demoSeries", { victim: dp.victim, demolisher: dp.demolisher }, t, dp.measures)) {
+      this.demoPending = null;
+      this.demoSaid.add(dp.victim);
     }
 
     // Near assist: no shot, or no save after the shot, in time → forgotten
@@ -486,6 +505,17 @@ class Detector extends EventEmitter {
     }
 
     if (f.type === "MVP") this.checkMvp(f.name);
+
+    // Demolished in series: the game names the demolisher (MainTarget) and the victim (SecondaryTarget)
+    const victim = d.SecondaryTarget && d.SecondaryTarget.Name;
+    if (f.type === "Demolish" && victim) {
+      const n = (this.demos.get(victim) || 0) + 1;
+      this.demos.set(victim, n);
+      if (n >= S.demoSeriesMin && !this.demoSaid.has(victim)) {
+        const measures = [{ ...condition("démolitions subies dans le match", "demoSeriesMin", n, "min", "n"), threshold: S.demoSeriesMin, ok: true }];
+        this.demoPending = { victim, demolisher: f.name, t, measures };
+      }
+    }
   }
 
   onGoal(d, t) {
@@ -680,6 +710,32 @@ class Detector extends EventEmitter {
       this.report("mvp", vars, measures);
     } else if (r.nearMiss) {
       this.emitNearMiss("mvp", vars, measures);
+    }
+  }
+
+  // Dead weight: at the end of the match, the lowest score of a team, far behind his teammates
+  checkDeadWeight() {
+    if (this.deadWeightDone) return;
+    this.deadWeightDone = true;
+    const S = this.S;
+    for (const team of [0, 1]) {
+      const mates = [...this.players.values()].filter((p) => p.team === team).sort((a, b) => (a.stats.Score || 0) - (b.stats.Score || 0));
+      if (mates.length < 2) continue;
+      const low = mates[0], score = low.stats.Score || 0;
+      const others = mates.slice(1).map((p) => p.stats.Score || 0);
+      const avg = others.reduce((a, b) => a + b, 0) / others.length;
+      if (!avg) continue;
+      const r = this.evaluate([
+        condition("score / moyenne des coéquipiers", "deadWeightMaxRatio", score / avg, "max", "n"),
+        condition("points de retard sur le suivant", "deadWeightMinGap", others[0] - score, "min", "n"),
+      ]);
+      const measures = [...r.measures, { name: "score", value: score }, { name: "moyenne des coéquipiers", value: Math.round(avg) }];
+      if (r.ok) {
+        this.fact("deadWeight", low.name);
+        this.report("deadWeight", { player: low.name }, measures);
+      } else if (r.nearMiss) {
+        this.emitNearMiss("deadWeight", { player: low.name }, measures);
+      }
     }
   }
 

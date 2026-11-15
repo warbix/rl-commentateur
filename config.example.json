@@ -92,7 +92,9 @@
     "adminAssist": true,
     "mvp": true,
     "ghost": true,
-    "giveaway": true
+    "giveaway": true,
+    "demoSeries": true,
+    "deadWeight": true
   },
   "_thresholds": "Detection thresholds (see REGLES.md). Distances in game units (100 = 1 m), speeds in km/h, durations in ms. Can be changed while the bot is running; npm run calibrate suggests values from your votes.",
   "thresholds": {
@@ -134,6 +136,9 @@
     "nearGoalNoGoalMs": 2000,
     "nearGoalCrossbarMinHeight": 550,
     "nearGoalPostMinSideOffset": 750,
+    "demoSeriesMin": 3,
+    "deadWeightMaxRatio": 0.5,
+    "deadWeightMinGap": 100,
     "liveCooldownMs": 15000,
     "topCornerWaitMs": 20000,
     "nearMissMargin": 0.3

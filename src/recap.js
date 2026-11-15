@@ -14,6 +14,8 @@ const TITLES = [
   { type: "adminAssist", title: "Fonctionnaire de la passe", unit: ["passe décisive par procuration", "passes décisives par procuration"] },
   { type: "mvp", title: "Seum de la soirée", unit: ["MVP raté de justesse", "MVP ratés de justesse"] },
   { type: "ghost", title: "Fantôme de la soirée", unit: ["disparition", "disparitions"] },
+  { type: "demoSeries", title: "Punching-ball de la soirée", unit: ["série de démolitions", "séries de démolitions"] },
+  { type: "deadWeight", title: "Boulet de la soirée", unit: ["match en boulet", "matchs en boulet"] },
   { type: "nearGoal", title: "Ferrailleur de la soirée", unit: ["tir sur le cadre", "tirs sur le cadre"] },
   { type: "finish", title: "Sniper de la soirée", unit: ["lucarne", "lucarnes"] },
 ];

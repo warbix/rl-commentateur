@@ -181,6 +181,28 @@ Fréquence mesurée : 12 sur les 14 premiers matchs enregistrés.
 
 ---
 
+## 14. Démoli en série 💥
+**Idée** : un joueur qui se fait démolir encore et encore. Le punching-ball du match.
+
+**Règle** — `StatfeedEvent` `Demolish` (le jeu donne le démolisseur, `MainTarget`, et la victime, `SecondaryTarget`) :
+- La victime en est à **≥ 3 démolitions** dans le match (`demoSeriesMin`) ⚙️
+- Une seule fois par joueur et par match
+
+**Cible** : la victime, en citant le démolisseur (« l'adversaire »). **Quand** : en direct, dès que possible (oublié après 20 s).
+Fréquence mesurée : 6 joueurs sur 34 matchs (deux équipes) ont subi 3 démolitions ou plus.
+
+## 15. Boulet du match 🪨
+**Idée** : le joueur qui a traîné son équipe, avec un score très loin de ses coéquipiers.
+
+**Règle** — en fin de match (`PodiumStart`), pour chaque équipe d'au moins 2 joueurs :
+- Le plus petit score de l'équipe vaut **≤ 50 %** de la moyenne de ses coéquipiers (`deadWeightMaxRatio`) ⚙️
+- et il a **≥ 100 points** de retard sur le suivant (`deadWeightMinGap`) ⚙️
+
+**Cible** : ce joueur. **Quand** : à la fin du match.
+Fréquence mesurée : environ 1 équipe sur 5.
+
+---
+
 ## Activer ou désactiver une règle
 
 Dans `config.json` → `rules`, chaque règle vaut `true` (active) ou `false` (coupée), même pendant que le bot tourne.
@@ -199,6 +221,8 @@ Une règle coupée n'est plus détectée du tout : pas de voix, pas de message �
 | `giveaway` | Passe à l'adversaire, presque passe décisive à l'adversaire, bénévole de l'année, bénévole du match |
 | `teamBlock` | Arrêt pour l'adversaire |
 | `nearGoal` | Barre, poteau, équerre |
+| `demoSeries` | Démoli en série |
+| `deadWeight` | Boulet du match |
 
 ## Qui est commenté
 

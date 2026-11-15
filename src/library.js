@@ -18,6 +18,7 @@ const OPPONENT_VARS = {
   "giveaway.shot": ["opponent"],
   "giveaway.saved": ["opponent"],
   "giveaway.goal": ["opponent"],
+  demoSeries: ["demolisher"],
 };
 // Variables that name a player of either team (none at the moment)
 const EITHER_VARS = {};
