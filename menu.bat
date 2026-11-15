@@ -1,7 +1,8 @@
 @echo off
 rem Double-click: a menu with the commands of the commentator
-chcp 65001 >nul
 cd /d "%~dp0"
+
+set "empty=0"
 
 :menu
 echo.
@@ -18,13 +19,16 @@ echo  Q. Quitter
 echo.
 set "choice="
 set /p "choice=Choix : "
+rem Nothing typed three times in a row (or no keyboard): quit instead of looping
+if not defined choice (set /a empty+=1) else (set "empty=0")
+if %empty% geq 3 exit /b
 
-if "%choice%"=="1" call npm start & goto menu
-if "%choice%"=="2" start "Page des voix" cmd /k npm run library & call npm start & goto menu
-if "%choice%"=="3" call npm run library & goto menu
-if "%choice%"=="4" call npm run pregenerate -- --prune & goto menu
-if "%choice%"=="5" call npm run calibrate & goto menu
-if "%choice%"=="6" call npm run check-api & goto menu
-if "%choice%"=="7" call npm test & goto menu
+if "%choice%"=="1" call npm start <nul & goto menu
+if "%choice%"=="2" start "Page des voix" cmd /k npm run library & call npm start <nul & goto menu
+if "%choice%"=="3" call npm run library <nul & goto menu
+if "%choice%"=="4" call npm run pregenerate -- --prune <nul & goto menu
+if "%choice%"=="5" call npm run calibrate <nul & goto menu
+if "%choice%"=="6" call npm run check-api <nul & goto menu
+if "%choice%"=="7" call npm test <nul & goto menu
 if /i "%choice%"=="q" exit /b
 goto menu
