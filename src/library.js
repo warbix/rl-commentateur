@@ -162,7 +162,7 @@ audio { flex: none; width: 220px; height: 32px; }
 <section class="test" id="test">
 <h2>Tester une phrase</h2>
 <p><small>Fonctionne avec <code>npm run library</code> (pas en ouvrant le fichier directement).</small></p>
-<textarea id="text">Arracheur, tu as le droit d'avoir le seum.</textarea>
+<textarea id="text">Tu as le droit d'avoir le seum.</textarea>
 <div class="row">
 <select id="voice"></select>
 <label><input type="checkbox" id="fixes" checked> avec les corrections de prononciation</label>
