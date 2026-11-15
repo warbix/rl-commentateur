@@ -31,6 +31,7 @@ test("our team: the match comments", () => {
     "giveaway.goal → Coequipier1",
     "ghost → Coequipier2",
     "tapIn → MonPseudo",
+    "mvp → MonPseudo",
   ]);
 });
 
