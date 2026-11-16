@@ -50,14 +50,14 @@
       "Meilleur défenseur adverse du match : {blocker}. Il vient de sortir le tir de {shooter}.",
       "{blocker} réussit enfin un arrêt ce match. Contre sa propre équipe, mais c'est un début.",
       "{shooter} tire, {blocker} sort la balle. L'adversaire n'a même plus besoin de défendre, {blocker} s'en occupe.",
-      "{blocker}, tu étais censé suivre l'action, pas l'annuler.",
+      "{blocker}, tu étais censé suivre l'action, pas tout niquer.",
       "Agent double repéré : {blocker}. Il vient de sauver un but que {shooter} avait déjà marqué.",
       "{shooter} va se souvenir longtemps de ce but. Celui que {blocker} lui a arraché sur la ligne.",
-      "{blocker} sauve plus de buts pour l'adversaire que pour nous. Sérieux, t'es payé par qui ?",
+      "{blocker} sauve plus de buts pour l'adversaire que pour nous. Sérieux, t'es soudoyé par les mecs d'en face",
       "{shooter} marquait. {blocker} a dit non. On appelle ça un traître.",
       "{blocker}, le seul arrêt propre de ta soirée, et tu le fais dans la mauvaise cage. Légendaire.",
-      "Si tu voulais jouer en face, {blocker}, fallait le dire avant le match.",
-      "{shooter}, tu peux insulter {blocker}. On ne dira rien. On est d'accord avec toi."
+      "Si tu voulais jouer dans l'autre équipe, {blocker}, fallait le dire avant le match.",
+      "{shooter}, tu peux insulter {blocker} de sale batard. On ne dira rien. On est corda avec toi."
     ]
   },
   "ownGoal": {
@@ -68,8 +68,8 @@
       "Personne ne tirait, et pourtant ça rentre. Merci {defender}, le meilleur attaquant de l'équipe adverse.",
       "{defender} marque. Petit souci : c'est dans la mauvaise cage.",
       "Et le but est pour l'équipe adverse, sur une passe décisive magistrale de {defender}.",
-      "{defender} trompe son propre gardien. Ah non, attendez, c'était lui le gardien.",
-      "Contre son camp de {defender}. L'équipe adverse aurait pu aller boire un café, ça rentrait quand même.",
+      "{defender} trompe son propre gardien. Ah non merde, attendez, c'était lui le gardien.",
+      "Contre son camp de {defender}. L'équipe adverse aurait pu aller boire un café, ça rentrait quand même avec un type pareil.",
       "{defender} vient de marquer son plus beau but de la soirée. Dommage pour la direction.",
       "Un but, c'est bien. Dans la bonne cage, c'est mieux. {defender}, on reprend les bases.",
       "{defender} change de camp en plein match. Personne ne lui a dit que ça ne se faisait pas.",
@@ -77,7 +77,8 @@
       "Magnifique frappe de {defender}. Cadrée, puissante, imparable. Dans sa propre cage.",
       "{defender}, tu joues pour quelle équipe exactement ? Parce que là, ils te remercient.",
       "Même en le faisant exprès, {defender} n'aurait pas fait mieux. Et on n'est pas sûrs qu'il ne l'ait pas fait exprès.",
-      "Contre son camp de {defender}. On va encadrer le replay et l'accrocher dans les toilettes."
+      "Contre son camp de {defender}. On va encadrer le replay et l'accrocher dans les toilettes.",
+      "Tu veux qu'on te nique ta mère {defender} ? C'est quoi ce raffût ?"
     ]
   },
   "finish": {
@@ -89,13 +90,13 @@
         "Lucarne de {scorer}. Je ne sais pas s'il l'a fait exprès, et lui non plus.",
         "Frappe dans la lucarne de {scorer}. Quelqu'un vérifie qu'il n'a pas prêté sa manette ?",
         "{scorer} sort le but de l'année. Enfin, de sa carrière. On va le voir sur toutes ses vidéos.",
-        "Lucarne de {scorer} ! Ne cherchez pas, c'est le rebond qui a tout fait.",
+        "Lucarne de {scorer} ! Ne cherchez pas, il a eu de la chatte",
         "{scorer} en pleine lucarne. Faites une capture d'écran, ça ne se reproduira pas.",
         "Lucarne de {scorer}. Même lui est choqué, regardez sa voiture, elle tremble encore.",
         "Joli but de {scorer}. Je cherche encore comment me moquer. Bon, c'est sûrement de la chance.",
-        "{scorer} met une lucarne et va en parler pendant trois semaines. Courage à tous.",
+        "{scorer} met une lucarne et va en parler pendant trois semaines. Force à vous.",
         "Lucarne de {scorer}. Une par saison, il vient de griller son quota.",
-        "{scorer} met une lucarne et se prend pour un pro. Rappel : tu as raté une cage vide il y a dix minutes.",
+        "{scorer} met une lucarne et se prend pour un pro. Calma frérot : t'en as loupé assez avant",
         "Belle lucarne de {scorer}. Le hasard fait bien les choses, parfois.",
         "{scorer}, profite. Demain tu redeviens le joueur moyen qu'on connaît tous.",
         "Lucarne pour {scorer}. Il visait le milieu, mais on ne va pas gâcher sa joie."
@@ -107,40 +108,44 @@
       "_variables": "{shooter} = the player whose shot hit the frame",
       "phrases": [
         "Sur la barre ! {shooter} visait la lucarne, il a trouvé la ferraille.",
-        "{shooter} a tiré sur la barre. Elle est solide, merci pour le test.",
+        "{shooter} a tiré sur la barre. Elle est solide comme ma bite, merci pour le test.",
         "La barre transversale remercie {shooter} pour sa visite. Le filet, lui, attend toujours.",
-        "{shooter} trouve la barre. Quelques centimètres trop haut, comme son ego.",
+        "{shooter} trouve la barre. Quelques centimètres trop haut, comme son ego. Redescends frérot",
         "Ding ! {shooter} fait sonner la barre. C'est joli, mais ça ne compte pas.",
         "{shooter} trouve la barre. Toute la cage était libre, il a choisi le seul morceau en métal.",
-        "Barre ! {shooter} a la précision d'un lancer de dés.",
+        "{shooter} tape la ferraille Torres",
         "{shooter} tape la barre. On garde ça précieusement pour le bêtisier de fin de saison.",
         "Le tir de {shooter} rebondit sur la barre et ressort. Un peu comme sa carrière.",
         "{shooter}, sur la barre. Même quand c'est ouvert, il trouve le moyen de ne pas marquer.",
         "{shooter} tape la barre. Même la cage ne veut pas de tes tirs.",
-        "La barre ! {shooter}, tu as la précision d'un mec qui joue avec les pieds.",
+        "La barre ! {shooter}, tu as la précision d'un joueur de céci foot.",
         "{shooter} trouve la transversale. C'est sa meilleure amie ce soir, vu que personne d'autre ne veut de lui.",
         "Barre pour {shooter}. Il visait la lucarne, il a eu la honte.",
-        "{shooter}, tu es à dix centimètres du but et à des années-lumière du niveau."
+        "{shooter}, tu es à dix centimètres du but et à des années-lumière du niveau.",
+        "{shooter} tape la barre, pendant qu'on tape des barres ! Time!"
       ]
     },
     "post": {
       "_variables": "{shooter} = the player whose shot hit the frame",
       "phrases": [
-        "Poteau ! {shooter} avait tout le cadre, il a choisi le seul endroit qui ne marque pas.",
+        "Poteau ! {shooter} avait tout le cadre, il a choisi le seul endroit qui ne marque pas. Looser !",
         "{shooter} tape le poteau. Le poteau, lui, n'a pas bougé.",
         "Encore un poteau pour {shooter}. À ce rythme, il va falloir le repeindre.",
         "{shooter} trouve le montant. Il paraît que c'est plus dur à viser que la cage.",
         "Le poteau sauve l'équipe adverse. Meilleur défenseur du match, devant tout le monde, et surtout devant {shooter}.",
         "Poteau pour {shooter}. La cage fait toute la largeur du terrain ou presque, il a trouvé le bord.",
         "{shooter} vise le poteau avec une précision chirurgicale. Dommage, c'est la cage qu'il fallait viser.",
-        "Le poteau dit merci à {shooter}, il commençait à s'ennuyer.",
+        "Le poteau dit merci à {shooter}, il commençait à se faire chier.",
         "{shooter} au poteau. À un mètre près, c'était un but. À un mètre près, {shooter} serait bon.",
-        "Poteau de {shooter}. Le genre de raté qu'il racontera en disant : j'ai pas eu de chance.",
-        "Poteau ! {shooter}, la cage fait la taille d'un garage et toi tu trouves le montant.",
+        "Poteau de {shooter}. Le genre de raté qu'il racontera en disant : j'ai pas de chatte.",
+        "Poteau ! {shooter}, la cage fait la taille de ta grosse daronne et toi tu trouves le montant.",
         "{shooter} tape le poteau. Enfin quelque chose de solide dans son jeu.",
-        "Encore un poteau. {shooter}, tu le fais exprès pour qu'on parle de toi ?",
+        "Encore un poteau. {shooter}, tu le fais exprès pour qu'on parle de toi fdp ?",
         "{shooter} au poteau. Le plus gros raté de la soirée, et la soirée n'est pas finie.",
-        "Le poteau a sauvé l'adversaire. {shooter}, tu viens de jouer pour eux, félicitations."
+        "Le poteau a sauvé l'adversaire. {shooter}, tu viens de jouer pour eux, félicitations.",
+        "Le poto {shooter} nous a lâché un poteau. Bientôt le potau feu ?",
+        "{shooter} ça tape les bords, mais tu sais pas l'insérer bien au fond ?",
+        "{shooter}, avant d'avoir tapé le bord, t'avais changé de bord gros pd ?"
       ]
     },
     "topCorner": {
@@ -148,39 +153,40 @@
       "phrases": [
         "Dans l'équerre ! Enfin, sur l'équerre. {shooter} était à deux doigts du but de sa vie.",
         "{shooter} touche l'équerre. Le but de l'année, à un centimètre près. C'est-à-dire pas de but.",
-        "L'équerre a dit non à {shooter}. Elle a bon goût.",
-        "{shooter} visait la lucarne, il a eu le cadre. Presque un chef-d'œuvre, donc raté.",
+        "L'équerre a dit non à {shooter}. Elle a bon goût mon cochon!",
+        "{shooter} visait la lucarne, il a eu le cadre. Presque un chef-d'œuvre, donc raté : Léonard de Vinci Autoroutes",
         "Équerre pour {shooter}. Sur le replay on dira que c'était voulu. Personne n'y croira.",
         "{shooter} sur l'équerre. Le but de l'année, version démo gratuite.",
-        "L'équerre ! {shooter} a frôlé la gloire. La gloire a changé de trottoir.",
+        "L'équerre ! {shooter} a frôlé la gloire. La gloire a décidé de changé de trottoir.",
         "{shooter} était à un centimètre de l'exploit. Et à un centimètre de ne plus jamais se taire.",
         "Équerre de {shooter}. Heureusement, on n'aurait pas supporté la célébration.",
         "{shooter} tape l'équerre. Le jeu a décidé que ce serait trop beau pour lui.",
-        "{shooter} tape l'équerre et se croit à deux doigts du génie. Non. À deux doigts du ridicule.",
-        "Équerre ! {shooter} a frôlé le but de l'année, il a eu le raté de l'année.",
-        "{shooter}, l'équerre, c'est joli au replay. Sur le tableau des scores, ça fait zéro.",
+        "{shooter} tape l'équerre et se croit à deux doigts du génie mais il est à deux doigts du ridicule.",
+        "Équerre ! {shooter} a frôlé le but de l'année, il a eu le raté de l'année ptdr",
+        "{shooter}, l'équerre, c'est joli au replay. Sur le tableau des scores, ça fait zéro frérot",
         "L'équerre a rejeté {shooter}. Comme tout le monde, en fait.",
-        "{shooter} rate de peu. Mais rater, c'est un peu sa spécialité."
+        "{shooter} rate de peu. Mais rater, c'est sa spécialité.",
+        "{shooter} est tellement déquerre qu'il tape l'équerre",
+        "Le ballon rentrait à quelques centimètres {shooter}, comme ta bite"
       ]
     }
   },
   "adminAssist": {
     "_variables": "{passer} = the teammate who passed, {scorer} = the scorer",
     "phrases": [
-      "Passe décisive pour {passer}. Il a touché la balle à une autre époque, mais ça compte apparemment.",
+      "Passe décisive pour {passer}. Il a touché la balle en 2025, mais ça compte apparemment.",
       "{passer} récupère une passe décisive purement administrative. Il peut la ranger avec ses autres papiers.",
-      "{scorer} a tout fait tout seul, mais {passer} touche quand même sa commission.",
+      "{scorer} a tout fait tout seul, mais le frérot {passer} touche quand même sa commission.",
       "Assistance de {passer}. Assistance à quoi, on ne sait pas, mais le jeu dit que c'est lui.",
       "{passer}, cette passe décisive, tu l'as eue comme une attestation de présence. Tu étais là, c'est tout.",
-      "Passe décisive de {passer}, touchée il y a une éternité. À ce compte-là, l'engagement aussi, c'est une passe.",
+      "Passe décisive de {passer}, touchée il y a une éternité. Même un engo est plus décisif.",
       "{passer} gagne une passe décisive sans rien faire. Le rêve de tout fonctionnaire.",
       "{scorer} dribble, tire, marque. Et {passer} lève la main pour réclamer la passe. Culotté.",
-      "Passe décisive pour {passer}, qui regardait l'action depuis les tribunes.",
+      "Passe décisive pour {passer} qui était déjà parti à la buvette tellement sa passe date",
       "{passer}, tu peux encadrer cette passe décisive. Tu ne la méritais pas, mais elle fera joli sur le tableau.",
-      "{passer}, cette passe décisive, tu l'as eue en regardant. Littéralement en regardant.",
       "{scorer} a fait le boulot, {passer} encaisse le chèque. Toujours le même parasite.",
-      "Passe décisive pour {passer}. Le jeu est généreux, nous on ne l'est pas : ça ne compte pas.",
-      "{passer} va s'en vanter, de cette passe. Il va juste oublier de dire qu'il n'a rien fait.",
+      "Passe décisive pour {passer}. Le jeu est généreux, nous on ne l'est pas : on décomptera 50 points à la fin",
+      "{passer} va s'en vanter de cette passe. Il va juste oublier de dire qu'il n'a rien fait.",
       "Merci {scorer} d'avoir offert une statistique à {passer}. Il en avait bien besoin."
     ]
   },
@@ -331,18 +337,18 @@
     "phrases": [
       "Boulet du match : {player}. Le score parle de lui-même, et il ne dit rien de gentil.",
       "{player} termine loin, très loin derrière ses coéquipiers. Il a joué, paraît-il.",
-      "{player}, ton score ressemble à celui d'un joueur déconnecté. Tu étais connecté ?",
-      "Merci à {player} d'avoir occupé une place dans l'équipe. C'était à peu près tout.",
-      "{player} a porté l'équipe. Sur son dos, comme un sac de ciment.",
+      "{player}, t'as vu ton score poto ? T'as du ping ?",
+      "Merci à {player} d'avoir occupé une place dans l'équipe mais on aurait pu s'en passer",
+      "Merci d'avoir permis au handi-rocket league et à son représentant {player} de jouer un vrai match. Malheureusement, on voit que c'est pas le même sport.",
       "Le boulet du match est {player}. Ses coéquipiers ont joué à un de moins, avec un poids en plus.",
       "{player}, dernier de ton équipe avec une marge impressionnante. Bravo pour la constance.",
       "Le score de {player} ferait pleurer un débutant.",
-      "{player} a fait le minimum syndical. Et encore, le syndicat proteste.",
+      "{player} a fait le minimum syndical. Et encore, la CGT proteste.",
       "Si {player} avait laissé sa manette sur la table, l'équipe aurait eu le même résultat.",
-      "{player}, ce match s'est joué malgré toi. Surtout malgré toi.",
-      "Le score de {player} tient dans une main. Et il reste des doigts.",
+      "{player}, même un enfant cancéreux a moins d'absentéisme!",
+      "Le score de {player} tient dans une main. Et il reste des doigts. Il avait ses doigts dans le cul",
       "{player} termine avec un score de figurant. Même pas premier rôle chez les figurants.",
-      "On cherche encore ce que {player} a fait ce match. Les stats aussi.",
+      "{player}, tu te branles les couilles ou quoi ? C'est quoi ce score ?",
       "{player}, à ce niveau-là, on ne joue pas avec toi, on joue malgré toi."
     ]
   }
