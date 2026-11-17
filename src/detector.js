@@ -532,9 +532,11 @@ class Detector extends EventEmitter {
     const nearMisses = {}; // family → { key, vars, measures }
 
     // Tap-in: the scorer's last touch is very close to the goal and low: he had nothing left to do
-    // (a defender touching it after without stopping it changes nothing)
+    // (a defender touching it after without stopping it changes nothing). Not when the touch before was his own
+    // (a pass to himself off the wall, a dribble): he made the chance himself.
     const iS = findLastIndex(hits, (h) => has(h, scorer));
-    if (iS >= 0) {
+    const selfPass = iS > 0 && hits[iS - 1].players.every((p) => p.name === scorer);
+    if (iS >= 0 && !selfPass) {
       const lastS = hits[iS];
       const r = this.evaluate([
         condition("dernière touche à la ligne", "tapInMaxDistance", distToOpponentGoal(TS, lastS.loc.Y), "max", "uu"),

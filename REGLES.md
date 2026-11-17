@@ -34,9 +34,10 @@ le 2e (pendant le replay, `Scorer.Name` vide) contient le **bon** `ImpactLocatio
 - Dernière touche du buteur à **≤ 9 m** de la ligne adverse (`tapInMaxDistance`) et à **≤ 12 m** du centre sur le côté (`tapInMaxSideOffset`) ⚙️
 - Touchée **pas haut** : balle à **≤ 2,5 m** du sol au moment de la touche (`tapInMaxTouchHeight`) ⚙️ (une reprise aérienne demande un vrai geste)
 - Un défenseur qui la touche après sans l'arrêter ne change rien
+- **Pas une passe à soi-même** : si la touche d'avant est aussi la sienne (passe sur le mur, dribble), il s'est créé l'occasion seul : pas de tap-in
 
 **Cible** : le buteur. **Quand** : pendant le replay.
-Fréquence mesurée : 19 sur 34 matchs complets (les deux équipes).
+Fréquence mesurée : 20 sur 36 matchs complets (les deux équipes), dont 9 pour nous.
 
 ## 2. Vol de but 🦹
 **Idée** : la balle rentrait toute seule, un coéquipier l'a touchée pour se l'attribuer.
