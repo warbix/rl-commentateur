@@ -17,6 +17,9 @@ const GOAL_LINE = 5120;
 const DEFAULTS = {
   // Tap-in: the scorer only had to touch the ball very close to the goal, low (no pass needed)
   tapInMaxDistance: 900, tapInMaxSideOffset: 1200, tapInMaxTouchHeight: 250,
+  // A previous touch of his own further than this is a pass to himself (off the wall): no tap-in. Closer, it is
+  // the same push (measured: repeated touches ≤ 4 m apart, passes to himself ≥ 23 m)
+  tapInMaxSelfTouchDistance: 1000,
   shotDelayMs: 300,
   // Steal: a teammate's shot on target, touched close to the goal by the scorer. The game reports "Shot" up to
   // a few seconds after the touch (half the time after 0.5 s, sometimes after the next touch): stealShotWindowMs.
@@ -532,10 +535,12 @@ class Detector extends EventEmitter {
     const nearMisses = {}; // family → { key, vars, measures }
 
     // Tap-in: the scorer's last touch is very close to the goal and low: he had nothing left to do
-    // (a defender touching it after without stopping it changes nothing). Not when the touch before was his own
-    // (a pass to himself off the wall, a dribble): he made the chance himself.
+    // (a defender touching it after without stopping it changes nothing). Not when the touch before was his own,
+    // far away (a pass to himself off the wall): he made the chance himself. Repeated touches close by are fine.
     const iS = findLastIndex(hits, (h) => has(h, scorer));
-    const selfPass = iS > 0 && hits[iS - 1].players.every((p) => p.name === scorer);
+    const before = iS > 0 ? hits[iS - 1] : null;
+    const selfPass = before && before.players.every((p) => p.name === scorer) &&
+      Math.hypot(before.loc.X - hits[iS].loc.X, before.loc.Y - hits[iS].loc.Y, before.loc.Z - hits[iS].loc.Z) > S.tapInMaxSelfTouchDistance;
     if (iS >= 0 && !selfPass) {
       const lastS = hits[iS];
       const r = this.evaluate([

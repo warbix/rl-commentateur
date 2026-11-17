@@ -101,6 +101,7 @@
     "tapInMaxDistance": 900,
     "tapInMaxSideOffset": 1200,
     "tapInMaxTouchHeight": 250,
+    "tapInMaxSelfTouchDistance": 1000,
     "shotDelayMs": 300,
     "stealMaxDistance": 1500,
     "stealShotWindowMs": 2000,
