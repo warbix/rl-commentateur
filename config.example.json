@@ -109,7 +109,7 @@
     "ownGoalShotWindowMs": 3000,
     "topCornerMinHeight": 450,
     "topCornerMinSideOffset": 550,
-    "adminAssistMinMs": 4000,
+    "adminAssistMinMs": 5000,
     "adminAssistMinTouches": 3,
     "mvpMaxGap": 50,
     "ghost3v3Ms": 40000,

@@ -24,7 +24,7 @@ const DEFAULTS = {
   // Own goal: the last touch before the goal is the conceding team's, and the ball was not already going in
   ownGoalMaxMs: 3000, ownGoalOnLineDistance: 1000, ownGoalShotWindowMs: 3000,
   topCornerMinHeight: 450, topCornerMinSideOffset: 550,
-  adminAssistMinMs: 4000, adminAssistMinTouches: 3,
+  adminAssistMinMs: 5000, adminAssistMinTouches: 3,
   // Close MVP: the MVP (always on the winning team) has at most this many points more than his best teammate
   mvpMaxGap: 50,
   // Ghost: play time without touching the ball. Measured on the recorded matches, these thresholds give
@@ -614,10 +614,10 @@ class Detector extends EventEmitter {
           { name: "délai jusqu'à la touche du buteur", value: scorerHit.t - hits[iA].t, unit: "ms" },
           { name: "la passe avance la balle de", value: distToOpponentGoal(TS, hits[iA].loc.Y) - distToOpponentGoal(TS, scorerHit.loc.Y), unit: "uu" },
         ] : [];
-        const measures = [...r.measures, ...touches.measures, { name: "adversaire touche entre les deux", value: opponentBetween ? "oui" : "non", ok: opponentBetween }, ...info];
+        const measures = [...r.measures, ...touches.measures, { name: "adversaire touche entre les deux", value: opponentBetween ? "oui" : "non" }, ...info];
         // A shot on target by the passer (saved, then scored on the rebound) is a real contribution: never admin
         if (!this.wasShotOrSave(assister, hits[iA].t)) {
-          if (r.ok || touches.ok || opponentBetween) found.adminAssist = { vars, measures };
+          if (r.ok || touches.ok) found.adminAssist = { vars, measures };
           else if (r.nearMiss) nearMisses.adminAssist = { key: "adminAssist", vars, measures };
         }
       }

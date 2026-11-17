@@ -80,9 +80,11 @@ Fréquence mesurée : 3 sur 39 matchs enregistrés.
 **Idée** : la passe a été comptée mais n'y est pour rien.
 
 **Règle** — sur `GoalScored` avec `Assister` :
-- Dernière touche du passeur → but : **≥ 4 s** ⚙️
+- Dernière touche du passeur → but : **≥ 5 s** ⚙️
 - **ou** le buteur a fait **≥ 3 touches** entre la passe et le but (il a tout fait seul)
-- **ou** une touche adverse a eu lieu entre la passe et la touche du buteur
+- Une touche adverse entre les deux ne suffit plus à elle seule (votée 👎 : la passe était récente)
+
+Fréquence mesurée : 14 pour nous sur 36 matchs (28 avant le passage de 4 à 5 s et le retrait de la touche adverse).
 
 **Cible** : le passeur. **Quand** : pendant le replay.
 
