@@ -33,12 +33,13 @@ const DEFAULTS = {
   // Pass to the opponent: a touch picked up cleanly by an opponent (not a 50/50, he keeps the ball), not a shot
   // nor a clear from one's own third, and the opponents shoot soon after. The game reports a shot late:
   // a "Shot" for the giver up to giveawayShotWindowMs after his touch cancels it.
-  giveawayMinMs: 1000, giveawayMinOwnGoalDistance: 2500, giveawayWindowMs: 6000, giveawayShotWindowMs: 2000, giveawayOfTheMatchMin: 3,
+  // The ball rolled too long before the pickup (giveawayMaxMs): nobody gave it away, it was lost.
+  giveawayMinMs: 1000, giveawayMaxMs: 3000, giveawayMinOwnGoalDistance: 2500, giveawayWindowMs: 4000, giveawayShotWindowMs: 2000, giveawayOfTheMatchMin: 3,
   // Kickoff: a ball lost in the first seconds after the kickoff is not a giveaway (nor a near assist)
   giveawayKickoffMs: 5000,
   // Near assist to the opponent: a touch in one's own half that does not go forward, picked up by an opponent
   // (not a 50/50), who shoots, and the shot is saved by the giver's team
-  nearAssistMaxOwnGoalDistance: 5120, nearAssistMaxForward: 500, nearAssistMinMs: 1000,
+  nearAssistMaxOwnGoalDistance: 5120, nearAssistMaxForward: 500, nearAssistMinMs: 1000, nearAssistMaxMs: 3000,
   nearAssistShotWindowMs: 4000, nearAssistSaveWindowMs: 2500,
   // Save for the opponent: a teammate is the first to touch a shot on target, close to the opponent goal, and no goal follows
   // The teammate's touch must take the ball out of the frame: made in front of the goal (within its width and height,
@@ -440,6 +441,7 @@ class Detector extends EventEmitter {
         condition("touche à sa propre ligne", "nearAssistMaxOwnGoalDistance", ownGiver, "max", "uu"),
         condition("balle envoyée vers l'avant", "nearAssistMaxForward", distToOwnGoal(giver.team, hit.loc.Y) - ownGiver, "max", "uu"),
         condition("délai avant la récupération", "nearAssistMinMs", t - prev.t, "min", "ms"),
+        condition("délai max avant la récupération", "nearAssistMaxMs", t - prev.t, "max", "ms"),
       ]);
       if (!wasShot && r.ok) {
         this.nearAssist = { giver: giver.name, giverTeam: giver.team, takerTeam: taker.team, pickedUpAt: t, shotAt: null, shooter: null, measures: r.measures };
@@ -454,6 +456,7 @@ class Detector extends EventEmitter {
     if (this.wasShotOrSave(giver.name, prev.t, S.giveawayShotWindowMs) || prev.t - this.roundStart < S.giveawayKickoffMs) return;
     const r = this.evaluate([
       condition("délai avant la récupération", "giveawayMinMs", t - prev.t, "min", "ms"),
+      condition("délai max avant la récupération", "giveawayMaxMs", t - prev.t, "max", "ms"),
       condition("distance à sa propre ligne", "giveawayMinOwnGoalDistance", ownGiver, "min", "uu"),
     ]);
     if (r.ok) {

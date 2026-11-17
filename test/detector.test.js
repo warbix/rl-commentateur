@@ -28,7 +28,6 @@ test("our team: the match comments", () => {
   assert.deepStrictEqual(replay(example).comments, [
     "ghost → Coequipier1",
     "finish.topCorner → Coequipier1",
-    "giveaway.goal → Coequipier1",
     "ghost → Coequipier2",
     "tapIn → MonPseudo",
     "mvp → MonPseudo",
@@ -48,7 +47,7 @@ test("everyone: the opponents' situations are said too", () => {
 test("recap: facts and win", () => {
   const { facts, results } = replay(example);
   assert.deepStrictEqual(results, [true]);
-  for (const f of ["tapIn → MonPseudo", "finish → Coequipier1", "giveaway → Coequipier1", "ghost → Coequipier2"]) {
+  for (const f of ["tapIn → MonPseudo", "finish → Coequipier1", "ghost → Coequipier2"]) {
     assert.ok(facts.includes(f), `missing fact: ${f}`);
   }
 });

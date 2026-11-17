@@ -122,17 +122,18 @@ le 95ᵉ centile des durées sans toucher est de 23 s en 2v2 contre 29 s en 3v3.
 
 **Règle** — touche du joueur P, touche suivante par un adversaire R :
 - **Pas un duel** : R la récupère **≥ 1 s** après la touche de P (`giveawayMinMs`) ⚙️
+- **Pas une balle perdue** : R la récupère **≤ 3 s** après (`giveawayMaxMs`) ⚙️. Au-delà, la balle a roulé, personne ne l'a donnée
 - **R garde la balle** : la touche d'après est aussi celle de son équipe
 - **Pas une excuse** :
   - la touche de P n'est pas un dégagement depuis son tiers défensif (touche à **≥ 25 m** de sa ligne, `giveawayMinOwnGoalDistance`)
   - ce n'est pas un tir ni un arrêt : pas de `Shot` / `Save` pour P dans les **2 s** (`giveawayShotWindowMs`, le jeu les annonce en retard)
   - ce n'est pas dans les **5 s** après l'engagement (`giveawayKickoffMs`)
-- **Ça coûte** : l'équipe de R tire dans les **6 s** (`giveawayWindowMs`) ⚙️. Sans tir, rien n'est dit.
+- **Ça coûte** : l'équipe de R tire ou marque dans les **4 s** après la récupération (`giveawayWindowMs`) ⚙️. Sans tir, rien n'est dit.
 
 **Paliers** : tir adverse → « passe à l'adversaire » (dit dès que l'équipe de P récupère la balle, ou 4 s après le tir) ;
 but adverse → « bénévole de l'année » (le commentaire du but). En fin de match, **bénévole du match** : le joueur qui a fait
 le plus de passes à l'adversaire (tir ou but), au moins 3 (`giveawayOfTheMatchMin`).
-**Cible** : P. Fréquence mesurée : environ 2 par match pour les deux équipes (64 sur 34 matchs).
+**Cible** : P. Fréquence mesurée sur 36 matchs : 9 tirs et 11 buts pour nous (24 et 20 avant les délais max de 3 s et 4 s).
 **Limite** : sans position des voitures, on ne sait pas si c'était une passe vers un coéquipier mal placé.
 
 ---
@@ -143,7 +144,7 @@ le plus de passes à l'adversaire (tir ou but), au moins 3 (`giveawayOfTheMatchM
 **Règle** — touche du joueur P, touche suivante par un adversaire :
 - Touche **dans son propre camp** (à ≤ 51 m de sa ligne, `nearAssistMaxOwnGoalDistance`), y compris devant sa cage
 - La balle **ne part pas vers l'avant** : au plus 5 m (`nearAssistMaxForward`) — ce n'est pas un dégagement
-- **Pas un duel** : l'adversaire la récupère après ≥ 1 s (`nearAssistMinMs`)
+- **Pas un duel** : l'adversaire la récupère après ≥ 1 s (`nearAssistMinMs`), mais **≤ 3 s** (`nearAssistMaxMs`)
 - L'adversaire **tire dans les 4 s** (`nearAssistShotWindowMs`), puis **l'équipe de P arrête le tir** (arrêt ou arrêt miraculeux) dans les 2,5 s (`nearAssistSaveWindowMs`)
 
 **Cible** : P, en citant le tireur et le sauveur. **Quand** : en direct, à l'arrêt. Remplace le « bénévole » simple sur la même balle.
